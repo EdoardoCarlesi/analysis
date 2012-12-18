@@ -4,7 +4,5 @@ ANALYSIS TOOLS v0.1
 Edoardo Carlesi 
 edoardo.carlesi@uam.es
 
-Edit the [Makefile.config] with your local machine settings; 
-then type make
-
-Makefile
+Edit the [Makefile.config] with your local machine settings; then type make
+The [Makefile] does not need to be edited.
