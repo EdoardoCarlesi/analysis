@@ -1,6 +1,7 @@
-###############################################################
+################################################################
 # Makefile for GADGET and AHF related reading routines,        #
 # growth factor calculations, integrations and interpolations  #
+# Edoardo Carlesi - edoardo.carlesi@uam.es 2010 - 2012	       #
 ################################################################
 include ../Makefile.config
 
