@@ -1,0 +1,330 @@
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_deriv.h>
+#include <gsl/gsl_spline.h>
+#include <gsl/gsl_integration.h>
+#include <gsl/gsl_histogram.h>
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#include "mathtools.h"
+#include "../general_variables.h"
+#include "../general_functions.h"
+
+
+
+double get_interpolated_value(double x_array[], double y_array[], int npts, double A)
+{
+	double V; 
+
+		gsl_interp_accel *gia = gsl_interp_accel_alloc();	
+		gsl_spline *gs = gsl_spline_alloc(gsl_interp_cspline, npts);
+		gsl_spline_init(gs,  x_array, y_array, npts);
+	
+		V = gsl_spline_eval(gs,A,gia);
+	
+		gsl_spline_free (gs);
+		gsl_interp_accel_free (gia);
+
+	return V;	
+}
+
+
+
+double* lin_stepper(double min, double max, int bins)
+{
+	fprintf(stderr, "\nMin:%e, Max:%e, bins:%d\n", min, max, bins);
+
+	int i=0;
+	double s, *steps;
+
+		s = (max-min)/(bins-1);
+		steps = (double*) calloc(bins,sizeof(double));
+		steps[0] = min;
+
+		for(i=1; i<bins; i++) steps[i]=steps[i-1]+s;
+
+	return steps;
+}
+
+
+
+double* log_stepper(double a_0, double a_1, int num)
+{
+	fprintf(stderr, "\nMin:%e, Max:%e, bins:%d\n", a_0,a_1,num);
+	
+	int i=0;
+	double a=a_0, step, *steps;
+
+	steps = (double *) calloc(num, sizeof(double));
+	step = -log(a_0/a_1)/((double) num-1); 
+
+		for(i=0; i<num; i++)
+		{
+        		a=a_0*exp(step*i);
+			steps[i]=a;
+		}
+
+	return steps;
+}
+
+
+
+double maximum(double *array, int size)
+{
+		int i=0;
+		double max=array[0];
+ 
+			for(i=0;i<size;i++) 
+				if(array[i]>max) max = array[i];
+
+	return max;
+}
+
+
+
+double minimum(double *array, int size)
+{
+	int i=0;
+	double min=array[0];
+ 
+			for(i=0;i<size;i++) 
+				if(array[i]<min) min = array[i];
+	return min;
+}
+
+
+
+double average(double *array, int size)
+{
+	int i=0; 
+	double avg=0; 
+
+		for (i=0; i<size; i++) 
+				avg += array[i];
+
+	return avg/(double) size;
+}	
+
+
+
+int check_array(int input, int *arr, int dim)
+{
+	int i=0, found=0, obj=0;
+
+		for(i=0; i<dim; i++)
+		{
+			obj=arr[i];
+		if (obj==input) 
+			{
+				found=1;
+			}
+		}
+
+	return found;
+}
+
+int *generate_random_subset(int Nmax, int Nmin, int *subset)
+{
+	int i=0, num=0;
+
+	if(Nmin > Nmax) {
+
+		fprintf(stderr, "\ngenerate_random_subset(). ERROR: Subset %d larger than dataset %d\n",Nmin,Nmax);
+	
+		} else {
+
+		srand ((int)time(NULL));
+
+			while (i <= Nmin)
+				{
+
+				num = rand()%Nmax;
+
+					if(check_array(num,subset,i)==0){
+				subset[i]=num;
+				i++;
+					}
+				}	
+			}
+
+	return subset;
+}
+
+
+	
+int int_maximum(int *array, int size)
+{
+		int max=array[0], i=0;
+	
+		for(i=0;i<size;i++) 
+			if(array[i]>max) max = array[i];
+
+	return max;
+}
+
+
+		/* Number the entries per bin in a given array */
+void lin_bin(double* array, double* bins, int bin_size, int array_size, int* binned_array)
+{
+	fprintf(stderr, "lin_bin(). Number of bins:%d, data array size:%d\n", bin_size, array_size);
+	int i=0, j=0;
+
+	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);
+	gsl_histogram_set_ranges (h, bins, bin_size);
+		
+		for(i=0; i<array_size; i++)
+			gsl_histogram_increment(h, array[i]);
+		
+		for(j=0; j<array_size; j++)
+			binned_array[j] = h->bin[j];			
+
+		return binned_array;
+	gsl_histogram_free(h);
+}
+
+
+		/* Average entry per array bin */
+void average_bin (double* array_x, double* array_y, double* bins, double* binned_array, int bin_size, int array_size)
+{
+	fprintf(stderr, "lin_bin(). Number of bins:%d, data array size:%d\n", bin_size, array_size);
+	int i=0, j=0; 
+
+	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);
+	gsl_histogram *g = gsl_histogram_alloc (bin_size-1);
+	gsl_histogram_set_ranges (h, bins, bin_size);
+	gsl_histogram_set_ranges (g, bins, bin_size);
+		
+		for(i=0; i<array_size; i++)
+		{
+			gsl_histogram_increment  (h, array_x[i]);
+			gsl_histogram_accumulate (g, array_x[i], array_y[i]);
+		}
+
+		for(j=0; j<array_size; j++)
+		{
+			binned_array[j] = g->bin[j]/h->bin[j];			
+		}
+
+		return binned_array;
+
+	gsl_histogram_free(h);
+	gsl_histogram_free(g);
+}
+
+
+int* int_shellsort(int *array, int n)
+{
+	int i=0,j=0,inc=3, m=0, num = (int) (n/100), temp=0;
+
+     while(inc>0)
+     {
+          for(i=0;i<n;i++)
+        	  {
+	m++;
+
+	print_counter(num);
+
+                   j=i;
+                   temp=array[i];
+                   while((j>=inc)&&array[j-inc]>temp)
+                   {
+                        array[j]=array[j-inc];
+                        j=j-inc;
+                   }
+                   array[j]=temp;
+          }
+          if(inc/2!=0)
+           inc=inc/2;
+          else if(inc==1)
+           inc=0;
+          else
+           inc=1;
+     }
+
+	return array;
+}
+
+
+
+double* shellsort(double *array, int n)
+{
+	int i,j,inc=3, m=0, num = (int) (n/100);
+	double temp;
+
+     while(inc>0)
+     {
+          for(i=0;i<n;i++)
+        	  {
+	m++;
+
+	print_counter(num);
+
+                   j=i;
+                   temp=array[i];
+                   while((j>=inc)&&array[j-inc]>temp)
+                   {
+                        array[j]=array[j-inc];
+                        j=j-inc;
+                   }
+                   array[j]=temp;
+          }
+          if(inc/2!=0)
+           inc=inc/2;
+          else if(inc==1)
+           inc=0;
+          else
+           inc=1;
+     }
+
+	return array;
+}
+
+
+
+double *invert_array(double *array, int size)
+{
+	int i=0;
+	double *inv_array;
+
+		inv_array = (double *) calloc(size, sizeof(double));
+
+		for(i=0; i<size; i++)
+		{
+			inv_array[i]=array[size-i-1];
+		}	
+
+	return inv_array;
+}
+
+
+
+double solid_angle(double theta, void *p)
+{
+	return sin(theta);
+}
+
+
+
+double integrate_solid_angle(double the1,double the2, double phi1, double phi2)
+{
+	double result, error;
+
+	the1 *= PI/180;
+	the2 *= PI/180;
+	phi1 *= PI/180;
+	phi2 *= PI/180;
+
+		gsl_function F;
+		gsl_integration_workspace *w = gsl_integration_workspace_alloc(1000);
+		F.function=&solid_angle;
+		F.params=0;
+
+			gsl_integration_qags(&F, the1, the2, 0, 1e-4, 1000, w, &result, &error);
+
+	return result*(phi2-phi1);
+}
