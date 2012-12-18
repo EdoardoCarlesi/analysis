@@ -1,0 +1,10 @@
+ANALYSIS TOOLS v0.1
+
+2010 - 2012
+Edoardo Carlesi 
+edoardo.carlesi@uam.es
+
+Edit the [Makefile.config] with your local machine settings; 
+then type make
+
+Makefile
