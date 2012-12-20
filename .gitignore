@@ -1,0 +1,5 @@
+# Files and subdirs to ignore
+output/*
+temp/*
+*.o
+*.a
