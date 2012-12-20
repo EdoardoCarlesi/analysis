@@ -233,14 +233,16 @@ return norm*lnslnm*sqrt(2./PI);
 
 void compute_numerical_mass_function(void)
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, n=0, i=0, k=0; 
-	double cumHalo=0, volume=0, mMin=0, mMax=0, halfstep=0, *mass_bins;
+	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, i=0, k=0; 
+	double cumHalo=0, volume=0, mMin=0, mMax=0, halfstep=0; 
+	double *mass, *mass_bin; 
+	int *n_mass, *cum_n_mass;
 
 	fprintf(stderr, "\nSorting mass function for %d halos in %d bins\n", nHaloes, nBins);
 	
 		Settings.tick=0;
 	
-		mass = (double*) calloc(totSub, sizeof(double));
+		mass = (double*) calloc(nHaloes, sizeof(double));
 		mass_bin = (double*) calloc(nBins, sizeof(double));
 		n_mass = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
@@ -252,8 +254,7 @@ void compute_numerical_mass_function(void)
 		mass_bin = log_stepper(mMin, mMax, nBins);
 		volume=Settings.box_size*Settings.box_size*Settings.box_size;
 
-		lin_bin(mass, mass_bin, nBins, totSub, n_mass);	
-
+		lin_bin(mass, mass_bin, nBins, nHaloes, n_mass);	
 
 			for(i=0; i<nBins-1; i++)
 			{

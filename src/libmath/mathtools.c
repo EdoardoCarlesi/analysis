@@ -183,13 +183,12 @@ void lin_bin(double* array, double* bins, int bin_size, int array_size, int* bin
 		for(j=0; j<array_size; j++)
 			binned_array[j] = h->bin[j];			
 
-		return binned_array;
 	gsl_histogram_free(h);
 }
 
 
 		/* Average entry per array bin */
-void average_bin (double* array_x, double* array_y, double* bins, double* binned_array, int bin_size, int array_size)
+void average_bin (double* array_x, double* array_y, double* bins, double* binned_array, double *error_array, int bin_size, int array_size)
 {
 	fprintf(stderr, "lin_bin(). Number of bins:%d, data array size:%d\n", bin_size, array_size);
 	int i=0, j=0; 
@@ -207,10 +206,10 @@ void average_bin (double* array_x, double* array_y, double* bins, double* binned
 
 		for(j=0; j<array_size; j++)
 		{
-			binned_array[j] = g->bin[j]/h->bin[j];			
+			binned_array[j] = g->bin[j]/h->bin[j];
+			if(h->bin[j]>0)	// Assuming poissonian error
+				error_array[j] = g->bin[j] / sqrt(h->bin[j]);
 		}
-
-		return binned_array;
 
 	gsl_histogram_free(h);
 	gsl_histogram_free(g);

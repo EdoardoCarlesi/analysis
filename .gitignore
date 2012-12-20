@@ -1,5 +1,7 @@
 # Files and subdirs to ignore
 output/*
 temp/*
+bin/*
+*.swp
 *.o
 *.a

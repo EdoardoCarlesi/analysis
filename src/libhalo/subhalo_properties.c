@@ -70,9 +70,10 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 			cpMax = cosphi[totSub-1]; cpMin = cosphi[0];
 
 			costh_bin   = lin_stepper(cMin, cMax, nBins);
-			costh_bin_y = lin_bin(costh, costh_bin, nBins, totSubNmin, costh_bin_y);
+			lin_bin(costh, costh_bin, nBins, totSubNmin, costh_bin_y);
+
 		        cosphi_bin   = lin_stepper(cpMin, cpMax, nBins);
-			cosphi_bin_y = lin_bin(cosphi, cosphi_bin, nBins, totSub, cosphi_bin_y);
+			lin_bin(cosphi, cosphi_bin, nBins, totSub, cosphi_bin_y);
 
 			halfstep = 0.5*(costh_bin[1]-costh_bin[0]);
 			halfstep2 = 0.5*(cosphi_bin[1]-cosphi_bin[0]);
@@ -136,10 +137,10 @@ void sort_sub_shape_and_triaxiality()
 				tMax = array_triax[nHaloes-1]; tMin = array_triax[0];
 
 				array_shape_bin = lin_stepper(sMin, sMax, nBins);
-				array_shape_bin_y=lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
+				lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
 
 				array_triax_bin = lin_stepper(tMin, tMax, nBins);
-				array_triax_bin_y=lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
+				lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
 
 			half_s = 0.5*(array_shape_bin[1] - array_shape_bin[0]);
 			half_t = 0.5*(array_triax_bin[1] - array_triax_bin[0]);
@@ -205,7 +206,7 @@ void sort_sub_lambda()
 
 					bin_x = lin_stepper(lMin, lMax, nBins);
 
-					lambda_int_y=lin_bin(lambda, bin_x, nBins, nHaloes, lambda_int_y);	
+					lin_bin(lambda, bin_x, nBins, nHaloes, lambda_int_y);	
 
 			for(i=0; i<nBins-1; i++)
 			{	
@@ -310,7 +311,7 @@ void n_r_subhalo_subset()
 		rMin = all_r[0]; 
 		rMax = all_r[subDim-1];
 		R = lin_stepper(rMin, rMax, nBins);
-		n_r = lin_bin(all_r, R, nBins, subDim, n_r);
+		lin_bin(all_r, R, nBins, subDim, n_r);
 
 		for(i=0; i<nBins-1; i++) 
 		{
@@ -363,7 +364,7 @@ void n_r_subhalo()
 			all_r = shellsort(all_r, totSub);
 			rMin = all_r[0]; rMax = all_r[totSub-1];
 			R = lin_stepper(rMin, rMax, nBins);
-			n_r = lin_bin(all_r, R, nBins, totSub, n_r);
+			lin_bin(all_r, R, nBins, totSub, n_r);
 
 		for(i=0; i<nBins-1; i++) 
 		{
@@ -423,7 +424,7 @@ void sort_velocity_distribution()
 			velMin = vel[0] ; 
 			velMax = vel[totSub-1];
 			vel_x = lin_stepper(velMin, velMax, nBins);
-			vel_y = lin_bin(vel, vel_x, nBins, totSub, vel_y);
+			lin_bin(vel, vel_x, nBins, totSub, vel_y);
 			halfstep=(vel_x[1]-vel_x[0])*0.5;
 
 		for(i=0; i<nBins-1; i++)
@@ -518,7 +519,7 @@ void sort_eccentricity()
 
 			eMin = ecc[0]; eMax = ecc[totSub-1];
 			ecc_bin = log_stepper(eMin, eMax, nBins);
-			n_ecc	 = lin_bin(ecc, ecc_bin, nBins, totSub, n_ecc);
+			lin_bin(ecc, ecc_bin, nBins, totSub, n_ecc);
 
 	for(i=0; i<nBins-1; i++)
 		fprintf(stdout, "m_bin:%e  n_bin:%d\n", ecc_bin[i], n_ecc[i]); 

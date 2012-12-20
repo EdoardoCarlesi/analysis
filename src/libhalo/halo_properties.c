@@ -70,7 +70,6 @@ void free_halo_properties()
 		free(HaloZ.radVel);
 		free(HaloZ.err_radVel);
 		free(haloes);
-
 #ifdef GAS
 		free(HaloZ.gas_T);
 		free(HaloZ.gas_u);
@@ -146,6 +145,7 @@ void sort_axis_alignement()
 			}
 		}
 
+	free(radius);
 	free(Abins);
 	free(Bbins);
 	free(Rbins);
@@ -158,7 +158,8 @@ void sort_axis_alignement()
 
 void sort_shape_and_triaxiality()
 {
-	int i=0, m=0, nBins=Settings.n_bins,  nHaloes=Settings.haloes_over_threshold, *array_shape_bin_y, *array_triax_bin_y;
+	int i=0, m=0, nBins=Settings.n_bins,  nHaloes=Settings.haloes_over_threshold;
+	int *array_shape_bin_y, *array_triax_bin_y;
 	double *array_shape, *array_triax, *array_shape_bin, *array_triax_bin; 
 	double half_t, half_s, sMax, sMin, tMax, tMin, p_s, p_t;
 
@@ -189,10 +190,10 @@ void sort_shape_and_triaxiality()
 			tMax = array_triax[nHaloes-1]; tMin = array_triax[0];
 
 			array_shape_bin = lin_stepper(sMin, sMax, nBins);
-			array_shape_bin_y=lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
+			lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
 
 			array_triax_bin = lin_stepper(tMin, tMax, nBins);
-			array_triax_bin_y=lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
+			lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
 
 			half_s = 0.5*(array_shape_bin[1]-array_shape_bin[0]);
 			half_t = 0.5*(array_triax_bin[1]-array_triax_bin[0]);
@@ -222,19 +223,19 @@ void sort_shape_and_triaxiality()
 
 void sort_radial_velocity()
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.haloes_over_threshold, i=0, *radial_velocity_bin_y;
-	double *radial_velocity_bin, *radial_velocity_error, *mass, *radial_velocity, *mass_bin; 
+	int nBins=Settings.n_bins, nHaloes=Settings.haloes_over_threshold, i=0; 
 	double mMax = haloes[0].Mvir, mMin = haloes[nHaloes-1].Mvir;
+	double *radial_velocity_bin, *radial_velocity_error, *mass, *radial_velocity, *mass_bin; 
 
 	fprintf(stdout, "\nSorting halo radial velocities.\n");
 	
 	Settings.tick=0;
 	mass = (double*) calloc(nHaloes, sizeof(double));	
-	mass_bin = (double*) calloc(nBins, sizeof(double));	
 	radial_velocity = (double*) calloc(nHaloes, sizeof(double));	
+
+	mass_bin = (double*) calloc(nBins, sizeof(double));	
 	radial_velocity_bin = (double*) calloc(nBins-1, sizeof(double));	
-	radial_velocity_error = (double*) calloc(nBins-1, sizeof(double));	
-	radial_velocity_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+	radial_velocity_error = (double*) calloc(nBins-1, sizeof(double));	// TODO error estimation
 
 		for(i=0; i<nHaloes; i++)
 		{
@@ -243,8 +244,8 @@ void sort_radial_velocity()
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
-			radial_velocity_bin = average_bin(mass, radial_velocity, radial_velocity_error, mass_bin, 
-			radial_velocity_bin, nBins, nHaloes);
+			average_bin(mass, radial_velocity, mass_bin, radial_velocity_bin, radial_velocity_error,
+				nBins, nHaloes);
 
 			for(i=0; i<nBins; i++)	
 			{
@@ -252,10 +253,11 @@ void sort_radial_velocity()
 				HaloZ.err_radVel[i]=radial_velocity_error[i];
 			}
 	
+	free(mass);
+	free(mass_bin);
 	free(radial_velocity); 
 	free(radial_velocity_bin); 
 	free(radial_velocity_error); 
-	free(radial_velocity_bin_y);
 	fprintf(stdout, "\n");
 }
 
@@ -297,7 +299,7 @@ void sort_lambda()
 				norm = 1./(delta_l*nHaloes);
 	
 				bin_x = lin_stepper(lMin, lMax, nBins);
-				lambda_int_y=lin_bin(lambda, bin_x, nBins, nHaloes, lambda_int_y);	
+				lin_bin(lambda, bin_x, nBins, nHaloes, lambda_int_y);	
 
 			halfstep=(bin_x[1]-bin_x[0])*0.5;
 
@@ -373,7 +375,7 @@ void sort_concentration()
 					conc = shellsort(conc, nHaloes_vir);
 					cMax = conc[nHaloes_vir-1]; cMin = conc[0]; 	
 					bin_x=lin_stepper(cMin,cMax,nBins);
-					int_c_bin_y=lin_bin(conc,bin_x,nBins,nHaloes_vir,int_c_bin_y);	
+					lin_bin(conc,bin_x,nBins,nHaloes_vir,int_c_bin_y);	
 
 				norm=(nBins)/((cMax-cMin)*nHaloes_vir);
 				halfstep=0.5*(bin_x[1]-bin_x[0]);
@@ -447,7 +449,7 @@ void sort_gas_fraction()
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
-			gas_fraction_bin = average_bin(mass, gas_fraction, gas_fraction_error, mass_bin, 
+			average_bin(mass, gas_fraction, gas_fraction_error, mass_bin, 
 					gas_fraction_bin, nBins, nHaloes);
 
 		for(i=0; i<nBins-1; i++)
@@ -456,6 +458,8 @@ void sort_gas_fraction()
 			HaloZ.mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
 		}
 
+	free(mass);
+	free(mass_bin);
 	free(gas_fraction); 
 	free(gas_fraction_bin); 
 	free(gas_fraction_error); 
@@ -487,8 +491,8 @@ void sort_and_fit_mass_temperature_relation()
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
-			temperature_bin = average_bin(mass, temperature, temperature_error, mass_bin, 
-					temperature_bin, nBins, nHaloes);
+			average_bin(mass, temperature, mass_bin, temperature_bin
+					temperature_error, nBins, nHaloes);
 
 
 			for(i=0; i<nBins-1; i++)
