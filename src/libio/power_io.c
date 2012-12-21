@@ -56,9 +56,9 @@ void read_pk_snapshots()
 	nPkSnaps = get_lines(pk, Urls_internal.pk_list);
 	rewind(pk);
 
-		if(nPkSnaps != Settings.n_pk_files) 
+	if(nPkSnaps != Settings.n_pk_files) 
 	{
-		fprintf(stderr, "\n** WARNING **\nNumber of redshifts (%d) and number of snapshots (%d) does not match!\n", 
+		fprintf(stderr, "\nNumber of redshifts (%d) and number of snapshots (%d) does not match!\n", 
 		Settings.n_pk_files, nPkSnaps);
 	}
 
@@ -85,8 +85,9 @@ void init_pks()
 		if(Settings.use_one_pk == 1) 
 			{
 				numPkFiles = 1;
+
 				} else {
-				numPkFiles = Settings.n_pk_files;
+					numPkFiles = Settings.n_pk_files;
 				}
 
 			Pks = (struct power_spectrum *) calloc(numPkFiles, sizeof(struct power_spectrum));
@@ -105,8 +106,12 @@ void init_pks()
 
 			Pks[m].k    = (double *) calloc(dimPkFile, sizeof(double));
 			Pks[m].pk   = (double *) calloc(dimPkFile, sizeof(double));
-			Pks[m].z = GF.z[m];
-			Pks[m].a = GF.a[m];
+
+				if(Settings.use_one_pk > 1)
+				{
+					Pks[m].z = GF.z[m];
+					Pks[m].a = GF.a[m];
+				}
 
 		fill_pk_file(m);
 	}

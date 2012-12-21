@@ -15,7 +15,7 @@ void determine_simulation_settings()
 #ifndef GAS
 	Settings.pMass = haloes[0].Mvir/haloes[0].n_part;
 	Settings.rho_0 = Settings.pMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
-	fprintf(stderr, "\nSetting pMass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
+	fprintf(stderr, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
 #else
 	Settings.dmMass  = haloes[0].M_dm/haloes[0].N_dm;
 	Settings.gasMass = haloes[0].M_gas/haloes[0].N_gas; 
@@ -29,16 +29,17 @@ void determine_simulation_settings()
 		Settings.rho_c = (3*haloes[0].Mvir)/(4*3.14*haloes[0].Rvir*haloes[0].Rvir*haloes[0].Rvir*200);
 
 		fprintf(stderr, "\nThere are %d haloes over the %e mass threshold of which:\n\
-		%d virialized\n %d with the right concentration\n\
-		%d satisfying the spin criterion.\n",
+		%d virialized\n\
+		%d with the right concentration\n\
+		%d satisfying the spin criterion\n\
+		and %d haloes with more than %d particles.\n", 
 		Settings.haloes_over_threshold,	Settings.thMass,
 		Settings.virialized_haloes,
 		Settings.virialized_concentration, 
-		Settings.spin_criterion
+		Settings.spin_criterion,
+		Settings.haloes_over_thnum, Settings.thNum
 		);
 
-	fprintf(stderr, "\nThere are %d haloes with more than %d particles.\n", 
-	Settings.haloes_over_thnum, Settings.thNum);
 } 
 
 
@@ -263,15 +264,6 @@ void read_halo_file()
 		Settings.virialized_haloes=vir;
 		Settings.virialized_concentration=conc;
 		Settings.spin_criterion=spin;
-
-			fprintf(stderr, "\nThere are %d haloes over the %e mass threshold of which:\n\
-			%d virialized\n %d with the right concentration\n\
-			%d satisfying the spin criterion.\n",
-			Settings.haloes_over_threshold,	Settings.thMass,
-			Settings.virialized_haloes,
-			Settings.virialized_concentration, 
-			Settings.spin_criterion
-			);
 
 		determine_simulation_settings();	
 

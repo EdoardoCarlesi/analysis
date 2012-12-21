@@ -37,16 +37,17 @@ double get_interpolated_value(double x_array[], double y_array[], int npts, doub
 
 double* lin_stepper(double min, double max, int bins)
 {
-	fprintf(stderr, "\nMin:%e, Max:%e, bins:%d\n", min, max, bins);
+	fprintf(stdout, "\nReturning %d linear steps between %e and %e...\n", bins, min, max);
 
 	int i=0;
 	double s, *steps;
 
-		s = (max-min)/(bins-1);
 		steps = (double*) calloc(bins,sizeof(double));
+		s = (max-min)/(bins-1);
 		steps[0] = min;
 
-		for(i=1; i<bins; i++) steps[i]=steps[i-1]+s;
+		for(i=1; i<bins; i++) 
+			steps[i]=steps[i-1]+s;
 
 	return steps;
 }
@@ -55,7 +56,7 @@ double* lin_stepper(double min, double max, int bins)
 
 double* log_stepper(double a_0, double a_1, int num)
 {
-	fprintf(stderr, "\nMin:%e, Max:%e, bins:%d\n", a_0,a_1,num);
+	fprintf(stdout, "\nReturning %d logarithmic steps between %e and %e...\n", num, a_0,a_1);
 	
 	int i=0;
 	double a=a_0, step, *steps;
@@ -76,11 +77,11 @@ double* log_stepper(double a_0, double a_1, int num)
 
 double maximum(double *array, int size)
 {
-		int i=0;
-		double max=array[0];
+	int i=0;
+	double max=array[0];
  
-			for(i=0;i<size;i++) 
-				if(array[i]>max) max = array[i];
+		for(i=0;i<size;i++) 
+			if(array[i]>max) max = array[i];
 
 	return max;
 }
@@ -128,26 +129,26 @@ int check_array(int input, int *arr, int dim)
 	return found;
 }
 
+
+
 int *generate_random_subset(int Nmax, int Nmin, int *subset)
 {
 	int i=0, num=0;
 
-	if(Nmin > Nmax) {
-
+	if(Nmin > Nmax) 
+	{
 		fprintf(stderr, "\ngenerate_random_subset(). ERROR: Subset %d larger than dataset %d\n",Nmin,Nmax);
-	
 		} else {
-
-		srand ((int)time(NULL));
+			srand ((int)time(NULL));
 
 			while (i <= Nmin)
-				{
-
+			{
 				num = rand()%Nmax;
 
-					if(check_array(num,subset,i)==0){
-				subset[i]=num;
-				i++;
+					if(check_array(num,subset,i)==0)
+					{
+						subset[i]=num;
+						i++;
 					}
 				}	
 			}
@@ -161,8 +162,10 @@ int int_maximum(int *array, int size)
 {
 		int max=array[0], i=0;
 	
-		for(i=0;i<size;i++) 
-			if(array[i]>max) max = array[i];
+		for(i=0;i<size;i++)
+
+			if(array[i]>max) 
+				max = array[i];
 
 	return max;
 }
@@ -171,7 +174,10 @@ int int_maximum(int *array, int size)
 		/* Number the entries per bin in a given array */
 void lin_bin(double* array, double* bins, int bin_size, int array_size, int* binned_array)
 {
-	fprintf(stderr, "lin_bin(). Number of bins:%d, data array size:%d\n", bin_size, array_size);
+	fprintf(stdout, "\nBinning into %d bins an array of size:%d...", bin_size, array_size);
+#ifdef PRINT_INFO
+	fprintf(stdout, "\n");
+#endif
 	int i=0, j=0;
 
 	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);
@@ -180,17 +186,23 @@ void lin_bin(double* array, double* bins, int bin_size, int array_size, int* bin
 		for(i=0; i<array_size; i++)
 			gsl_histogram_increment(h, array[i]);
 		
-		for(j=0; j<array_size; j++)
-			binned_array[j] = h->bin[j];			
+		for(j=0; j<bin_size-1; j++)
+		{
+			binned_array[j] = (int) h->bin[j];
+#ifdef PRINT_INFO
+			fprintf(stdout, "bin[%d]=%lf\n", j, h->bin[j]);
+#endif
+		}
 
 	gsl_histogram_free(h);
+	fprintf(stdout, "done.\n");
 }
 
 
 		/* Average entry per array bin */
 void average_bin (double* array_x, double* array_y, double* bins, double* binned_array, double *error_array, int bin_size, int array_size)
 {
-	fprintf(stderr, "lin_bin(). Number of bins:%d, data array size:%d\n", bin_size, array_size);
+	fprintf(stdout, "\nBinning and averaging into %d bins an array of size:%d...", bin_size, array_size);
 	int i=0, j=0; 
 
 	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);
@@ -216,6 +228,25 @@ void average_bin (double* array_x, double* array_y, double* bins, double* binned
 }
 
 
+
+void cum_bin(int *n, int *nCum, int size)
+{
+	int i=0;
+	
+	nCum[size-1] = n[size-1];		
+
+	for(i=1; i<size; i++)
+		nCum[size-i-1] = n[size-i-1] + nCum[size-i];
+/*
+	for(i=0; i<size; i++)
+	{
+		fprintf(stdout, "Cumulative:%d, bin:%d\n", nCum[i], n[i]);
+	}
+*/
+}
+
+
+
 int* int_shellsort(int *array, int n)
 {
 	int i=0,j=0,inc=3, m=0, num = (int) (n/100), temp=0;
@@ -223,19 +254,20 @@ int* int_shellsort(int *array, int n)
      while(inc>0)
      {
           for(i=0;i<n;i++)
-        	  {
-	m++;
-
-	print_counter(num);
+	{
+		m++;
+		print_counter(num);
 
                    j=i;
                    temp=array[i];
+
                    while((j>=inc)&&array[j-inc]>temp)
                    {
                         array[j]=array[j-inc];
                         j=j-inc;
                    }
-                   array[j]=temp;
+
+                  array[j]=temp;
           }
           if(inc/2!=0)
            inc=inc/2;
@@ -258,18 +290,19 @@ double* shellsort(double *array, int n)
      while(inc>0)
      {
           for(i=0;i<n;i++)
-        	  {
-	m++;
-
-	print_counter(num);
+          {
+		m++;
+		print_counter(num);
 
                    j=i;
                    temp=array[i];
+
                    while((j>=inc)&&array[j-inc]>temp)
                    {
                         array[j]=array[j-inc];
                         j=j-inc;
                    }
+
                    array[j]=temp;
           }
           if(inc/2!=0)

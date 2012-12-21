@@ -42,42 +42,39 @@ void compute_growth_factor()
 {
 		fprintf(stderr,"compute_growth_factor().\n");
 
-		int i=0, vecOne=0, dim_eff=0; 
-		double norm=1., delta=1., delta_0=1., K, delta_a, a, z, pk, pk_norm, kk; 
+		int i=0, pk0=0, pkNorm=0, dim_eff=0; 
+		double norm=1., pk_norm=1., delta=1., delta_a, a, z, pk, K, kk; 
 
 			kk = Pks[0].k[0];
 			K = GF.scale_k, 
 			dim_eff = Settings.n_pk_files;
-			vecOne = 2;
+			pkNorm  = dim_eff - 1;
 
-			if(K < kk) 
+				if(K < kk) 
 				{
-				fprintf(stderr, 
-				"\n** WARNING! **\n Chosen k (%lf) is smaller than the numerical range. Setting k=%lf.\n", 
-				K, kk);
-				K = kk; 
+					fprintf(stderr, 
+					"\n**Chosen k (%lf) is smaller than the numerical range. Setting k=%lf.\n", 
+					K, kk);
+					K = kk; 
 				}
+					// pk0 is the highest redshift power spectrum
+					// pkNorm is the z at which we want the GF to be exactly one
+				pk_norm = power_k(K, pk0);
+				norm = power_k(K, pkNorm);
 
-				pk_norm = power_k(K, vecOne);
-				norm = power_k(K, dim_eff-1);
-
-		fprintf(stderr, "vecOne:%d, pk:%lf, norm:%lf, dimEff:%d, K:%lf\n", vecOne, pk_norm, norm, dim_eff, K);
+		fprintf(stderr, "Normalizing to Pk[%d]=%lf at scale k:%lf\n", pk0, pk_norm, K);
 
 		for (i=0; i<dim_eff; i++)
 		{
-			pk = power_k(K, vecOne);
+			pk = power_k(K, i);
 			delta = sqrt(pk/pk_norm);
 			delta *= sqrt(pk_norm/norm);
-
-				if(i==vecOne) delta_0 = GF.a[vecOne]/delta;
-	
-			delta *= delta_0;
-			a=Pks[i].a;
+			a = Pks[i].a;
 			z = 1./a - 1;
 			delta_a = delta/a;
 
 #ifdef PRINT_INFO
-		fprintf(stderr, "%d) z:%lf delta:%lf, delta_a:%lf\n", i, z, delta, delta_a);
+		fprintf(stderr, "GF.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta_a);
 #endif
 
 			GF.gf_z[i] = delta;

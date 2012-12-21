@@ -140,8 +140,8 @@ void print_theoretical_mass_function(double z)
 
 	n_num = dn_num = n_mass = err = 0;
 	th_mf=Urls_internal.output_prefix;
-	sprintf(z_num,"%lf", z);
-	out_file=merge_strings(th_mf, "mass_function.dat");
+	sprintf(z_num,"z_%lf", z);
+	out_file=merge_strings(th_mf, merge_strings(z_num, "_theoretical_mass_function.dat"));
 	fout=fopen(out_file, "w");
 
 	fprintf(stderr, "Mass function output file:%s \n", out_file);
@@ -150,12 +150,6 @@ void print_theoretical_mass_function(double z)
 		FILE_HEADER(fout, "Mass", count);
 		FILE_HEADER(fout, "dn Tinker", count);
 		FILE_HEADER(fout, "n(>M) Tinker", count);
-#ifndef TH_ONLY
-		FILE_HEADER(fout, "Mass Numerical", count);
-		FILE_HEADER(fout, "dn Numerical", count);
-		FILE_HEADER(fout, "n(>M) Numerical", count);
-		FILE_HEADER(fout, "error Numerical", count);
-#endif
 		fprintf(fout, "\n");
 
 			for(k=0; k<AMF.bins-1; k++)
@@ -163,22 +157,9 @@ void print_theoretical_mass_function(double z)
 				th_mass=AMF.th_masses[k];
 				tin=AMF.tin[k];
 				diff_tin=AMF.diff_tin[k];	
-#ifndef TH_ONLY
-				n_mass=MF.num_masses[k];
-				n_num=MF.n[k];
-				dn_num=MF.dn[k];
-				err=MF.err[k];
-#endif
-	
 				fprintf(fout,"%e", th_mass);
 				fprintf(fout,"\t%e", diff_tin);
 				fprintf(fout,"\t%e", tin);
-#ifndef TH_ONLY
-				fprintf(fout,"\t%e", n_mass);
-				fprintf(fout,"\t%e", dn_num);
-				fprintf(fout,"\t%e", n_num);
-				fprintf(fout,"\t%e", err);
-#endif
 				fprintf(fout, "\n");
 			}
 
@@ -421,23 +402,25 @@ void print_numerical_mass_function()
 
 		fprintf(output,"#");
 		FILE_HEADER(output, "M", count);
-		FILE_HEADER(output, "dn", count);
 		FILE_HEADER(output, "n", count);
-		FILE_HEADER(output, "dn_err", count);
-		FILE_HEADER(output, "n_err", count);
-		FILE_HEADER(output, "n_bin", count);
 		FILE_HEADER(output, "n_tot", count);
+		FILE_HEADER(output, "n_err", count);
+		FILE_HEADER(output, "M_dM", count);
+		FILE_HEADER(output, "dn", count);
+		FILE_HEADER(output, "n_bin", count);
+		FILE_HEADER(output, "dn_err", count);
 		fprintf(output,"\n");
 
 			for(i=0; i<nBins; i++) 
 			{
 				fprintf(output, "%e", MF.num_masses[i]);
-				fprintf(output, "\t%e", MF.dn[i]);
 				fprintf(output, "\t%e", MF.n[i]);
-				fprintf(output, "\t%e", MF.err_dn[i]);
-				fprintf(output, "\t%e", MF.err[i]);
-				fprintf(output, "\t%d", MF.n_bin[i]);
 				fprintf(output, "\t%d", MF.n_tot[i]);
+				fprintf(output, "\t%e", MF.err[i]);
+				fprintf(output, "\t%e", MF.dn_num_masses[i]);
+				fprintf(output, "\t%e", MF.dn[i]);
+				fprintf(output, "\t%d", MF.n_bin[i]);
+				fprintf(output, "\t%e", MF.err_dn[i]);
 				fprintf(output,"\n");
 			}
 	fclose(output);

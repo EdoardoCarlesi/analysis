@@ -127,6 +127,7 @@ extern struct mass_function
 	double *ln_sigmas;
 	double *dlnSdlnM;
 	double *num_masses;
+	double *dn_num_masses; // The derivative is taken in the middle of the mass bin
 
 	double *dn;
 	double *n;

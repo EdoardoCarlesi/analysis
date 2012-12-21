@@ -18,10 +18,6 @@
 #include <omp.h>
 #endif
 
-#ifdef KURAC
-#include "tareador_hooks.h"
-#endif
-
 
 int PK_INDEX;
 
@@ -38,7 +34,8 @@ double M_r(double r)
 
 double R_m(double m)
 {
-	if (Settings.rho_0 == 0) fprintf(stderr, "\nWARNING **** Rho_0 = 0.000 **** WARNING\n");
+	if (Settings.rho_0 == 0) 
+		fprintf(stderr, "\nWARNING **** Rho_0 = 0.000 **** WARNING\n");
 
 	return pow((3 * m)/(Settings.rho_0 * 4 * PI), 1./3.);
 }
@@ -132,7 +129,7 @@ void normalize_sigma8()
 
 		Cosmo.n_s8 = s8*s8/result;
 
-			fprintf(stderr, "Original sigma8:%lf, required sigma8: %lf, normalization factor:%lf\n", 
+			fprintf(stdout, "Original sigma8:%lf, required sigma8: %lf, normalization factor:%lf\n", 
 				sqrt(result), s8, Cosmo.n_s8);
 
 		gsl_integration_workspace_free (w);
@@ -144,10 +141,13 @@ void normalize_sigma8()
 
 void init_MF()
 {
+	fprintf(stdout, "\nAllocating memory for mass function structures...\n");
+
 	int nBins = Settings.n_bins;
 	// We need N-1 points, since the value saved is the one at half length of every bin
 	MF.bins = nBins-1;
 	MF.num_masses = (double*) calloc(nBins-1, sizeof(double));
+	MF.dn_num_masses = (double*) calloc(nBins-1, sizeof(double));
 	MF.n = (double*) calloc(nBins-1, sizeof(double));
 	MF.n_tot = (int*) calloc(nBins-1, sizeof(int));
 	MF.n_bin = (int*) calloc(nBins-1, sizeof(int));
@@ -160,6 +160,8 @@ void init_MF()
 
 void init_AMF()
 {
+	fprintf(stdout, "\nAllocating memory for theoretical mass function structures...\n");
+
 	int pts=AMF.bins;
 
 	AMF.th_masses = (double *) calloc(pts, sizeof(double)); 
@@ -178,13 +180,17 @@ void init_sigmas()
 	int k=0, pts=AMF.bins;
 	double M, Mmax, Mmin, sig, *m_steps; 
 
-	fprintf(stderr, "\nInitializing sigmas to calculate the theoretical Tinker mass function.\n");
+	m_steps = (double*) calloc(pts, sizeof(double));
+
+	fprintf(stdout, "\nInitializing sigmas to calculate the theoretical Tinker mass function...");
 	// AMF Min and Max are initialized when the program starts in the values read in the exec.sh script
 	Mmin=AMF.Mmin;
 	Mmax=AMF.Mmax;
 
 	m_steps = log_stepper(Mmin, Mmax, pts); 
 
+#ifdef _OPENMP
+#endif
 		for(k=0; k<AMF.bins; k++)
 		{
 			M=m_steps[k];
@@ -195,8 +201,10 @@ void init_sigmas()
 			AMF.ln_sigmas[k]=inv_ln_10*log(sig);
 		}
 
+	fprintf(stdout, "done.\n");
 	free(m_steps);
 }
+
 
 
 void init_dlnsdlnm()
@@ -226,7 +234,7 @@ double mf_normalization(double M)
 		lnslnm = sqrt(pow(d_ln_sigma_d_ln_M(M),2)); 
 		norm = Settings.rho_0/(M*M);
 
-return norm*lnslnm*sqrt(2./PI);
+	return norm*lnslnm*sqrt(2./PI);
 }
 
 
@@ -234,11 +242,11 @@ return norm*lnslnm*sqrt(2./PI);
 void compute_numerical_mass_function(void)
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, i=0, k=0; 
-	double cumHalo=0, volume=0, mMin=0, mMax=0, halfstep=0; 
+	double dn_norm=1., cumHalo=0, volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
 	double *mass, *mass_bin; 
 	int *n_mass, *cum_n_mass;
 
-	fprintf(stderr, "\nSorting mass function for %d halos in %d bins\n", nHaloes, nBins);
+	fprintf(stdout, "\nSorting mass function for %d halos in %d bins\n", nHaloes, nBins);
 	
 		Settings.tick=0;
 	
@@ -249,37 +257,41 @@ void compute_numerical_mass_function(void)
 
 		init_MF();
 	
-		mMin=haloes[nHaloes-1].Mvir;
-		mMax=haloes[0].Mvir;
+		mMin=haloes[nHaloes-1].Mvir*0.999;
+		mMax=haloes[0].Mvir*1.001;
 		mass_bin = log_stepper(mMin, mMax, nBins);
-		volume=Settings.box_size*Settings.box_size*Settings.box_size;
-
+		
+		for(i=0; i<nHaloes; i++)
+			mass[i] = haloes[i].Mvir;			
+	
 		lin_bin(mass, mass_bin, nBins, nHaloes, n_mass);	
+		
+		cum_bin(n_mass, cum_n_mass, nBins-1);
 
-			for(i=0; i<nBins-1; i++)
-			{
-				k = nBins - i - 1;
-				cumHalo += n_mass[k];
-				cum_n_mass[k] = cumHalo;
-			}
-
+			volume=Settings.box_size*Settings.box_size*Settings.box_size;
 
 		for(i=0; i<nBins-1; i++)
 		{
-				halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
-				MF.num_masses[i]=mass_bin[i]+halfstep;
-				MF.n[i]=n_mass[i];
-				MF.n_tot[i]=cum_n_mass[i];
-				MF.err[i]=sqrt(n_mass[i])/volume;
-				MF.dn[i]=n_mass[i]/volume;
-				MF.n_bin[i]=cum_n_mass[i]/volume;
-				MF.err_dn[i]=sqrt(cum_n_mass[i])/volume;
-		}	
+			halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
+			dn_norm = 2*halfstep/nHaloes;
+			dM = mass_bin[i+1]-mass_bin[i];
+			MF.num_masses[i]=mass_bin[i];
+			MF.dn_num_masses[i]=mass_bin[i]+halfstep;
+			MF.dn[i]=n_mass[i]/(volume*dM);
+			MF.n[i]=cum_n_mass[i]/volume;
+			MF.err_dn[i]=sqrt(n_mass[i])/(volume*dM);
+			MF.err[i]=sqrt(cum_n_mass[i])/volume;
 
+			MF.n_bin[i]=n_mass[i];
+			MF.n_tot[i]=cum_n_mass[i];
+		}
+	
 		free(mass); 
 		free(mass_bin); 
 		free(n_mass); 
 		free(cum_n_mass);
+
+	fprintf(stdout, "\nSorting done.\n");
 }
 
 
@@ -300,10 +312,8 @@ void compute_theoretical_mass_function(int index)
 
 		init_dlnsdlnm();
 
-#ifndef TH_ONLY
-			if(Settings.fit==1) 
-				best_fit_mf_tinker(MF.num_masses, MF.dn, MF.err_dn, MF.bins);
-#endif
+		if(Settings.fit==1) 
+			best_fit_mf_tinker(MF.num_masses, MF.dn, MF.err_dn, MF.bins);
 
 		Mmin = AMF.th_masses[0];
 		Mmax = AMF.th_masses[AMF.bins-1];
@@ -344,7 +354,7 @@ void store_mf(int m)
 {
 	int k=0;
 
-	fprintf(stderr, "\nstore_mf(%d). Saving the (cumulative) mass functions into mf structure.\n",m);
+	fprintf(stdout, "\nstore_mf(%d). Saving the (cumulative) mass functions into mf structure.\n",m);
 
 	mf[m].bins = AMF.bins;
 

@@ -1,26 +1,38 @@
 #!/bin/bash
-# Script to execute all the programs using centralized settings
-letter='l'
+# Script to execute all the analysis settings.
+# $1 (input argument) must be set to: 	- 1 (fit_nfw)
+#					- 2 (make_pk.sh)	
+#					- 3 (growth_factor)
+#					- 4 (mass_function)
+#					- 5 (halo_statistics)
+#					- 6
+#					- 7
+#					- 8
+#					- 9
+#					- 10 (theoretical_mass_function)
+#					- 11
+
+#letter='l'
 #model1='lcdm_features_'$letter
-model1='cde099nosph'
+model1='cde099b'
 model2='ude'
-box_size=100
-particle_number=32
+box_size=80
+particle_number=128
 n_bins=20
 r_bins=7
 catalogue_z=0
-catalogue_number=0
+catalogue_number=32
 snap_zero=0
 tot_snaps=29
-use_snaps=29
+use_snaps=32
 k=0.13
 fit=0
 pk_skip=11
 mf_skip=1
 
 #Minimum and maximum mass for the mass function computation
-m_min=1.e+12
-m_max=1.e+16
+m_min=1.e+11
+m_max=1.e+15
 m_th=1.e+9
 
 #Particle number threshold
@@ -78,9 +90,9 @@ fi
 if [ $particle_number -eq 64 ] ; then
 #outputs=$base_data/outputs_lcdm_gas.txt
 outputs=$base_data/output_z30.txt
-#outputs=$base_data/$particle_number/$box_size/outputs_lcdm_gas.txt
 fi
 if [ $particle_number -eq 128 ] ; then
+#outputs=$base_data/outputs_lcdm_gas.txt
 outputs=$base_data/output_z40.txt
 fi
 if [ $particle_number -eq 256 ] ; then
@@ -117,10 +129,12 @@ echo $halo_name1
 
 pk_file_base1=$snaps_dir1/Pk*$particle_number
 pk_file_base2=$snaps_dir2/Pk*$particle_number
-pk_file1=$pk_file_base1-1_snapshot_0$catalogue_number
 #pk_file1=${HOME}/Spettri_Latta/P_$letter'_matterpower.dat'
 #pk_file1=${HOME}/Spettri_Latta/lcdm.dat
-pk_file2=$pk_file_base2-1_snapshot_0$catalogue_number
+pk_file1=${HOME}/Gadget-devel/N-GenIC/pks/cde099.dat
+#pk_file1=`ls $pk_file_base1*snap*$catalogue_number`
+pk_file2=`ls $pk_file_base2*snap*$catalogue_number`
+
 halo_file1=$halo_dir1/$halo_name1
 halo_file2=$halo_dir2/$halo_name2
 profile_file1=$halo_dir1/$profile_name1

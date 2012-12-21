@@ -1,5 +1,6 @@
 #include <stdio.h>
 
+#include "libio/write_io.h"
 #include "libcosmo/tinker.h"
 #include "libcosmo/mass_function.h"
 #include "general_functions.h"
@@ -7,7 +8,7 @@
 
 int main(int arg, char **argv)
 {
-	fprintf(stdout, "\nmain(). Computing the mass function.\n");
+	fprintf(stdout, "\nComputing the mass function, starting the main().\n");
 
 	initialize_internal_variables(argv);
 	MF.bins  = Settings.n_bins-1; 
@@ -21,8 +22,10 @@ int main(int arg, char **argv)
 
 	Settings.use_one_pk = 1;
 
+		read_halo_file();
 		compute_numerical_mass_function();
-	
-	fprintf(stdout, "\nmain(). Mass function computed.\n");
+		print_numerical_mass_function();	
+
+	fprintf(stdout, "\nMass function computed.\n");
 	return 0;
 }

@@ -18,6 +18,7 @@ double* invert_array(double*, int);
 double* log_stepper(double, double, int);
 double* lin_stepper(double, double, int);
 
+void cum_bin(int*, int*, int);
 void lin_bin(double*, double*, int, int, int*);
 void average_bin(double*, double*, double *, double*, double*, int, int);
 
