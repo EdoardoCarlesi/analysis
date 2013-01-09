@@ -15,6 +15,10 @@ LIBS    += libparallel/libparallel.a
 INCLUDE += libparallel/general.h libparallel/halo_io.h
 endif
 
+ifeq (${SYS}, "castor")
+LIBS	+= -lgsl -lgslcblas -lm
+endif
+
 EXECS = nfw_fit growth_factor halo_comparison halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
 	mass_function number_density merger_tree
 
