@@ -10,6 +10,11 @@ SRCS = general_variables.c general_functions.c
 OBJ  = general_variables.o general_functions.o
 INCLUDE += general_variables.h general_functions.h
 
+ifeq (${WITH_MPI}, "on")
+LIBS    += libparallel/libparallel.a
+INCLUDE += libparallel/general.h libparallel/halo_io.h
+endif
+
 EXECS = nfw_fit growth_factor halo_comparison halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
 	mass_function number_density merger_tree
 
@@ -64,6 +69,8 @@ clean:
 		cd libio ; ${MAKE} clean
 		cd libcosmo ; ${MAKE} clean
 		cd libhalo ; ${MAKE} clean
+		cd libparallel ; ${MAKE} clean
+		
 		
 # Various libraries needed by the program
 libmath/libmath.a: 
@@ -77,3 +84,7 @@ libio/libio.a:
 
 libhalo/libhalo.a: 
 	cd libhalo/ ; ${MAKE} libhalo.a
+
+libparallel/libparallel.a: 
+	cd libparallel/ ; ${MAKE} libparallel.a
+

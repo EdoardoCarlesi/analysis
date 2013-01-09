@@ -3,11 +3,60 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <malloc.h>
 
+#include "general_variables.h"
 
-#include "libio/halo_io.h"
 #include "libio/read_io.h"
 
+#ifdef WITH_MPI
+#include <mpi.h>
+#include "libparallel/halo_io.h"
+#include "libparallel/general.h"
+#else 
+#include "libio/halo_io.h"
+#endif
+
+int main(int argc, char **argv)
+{
+	int j=0;
+	char *halo_urls[2];
+
+	NTask = atoi(argv[1]);
+	init_pstructures();
+	
+	halo_urls[0] = "/home/carlesi/Gadget-devel/gadget_exec/256/lcdm/ahf/snapshot_029.0000.z0.000.AHF_halos";
+	halo_urls[1] = "/home/carlesi/Gadget-devel/gadget_exec/256/lcdm/ahf/snapshot_029.0001.z0.000.AHF_halos";
+
+	MPI_Init(&argc, &argv);
+	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
+	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
+
+	fprintf(stdout, "\nTask=%d, NTask=%d\n", ThisTask, NTask);
+
+	//pUrls[ThisTask].halo_file = halo_urls[ThisTask];
+	copy_url(halo_urls[ThisTask]);
+
+	//MPI_Barrier(MPI_COMM_WORLD);
+
+	fprintf(stdout, "\nTask=%d, halo_url=%s\n", ThisTask, pUrls[ThisTask].halo_file);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+
+	pread_halo_file();
+
+	//if(ThisTask==0)
+	//for(j=0; j<NTask; j++)
+	//	fprintf(stdout, "\n_Task=%d, halo_url=%s\n", j, pUrls[j].halo_file);
+
+	MPI_Finalize();
+
+	return 0;
+}
+
+
+
+/*
 int main(int argc, char **argv){
 fprintf(stderr, "\n*********TEST**********\n");
 
@@ -15,7 +64,6 @@ int *ran; int N=50; int M=30;
 ran = (int*)calloc(M,sizeof(int));
 generate_random_subset(N,M,ran);
 
-/*
 initialize_internal_variables(argv);
 
 char *url = "/home/carlesi/vde1_correlation_function.dat";
@@ -204,10 +252,10 @@ double rho0 = cc*cc*cc*200/(3*(log(1+cc)-(cc/(1+cc))));
 best_fit_nfw(rho0, rs, nbin, a_x, a_y, e_y);
 fprintf(stderr, "Chi2: %lf \n", Chi2.chi);
 print_nfw();
-*/
 
 return 0;
 }
+*/
 
 
 

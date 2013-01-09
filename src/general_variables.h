@@ -1,3 +1,4 @@
+
 extern struct power_spectrum 
 {
 	int n_pk_entries;
@@ -80,7 +81,7 @@ extern struct general_settings
 	double rho_dm;
 	double rho_b;
 #endif
-} Settings;
+} Settings, *pSettings;
 
 
 extern struct cosmology
@@ -164,17 +165,16 @@ extern struct merger_tree
 extern struct halo
 {
 	int n_part;
-	int n_part500;
-	int nv_part;
 	int n_satellites;
         int n_bins;
 	int neg_r_bins;
 	int id;
 	int host;
-	int *id_satellites;
 	int virial;
 	int spin;
 	int conc;
+
+	int *id_satellites;
 
 	double Xc;
 	double Yc;
@@ -189,7 +189,6 @@ extern struct halo
 	double Eay; 
 	double Eaz; 
 	double Mvir;
-	double Mvir500;
 	double Rvir;
 	double Rmax;
 	double Vmax;
@@ -205,8 +204,8 @@ extern struct halo
 	double c;
 	double r2;
 	double aa;
-	double cc;
 	double bb;
+	double cc;
 	double c_a;
 	double triax;
 	double z_form;
@@ -214,6 +213,7 @@ extern struct halo
 	double chi_nfw;
 	double rs_nfw;
 	double rho0_nfw;
+
 	double *radius;
 	double *rho;
 	double *over_rho;
@@ -221,11 +221,30 @@ extern struct halo
 	double *over_err;
 	double *err_dn;
 	double *bin;
+
 #ifdef GAS
 	int N_dm;
 	int N_gas;
 	double M_dm;
 	double M_gas;
+	double Eax_gas;
+	double Eay_gas;
+	double Eaz_gas;
+	double Ebx_gas;
+	double Eby_gas;
+	double Ebz_gas;
+	double Ecx_gas;
+	double Ecy_gas;
+	double Ecz_gas;
+	double lambda_gas;
+	double lambdaE_gas;
+	double b_gas;
+	double c_gas;
+	double Ekin_gas;
+	double Epot_gas;
+	double b_fraction;
+	double Cum_u_gas;
+	double T_gas;
 #ifdef EXTRA_GAS
 	double X_dm;
 	double Y_dm;
@@ -240,26 +259,8 @@ extern struct halo
 	double VY_gas;
 	double VZ_gas;
 #endif
-	double Eay_gas;
-	double Eax_gas;
-	double Eaz_gas;
-	double Eby_gas;
-	double Ebx_gas;
-	double Ebz_gas;
-	double Ecy_gas;
-	double Ecx_gas;
-	double Ecz_gas;
-	double lambda_gas;
-	double lambdaE_gas;
-	double b_gas;
-	double c_gas;
-	double Ekin_gas;
-	double Epot_gas;
-	double b_fraction;
-	double Cum_u_gas;
-	double T_gas;
 #endif  // GAS
-} *haloes, *subhaloes;
+} *haloes, *subhaloes, **pHaloes;
 
 
 extern struct full_catalogue
@@ -272,7 +273,7 @@ extern struct full_catalogue
 	char **urls_satellites;
 	char **urls_particles;
 
-} FC;
+} FC, *pFC;
 
 
 extern struct internal_urls
@@ -292,7 +293,7 @@ extern struct internal_urls
 	char *profile_list;
 	char *subhalo_list;
 
-} Urls_internal;
+} Urls_internal, *pUrls;
 
 
 extern struct halo_properties

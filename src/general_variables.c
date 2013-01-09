@@ -1,11 +1,11 @@
 #include "general_variables.h"
 
-struct general_settings Settings;
-struct internal_urls Urls_internal;
-struct full_catalogue FC;
+struct general_settings Settings, *pSettings;
+struct internal_urls Urls_internal, *pUrls;
+struct full_catalogue FC, *pFC;
 struct cosmology Cosmo;
 
-struct halo *haloes, *subhaloes;
+struct halo *haloes, *subhaloes, **pHaloes;
 struct halo_properties SubHaloZ, HaloZ, *HaloProperties, *SubHaloProperties;
 
 struct merger_tree *MTree;
