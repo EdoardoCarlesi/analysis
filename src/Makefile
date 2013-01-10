@@ -66,6 +66,7 @@ theoretical_mass_function : theoretical_mass_function.c ${LIBS} ${SRCS}
 
 test : test.c ${LIBS} ${SRCS}
 	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o test test.c ${SRCS} ${LIBS} ${LIBS};
+		mv test ${HOME_DIR}/bin/		
 
 clean: 
 		rm -rf test *.txt *.o *~ ${HOME_DIR}/bin/*

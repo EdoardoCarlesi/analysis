@@ -19,13 +19,11 @@
 
 int main(int argc, char **argv)
 {
-	int j=0;
 	char *halo_urls[2];
 
 	NTask = atoi(argv[1]);
 	init_pstructures();
-	
-	Settings.thMass = 1.e10;
+
 	halo_urls[0] = "/home/edoardo/snapshot_029.0000.z0.000.AHF_halos";
 	halo_urls[1] = "/home/edoardo/snapshot_029.0001.z0.000.AHF_halos";
 
@@ -33,19 +31,28 @@ int main(int argc, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
 
-	//fprintf(stdout, "\nTask=%d, NTask=%d\n", ThisTask, NTask);
+	if(ThisTask == 0)
+	{
+		Settings.thMass = 1.e10;
+		Settings.nP_1D = 256;
+		Settings.box_size = 75;
+		Settings.thNum = 1e4;
+		Cosmo.virial = 1.5;
+		Cosmo.spin = 0.15;
+	}
 
-	//pUrls[ThisTask].halo_file = halo_urls[ThisTask];
-	copy_url(halo_urls[ThisTask]);
+		MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
+		MPI_Bcast(&Cosmo, sizeof(struct cosmology), MPI_BYTE, 0, MPI_COMM_WORLD);
 
-	//MPI_Barrier(MPI_COMM_WORLD);
+		copy_url(halo_urls[ThisTask]);
 
-	//fprintf(stdout, "\nTask=%d, halo_url=%s\n", ThisTask, pUrls[ThisTask].halo_file);
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		pread_halo_file();
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
-	pread_halo_file();
-
+	gather_haloes();
 	//if(ThisTask==0)
 	//for(j=0; j<NTask; j++)
 	//	fprintf(stdout, "\n_Task=%d, halo_url=%s\n", j, pUrls[j].halo_file);

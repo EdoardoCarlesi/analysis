@@ -12,6 +12,8 @@
 
 int ThisTask;
 int NTask;
+int NHaloes;
+int TaskHaloes;
 
 MPI_Datatype 	MPI_halo;
 

@@ -9,9 +9,49 @@
 #include "../general_variables.h"
 #include "../general_functions.h"
 #include "../libio/read_io.h"
-#include "../libio/halo_io.h"
 
 #define LINE_SIZE 2048
+
+
+void pdetermine_simulation_settings()
+{
+	if(ThisTask==0)
+	{
+#ifndef GAS
+	Settings.pMass = pHaloes[ThisTask][0].Mvir/pHaloes[ThisTask][0].n_part;
+	Settings.rho_0 = Settings.pMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
+	fprintf(stderr, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
+#else
+	Settings.dmMass  = pHaloes[ThisTask][0].M_dm/pHaloes[ThisTask][0].N_dm;
+	Settings.gasMass = pHaloes[ThisTask][0].M_gas/pHaloes[ThisTask][0].N_gas; 
+	Settings.rho_dm = Settings.dmMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
+	Settings.rho_b = Settings.gasMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
+	Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
+	fprintf(stderr, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
+	fprintf(stderr, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
+#endif
+
+	Settings.rho_c = (3*pHaloes[ThisTask][0].Mvir)/(4*3.14*pHaloes[ThisTask][0].Rvir*pHaloes[ThisTask][0].Rvir*pHaloes[ThisTask][0].Rvir*200);
+}
+
+		MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
+
+		fprintf(stderr, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
+		%d virialized\n\
+		%d with the right concentration\n\
+		%d satisfying the spin criterion\n\
+		and %d haloes with more than %d particles.\n", ThisTask,
+		pSettings[ThisTask].haloes_over_threshold,
+		Settings.thMass,
+		pSettings[ThisTask].virialized_haloes,
+		pSettings[ThisTask].virialized_concentration, 
+		pSettings[ThisTask].spin_criterion,
+		pSettings[ThisTask].haloes_over_thnum, 
+		Settings.thNum
+		);
+
+}
+
 
 void pread_halo_file()
 {
@@ -40,10 +80,11 @@ void pread_halo_file()
 
 		while(!feof(h_file))
 		{
-			fgets(dummyline, LINE_SIZE, h_file);
+				fgets(dummyline, LINE_SIZE, h_file);
+		
 			if(j>=skip) 
 			{
-//fprintf(stdout, "Task=%d, j=%d, n=%d, skip=%d, n_haloes=%d, %s\n", ThisTask, j, n, skip, pSettings[ThisTask].n_haloes, dummyline);	
+
 	sscanf(dummyline,
 #ifndef GAS
 	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
@@ -104,17 +145,16 @@ void pread_halo_file()
 #endif
 #endif
 	);
-
-	pHaloes[ThisTask][n].aa = 1.0; // In the new catalogues haloes' major axis is normalized to one
+	// In the new catalogues haloes' major axis is normalized to one
+	pHaloes[ThisTask][n].aa = 1.0; 
 #ifdef  GAS
 #ifndef EXTRA_GAS
 	// The cumulative u has to be read from the profile catalogues
 	pHaloes[ThisTask][n].Cum_u_gas = 0.0;
 #endif
 #endif
-//	fprintf(stdout, "\nTask=%d, setting additional halo properties.\n", ThisTask);
-//	set_additional_halo_properties(n);
-	//fprintf(stdout, "\nTask=%d, setting additional done.\n", ThisTask);
+
+	pset_additional_halo_properties(n);
 
 #ifdef USE_UNIT_MPC
 	pHaloes[ThisTask][n].Rvir *= 1.e-3;
@@ -149,21 +189,23 @@ void pread_halo_file()
 		if(sqrt(pHaloes[ThisTask][n].th_vir*pHaloes[ThisTask][n].th_vir) < Cosmo.virial) 
 		{
 
-		if(pHaloes[ThisTask][n].c_nfw == -1) 
-		{
-			pHaloes[ThisTask][n].conc=0;		
-		} else {
+			if(pHaloes[ThisTask][n].c_nfw == -1) 
+			{
+				pHaloes[ThisTask][n].conc=0;		
+
+			} else {
+
 			pHaloes[ThisTask][n].conc=1;
 			conc++;
-		}
+			}
 
-		if(pHaloes[ThisTask][n].lambda > Cosmo.spin)
-		{
-			pHaloes[ThisTask][n].spin=0;
-		} else {
-			pHaloes[ThisTask][n].spin=1;
-			spin++;	
-		}
+				if(pHaloes[ThisTask][n].lambda > Cosmo.spin)
+				{
+					pHaloes[ThisTask][n].spin=0;		
+				} else {
+					pHaloes[ThisTask][n].spin=1;
+					spin++;	
+			}
 
 			vir++;
 
@@ -176,10 +218,10 @@ void pread_halo_file()
 
 		if(Settings.thNum < pHaloes[ThisTask][n].n_part)
 		{
-			Settings.haloes_over_thnum = pHaloes[ThisTask][n].id + 1;
+			pSettings[ThisTask].haloes_over_thnum = pSettings[ThisTask].n_haloes - n;
 	}
 
-		//	print_counter(2000);
+			print_counter(2000);
 	
 			n++;
 			j++;
@@ -188,12 +230,12 @@ void pread_halo_file()
 	}
 } // Finished counting haloes over threshold conditions
 
-		Settings.haloes_over_threshold=thr;
-		Settings.virialized_haloes=vir;
-		Settings.virialized_concentration=conc;
-		Settings.spin_criterion=spin;
+		pSettings[ThisTask].haloes_over_threshold=thr;
+		pSettings[ThisTask].virialized_haloes=vir;
+		pSettings[ThisTask].virialized_concentration=conc;
+		pSettings[ThisTask].spin_criterion=spin;
 
-		determine_simulation_settings();	
+		pdetermine_simulation_settings();	
 
 	fclose(h_file);
 }
@@ -395,4 +437,15 @@ void pget_halo_files_urls()
 }
 
 
+
+void gather_haloes()
+{
+	TaskHaloes = pSettings[ThisTask].n_haloes;
+	fprintf(stdout, "Task=%d, Haloes=%d\n", ThisTask, TaskHaloes);
+	MPI_Reduce(&TaskHaloes, &NHaloes, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);	
+	
+	if(ThisTask==0)
+		fprintf(stdout, "\ngather_haloes()... %d haloes found\n", NHaloes);
+
+}
 
