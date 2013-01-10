@@ -68,7 +68,7 @@ test : test.c ${LIBS} ${SRCS}
 	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o test test.c ${SRCS} ${LIBS} ${LIBS};
 
 clean: 
-		rm -rf *.txt *.o *~ ${HOME_DIR}/bin/*
+		rm -rf test *.txt *.o *~ ${HOME_DIR}/bin/*
 		cd libmath ; ${MAKE} clean
 		cd libio ; ${MAKE} clean
 		cd libcosmo ; ${MAKE} clean

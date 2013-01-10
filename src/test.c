@@ -25,21 +25,22 @@ int main(int argc, char **argv)
 	NTask = atoi(argv[1]);
 	init_pstructures();
 	
-	halo_urls[0] = "/home/carlesi/Gadget-devel/gadget_exec/256/lcdm/ahf/snapshot_029.0000.z0.000.AHF_halos";
-	halo_urls[1] = "/home/carlesi/Gadget-devel/gadget_exec/256/lcdm/ahf/snapshot_029.0001.z0.000.AHF_halos";
+	Settings.thMass = 1.e10;
+	halo_urls[0] = "/home/edoardo/snapshot_029.0000.z0.000.AHF_halos";
+	halo_urls[1] = "/home/edoardo/snapshot_029.0001.z0.000.AHF_halos";
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
 
-	fprintf(stdout, "\nTask=%d, NTask=%d\n", ThisTask, NTask);
+	//fprintf(stdout, "\nTask=%d, NTask=%d\n", ThisTask, NTask);
 
 	//pUrls[ThisTask].halo_file = halo_urls[ThisTask];
 	copy_url(halo_urls[ThisTask]);
 
 	//MPI_Barrier(MPI_COMM_WORLD);
 
-	fprintf(stdout, "\nTask=%d, halo_url=%s\n", ThisTask, pUrls[ThisTask].halo_file);
+	//fprintf(stdout, "\nTask=%d, halo_url=%s\n", ThisTask, pUrls[ThisTask].halo_file);
 
 	MPI_Barrier(MPI_COMM_WORLD);
 

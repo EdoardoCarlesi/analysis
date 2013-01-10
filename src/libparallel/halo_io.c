@@ -11,15 +11,20 @@
 #include "../libio/read_io.h"
 #include "../libio/halo_io.h"
 
-
+#define LINE_SIZE 2048
 
 void pread_halo_file()
 {
-	int n=0, j=0, thr=0, vir=0, conc=0, spin=0;
+	int n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0;
 	double a, minMass;
-	char dummyline[10000]; 
+	char dummyline[LINE_SIZE]; 
 	FILE *h_file=NULL;
-
+	
+	if(ThisTask==0)
+		skip = 1;
+	else
+		skip=0;
+	
 	Settings.tick=0;
 	h_file = fopen(pUrls[ThisTask].halo_file, "r");
 
@@ -28,17 +33,18 @@ void pread_halo_file()
 	else
 		fprintf(stderr, "Task=%d, found halo file:%s\n", ThisTask, pUrls[ThisTask].halo_file);
 
-		Settings.n_haloes = get_lines(h_file, pUrls[ThisTask].halo_file) - Settings.halo_skip;
+		pSettings[ThisTask].n_haloes = get_lines(h_file, pUrls[ThisTask].halo_file) - skip;
 
-		haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
+		pHaloes[ThisTask] = (struct halo*) calloc(pSettings[ThisTask].n_haloes, sizeof(struct halo));
 		minMass = Settings.thMass;
 
 		while(!feof(h_file))
 		{
-			fgets(dummyline, 10000, h_file);
-				if(j>=Settings.halo_skip) 
-			{	
-	sscanf(dummyline, 
+			fgets(dummyline, LINE_SIZE, h_file);
+			if(j>=skip) 
+			{
+//fprintf(stdout, "Task=%d, j=%d, n=%d, skip=%d, n_haloes=%d, %s\n", ThisTask, j, n, skip, pSettings[ThisTask].n_haloes, dummyline);	
+	sscanf(dummyline,
 #ifndef GAS
 	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
@@ -74,14 +80,14 @@ void pread_halo_file()
 	&pHaloes[ThisTask][n].VYc, 	&pHaloes[ThisTask][n].VZc, 	&pHaloes[ThisTask][n].Rvir, 
 	&pHaloes[ThisTask][n].Rmax, 	&pHaloes[ThisTask][n].r2, 	&a, 				
 	&a,				&pHaloes[ThisTask][n].Vmax, 	&a, 			
-	&a, 				&pHaloes[ThisTask][n].lambda, // First 20 entries
+	&a, 				&pHaloes[ThisTask][n].lambda, 	// First 20 entries
 	&pHaloes[ThisTask][n].lambdaE, 	&pHaloes[ThisTask][n].Lx, 	&pHaloes[ThisTask][n].Ly, 			
 	&pHaloes[ThisTask][n].Lz, 	&pHaloes[ThisTask][n].bb,	&pHaloes[ThisTask][n].cc, 		
 	&pHaloes[ThisTask][n].Eax, 	&pHaloes[ThisTask][n].Eay, 	&pHaloes[ThisTask][n].Eaz,		
 	&a, 				&a, 				&a, 
 	&a, 				&a,				&a, 				
 	&a,				&pHaloes[ThisTask][n].n_bins,	&a, 			
-	&pHaloes[ThisTask][n].Ekin, 	&pHaloes[ThisTask][n].Epot, // First 40 entries
+	&pHaloes[ThisTask][n].Ekin, 	&pHaloes[ThisTask][n].Epot, 	// First 40 entries
 	&a, 				&a, 				&pHaloes[ThisTask][n].c_nfw
 #ifdef GAS
 	, &pHaloes[ThisTask][n].N_gas, 	&pHaloes[ThisTask][n].M_gas, 	&pHaloes[ThisTask][n].lambda_gas, 		
@@ -98,6 +104,7 @@ void pread_halo_file()
 #endif
 #endif
 	);
+
 	pHaloes[ThisTask][n].aa = 1.0; // In the new catalogues haloes' major axis is normalized to one
 #ifdef  GAS
 #ifndef EXTRA_GAS
@@ -105,8 +112,9 @@ void pread_halo_file()
 	pHaloes[ThisTask][n].Cum_u_gas = 0.0;
 #endif
 #endif
-
-	set_additional_halo_properties(n);
+//	fprintf(stdout, "\nTask=%d, setting additional halo properties.\n", ThisTask);
+//	set_additional_halo_properties(n);
+	//fprintf(stdout, "\nTask=%d, setting additional done.\n", ThisTask);
 
 #ifdef USE_UNIT_MPC
 	pHaloes[ThisTask][n].Rvir *= 1.e-3;
@@ -171,7 +179,7 @@ void pread_halo_file()
 			Settings.haloes_over_thnum = pHaloes[ThisTask][n].id + 1;
 	}
 
-			print_counter(2000);
+		//	print_counter(2000);
 	
 			n++;
 			j++;
@@ -243,7 +251,7 @@ void pread_profiles_file()
 {
 	int nr=0, k=0, j=0, np1=0, np2=0, halo_bins=0, counter=0, kk=0;
 	double a, over, over1, over2, over3, radius1, radius2, err_p;
-	char dummyline[4096]; 
+	char dummyline[LINE_SIZE]; 
 	FILE *h_file=NULL;
 
 		h_file = fopen(Urls_internal.profiles_file, "r");
@@ -261,7 +269,7 @@ void pread_profiles_file()
 
 		while(counter < Settings.haloes_over_threshold)
 		{
-			fgets(dummyline, 4096, h_file);
+			fgets(dummyline, LINE_SIZE, h_file);
 			if(j>= Settings.halo_skip) 
 			{
 				sscanf(dummyline, "%lf %d %lf %lf %lf", &radius1, &np1, &a, &over1, &over);	
