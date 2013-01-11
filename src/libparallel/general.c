@@ -19,7 +19,7 @@ int *SizeHaloesStructHalo;
 
 
 
-void copy_url(char *url)
+void copy_halo_url(char *url)
 {
 	pUrls[ThisTask].halo_file = (char*) calloc(strlen(url)-1, sizeof(char));
 	strcpy(pUrls[ThisTask].halo_file, url);
@@ -27,13 +27,12 @@ void copy_url(char *url)
 
 
 
-void init_pstructures()
+void init_comm_structures()
 {
 	pSettings = (struct general_settings *) calloc(NTask, sizeof(struct general_settings));
 	pHaloes = (struct halo **) calloc(NTask, sizeof(struct halo *));
 	pUrls = (struct internal_urls *) calloc(NTask, sizeof(struct internal_urls));
 	pFC = (struct full_catalogue *) calloc(NTask, sizeof(struct full_catalogue));
-
 	SizeDispl = (int*) calloc(NTask, sizeof(int));			
 	SizeHaloes = (int*) calloc(NTask, sizeof(int));
 	SizeDisplStructHalo = (int*) calloc(NTask, sizeof(int));			
@@ -41,15 +40,24 @@ void init_pstructures()
 }
 
 
-void mpi_bcast_sizes()
+
+void free_comm_structures()
 {
-	MPI_Bcast(SizeHaloes, NTask, MPI_INT, 0, MPI_COMM_WORLD);
-	MPI_Bcast(SizeDispl, NTask, MPI_INT, 0, MPI_COMM_WORLD);
+	fprintf(stdout, "\nTask=%d, freeing memory allocated for communication...\n", ThisTask);
+
+	free(pSettings);
+	free(pHaloes);
+	free(pUrls);
+	free(pFC);
+	free(SizeDispl);
+	free(SizeDisplStructHalo);
+	free(SizeHaloes);
+	free(SizeHaloesStructHalo);
 }
 
 
 
-void set_halo_displacement()
+void gather_halo_structures()
 {	
 	int n, TaskHaloes, TaskOverThreshold, TaskVirialized, TaskSpin, TaskConcentration, TaskAll;
 	
@@ -84,7 +92,7 @@ void set_halo_displacement()
 			SizeDispl[0] = 0;
 			SizeDisplStructHalo[0] = 0;
 	
-		haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
+			haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
 		}
 
 		MPI_Gather(&pSettings[ThisTask].n_haloes, 1, MPI_INT, SizeHaloes, 1, MPI_INT, 0, MPI_COMM_WORLD);	
@@ -92,6 +100,7 @@ void set_halo_displacement()
 		MPI_Gather(&pSettings[ThisTask].n_haloes_size, 1, MPI_INT, 
 			SizeHaloesStructHalo, 1, MPI_INT, 0, MPI_COMM_WORLD);	
 
+				// When using Gatherv the Displ and Haloes size vectors are relevant only at root
 			if(ThisTask==0)
 			{
 				for(n=1; n<NTask; n++)
@@ -100,14 +109,6 @@ void set_halo_displacement()
 					SizeDisplStructHalo[n] = SizeHaloesStructHalo[n-1]+SizeDisplStructHalo[n-1];
 				}
 			}
-/*
-		if(ThisTask==0)
-			for(n=0; n<NTask; n++)
-			{	
-				fprintf(stdout, "Task=%d, SizeHaloes[%d]=%d\n", ThisTask, n, SizeHaloes[n]);
-				fprintf(stdout, "Task=%d, SizeDispl[%d]=%d\n", ThisTask, n, SizeDispl[n]);
-			}
-*/
 
 	MPI_Gatherv(&pHaloes[ThisTask][0], pSettings[ThisTask].n_haloes*sizeof(struct halo), MPI_BYTE, 
 		haloes, SizeHaloesStructHalo, SizeDisplStructHalo, MPI_BYTE, 0, MPI_COMM_WORLD);

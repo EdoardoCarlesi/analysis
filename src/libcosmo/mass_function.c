@@ -241,8 +241,8 @@ double mf_normalization(double M)
 
 void compute_numerical_mass_function(void)
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, i=0, k=0; 
-	double dn_norm=1., cumHalo=0, volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
+	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, i=0; 
+	double dn_norm=1., volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
 	double *mass, *mass_bin; 
 	int *n_mass, *cum_n_mass;
 
@@ -256,13 +256,13 @@ void compute_numerical_mass_function(void)
 		cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
 
 		init_MF();
-	
-		mMin=haloes[nHaloes-1].Mvir*0.999;
-		mMax=haloes[0].Mvir*1.001;
-		mass_bin = log_stepper(mMin, mMax, nBins);
 		
 		for(i=0; i<nHaloes; i++)
 			mass[i] = haloes[i].Mvir;			
+	
+		mMin=minimum(mass, nHaloes)*0.999;
+		mMax=maximum(mass, nHaloes)*1.001;
+		mass_bin = log_stepper(mMin, mMax, nBins);
 	
 		lin_bin(mass, mass_bin, nBins, nHaloes, n_mass);	
 		

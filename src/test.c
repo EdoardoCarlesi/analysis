@@ -5,10 +5,11 @@
 #include <stdlib.h>
 #include <malloc.h>
 
+#include "libcosmo/mass_function.h"
 #include "libio/read_io.h"
 #include "libio/halo_io.h"
-#include "general_variables.h"
 #include "libhalo/halo_properties.h"
+#include "general_variables.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -16,12 +17,10 @@
 #include "libparallel/general.h"
 #endif
 
+
 int main(int argc, char **argv)
 {
 	char *halo_urls[2];
-
-	NTask = atoi(argv[1]);
-	init_pstructures();
 
 	halo_urls[0] = "/home/edoardo/snapshot_029.0000.z0.000.AHF_halos";
 	halo_urls[1] = "/home/edoardo/snapshot_029.0001.z0.000.AHF_halos";
@@ -29,6 +28,8 @@ int main(int argc, char **argv)
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
+
+	init_comm_structures();
 
 	if(ThisTask == 0)
 	{
@@ -39,24 +40,28 @@ int main(int argc, char **argv)
 		Settings.n_bins = 10;
 		Cosmo.virial = 1.5;
 		Cosmo.spin = 0.15;
-		
-	initialize_halo_properties_structure();
-
 	}
 
 		MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
 		MPI_Bcast(&Cosmo, sizeof(struct cosmology), MPI_BYTE, 0, MPI_COMM_WORLD);
 
-		copy_url(halo_urls[ThisTask]);
+		copy_halo_url(halo_urls[ThisTask]);
 
 		MPI_Barrier(MPI_COMM_WORLD);
 
-		pread_halo_file();
+		mpi_read_halo_file();
 
-	set_halo_displacement();
-//	psort_shape_and_triaxiality();
+	gather_halo_structures();
+
+	free_comm_structures();
+
 	if(ThisTask==0)
+	{
+		initialize_halo_properties_structure();
 		sort_shape_and_triaxiality();
+		sort_lambda();
+		compute_numerical_mass_function();
+	}
 
 	MPI_Finalize();
 

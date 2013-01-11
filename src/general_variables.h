@@ -57,7 +57,7 @@ extern struct general_settings
 	int n_spin;
 	int n_all;
 	int n_haloes;
-	int n_haloes_size;
+	int n_haloes_size; // Used for MPI communication
 
 	int min_subhaloes;
 	int n_subhaloes;
@@ -65,10 +65,10 @@ extern struct general_settings
 	int n_bins;
 	int r_bins;
 
-	// Use minimum mass or minimum number of particles
 	int use_n_min; // If =1 using n_min, otherwise using mass_min
 	int n_min;
 	double mass_min;
+	int n_haloes_to_use; // Use the first N haloes
 
 	int use_spin;
 	int use_vir;
@@ -168,6 +168,7 @@ extern struct merger_tree
 	double *z;
 	double *M;
 	double *c;
+
 } *MTree;
 
 
@@ -287,6 +288,7 @@ extern struct full_catalogue
 } FC, *pFC;
 
 
+
 extern struct internal_urls
 {
 	char *halo_dir;
@@ -304,7 +306,9 @@ extern struct internal_urls
 	char *profile_list;
 	char *subhalo_list;
 
+
 } Urls_internal, *pUrls;
+
 
 
 extern struct halo_properties

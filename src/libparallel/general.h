@@ -11,8 +11,7 @@ extern int *SizeHaloes;
 extern int *SizeDisplThreshold;
 extern int *SizeHaloesThreshold;
 
-void mpi_bcast_size();
-
-void set_halo_displacement(void);
-void init_pstructures(void);
-void copy_url(char*);
+void gather_halo_structures(void);
+void init_comm_structures(void);
+void free_comm_structures(void);
+void copy_halo_url(char*);

@@ -114,14 +114,18 @@ gsl_vector* least_square_nl_fit(struct data dat, struct parameters par, gsl_mult
     		s = gsl_multifit_fdfsolver_alloc(T, n, p);
     		gsl_multifit_fdfsolver_set(s, &f, &x.vector);
 
-        print_state (iter, s);
-     
+#ifdef PRINT_INFO
+	       print_state (iter, s);
+#endif
+
        do
          {
            iter++;
            status = gsl_multifit_fdfsolver_iterate (s);
 
-	     print_state (iter, s);
+#ifdef PRINT_INFO
+	       print_state (iter, s);
+#endif
 
            if (status)
              break;
@@ -131,7 +135,10 @@ gsl_vector* least_square_nl_fit(struct data dat, struct parameters par, gsl_mult
          }
        while (status == GSL_CONTINUE && iter < 500);
      
-   print_state (iter, s);
+#ifdef PRINT_INFO
+	       print_state (iter, s);
+#endif
+
        gsl_multifit_covar (s->J, 0.0, covar);
      
        { 

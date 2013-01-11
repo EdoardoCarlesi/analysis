@@ -13,7 +13,7 @@
 #define LINE_SIZE 2048
 
 
-void pdetermine_simulation_settings()
+void mpi_determine_simulation_settings()
 {
 	if(ThisTask==0)
 	{
@@ -40,28 +40,38 @@ void pdetermine_simulation_settings()
 
 	if(Settings.use_n_min == 1)
 	{
-		fprintf(stderr, "\nTask=%d has %d haloes over the %d particles threshold of which:\n", 
-			ThisTask, pSettings[ThisTask].n_threshold, Settings.n_min);
-	} else {
-		fprintf(stderr, "\nTask=%d has %d haloes over the %e mass threshold of which:\n",
-			ThisTask, pSettings[ThisTask].n_threshold, Settings.mass_min);
-	}
-		fprintf(stderr, "\
+		fprintf(stderr, "\nTask=%d has %d haloes over the %d particles threshold of which:\n\
 		- %d virialized\n\
 		- %d with the right concentration\n\
 		- %d satisfying the spin criterion\n\
 		and %d haloes complying with all criteria.\n", 
+		ThisTask, 
+		pSettings[ThisTask].n_threshold, Settings.n_min,
+		pSettings[ThisTask].n_virialized,
+		pSettings[ThisTask].n_concentration, 
+		pSettings[ThisTask].n_spin,
+		pSettings[ThisTask].n_all
+		);		
+
+	} else {
+		fprintf(stderr, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
+		- %d virialized\n\
+		- %d with the right concentration\n\
+		- %d satisfying the spin criterion\n\
+		and %d haloes complying with all criteria.\n", 
+		ThisTask, 
+		pSettings[ThisTask].n_threshold, Settings.mass_min,
 		pSettings[ThisTask].n_virialized,
 		pSettings[ThisTask].n_concentration, 
 		pSettings[ThisTask].n_spin,
 		pSettings[ThisTask].n_all
 		);
-
+	}
 }
 
 
 
-void pread_halo_file()
+void mpi_read_halo_file()
 {
 	int n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
 	double a=0; // Dummy variable to read columns
@@ -162,7 +172,7 @@ void pread_halo_file()
 	// In the new catalogues haloes' major axis is normalized to one
 	pHaloes[ThisTask][n].aa = 1.0; 
 
-	pset_additional_halo_properties(n);
+	mpi_set_additional_halo_properties(n);
 
 #ifdef USE_UNIT_MPC
 	pHaloes[ThisTask][n].Rvir *= 1.e-3;
@@ -263,14 +273,14 @@ void pread_halo_file()
 		pSettings[ThisTask].n_spin=spin;
 		pSettings[ThisTask].n_all=all;
 
-		pdetermine_simulation_settings();	
+		mpi_determine_simulation_settings();	
 
 	fclose(h_file);
 }
 
 
 
-void pset_additional_halo_properties(int n)
+void mpi_set_additional_halo_properties(int n)
 {
 	double c = pHaloes[ThisTask][n].Rvir/pHaloes[ThisTask][n].r2;
 
@@ -316,7 +326,7 @@ void pset_additional_halo_properties(int n)
 
 
 
-void pread_profiles_file()
+void mpi_read_profiles_file()
 {
 	int nr=0, k=0, j=0, np1=0, np2=0, halo_bins=0, counter=0, kk=0;
 	double a, over, over1, over2, over3, radius1, radius2, err_p;
