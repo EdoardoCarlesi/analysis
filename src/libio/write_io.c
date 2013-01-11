@@ -14,7 +14,7 @@
 void print_number_densities()
 {
 		int k=0, count=1, N=ND.npts; 
-		double M=Settings.thMass;
+		double M=Settings.mass_min;
 		char *out  = merge_strings(Urls_internal.output_prefix,"number_density.dat");
 		FILE *fout = fopen(out, "w");
 

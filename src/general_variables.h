@@ -43,30 +43,38 @@ extern struct general_settings
 	int fit;	
 	int tick;
 	int inverse_read;
-	int combine_files;
 	int nP_1D;
-	int pk_skip;
-	int n_pk_files;
-	int use_one_pk;
 	int halo_skip;
+	int pk_skip;
+	int use_one_pk;
+	int n_pk_files;
 	double box_size;
 	double zStart;
-	double Gn; 
 	
-	int haloes_over_threshold;
-	int haloes_over_thnum;
-	int virialized_haloes;
-	int virialized_concentration;
-	int spin_criterion;
-	int min_subhaloes;
+	int n_threshold; // Threshold can be mass or particle number per halo
+	int n_virialized;
+	int n_concentration;
+	int n_spin;
+	int n_all;
 	int n_haloes;
+	int n_haloes_size;
+
+	int min_subhaloes;
 	int n_subhaloes;
 	int n_subhaloes_nmin;
 	int n_bins;
 	int r_bins;
-	int thNum;
+
+	// Use minimum mass or minimum number of particles
+	int use_n_min; // If =1 using n_min, otherwise using mass_min
 	int n_min;
-	double thMass;
+	double mass_min;
+
+	int use_spin;
+	int use_vir;
+	int use_conc;
+	int use_all;
+
 	double rho_c;
 	double rho_0;
 	double Rmin;
@@ -99,6 +107,7 @@ extern struct cosmology
 	double delta_c;
 	double s8;
 	double n_s8;
+	double Gn; 
 
 	double err;
 	double virial;
@@ -173,6 +182,7 @@ extern struct halo
 	int virial;
 	int spin;
 	int conc;
+	int all;
 
 	int *id_satellites;
 
@@ -195,6 +205,7 @@ extern struct halo
 	double Ekin;
 	double Epot;
 	double th_vir;
+	double abs_th_vir;
 	double AngMom;
 	double Jcirc;
 	double ecc;
@@ -206,7 +217,7 @@ extern struct halo
 	double aa;
 	double bb;
 	double cc;
-	double c_a;
+	double shape;
 	double triax;
 	double z_form;
 	double c_nfw;

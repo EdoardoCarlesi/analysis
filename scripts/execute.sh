@@ -74,8 +74,8 @@ base_temp=$base_analysis/temp/
 prefix1=$base_out$model1'-'$box_size'-'$particle_number'-'
 prefix2='k_'$k'-'
 prefix3='z_'$catalogue_z'-'
-prefix4='M_'$m_th'-'
-prefix5='N_'$num_th'_'
+prefix4='M_'$m_min'-'
+prefix5='N_'$n_min'_'
 prefix6='snaps_'$use_snaps
 
 if [ $fit -eq 1 ] ; then 
@@ -157,7 +157,7 @@ cd $base_analysis/src/
 make clean
 
 url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_file1' '$pk_file_base1' '$snaps_dir1' '$halo_dir1
-set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$num_th' '$n_min
+set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min
 cosmo_variables=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
 extra_variables=$k' '$zMax
 halo2_variables=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2

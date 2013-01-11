@@ -5,16 +5,15 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-#include "general_variables.h"
-
 #include "libio/read_io.h"
+#include "libio/halo_io.h"
+#include "general_variables.h"
+#include "libhalo/halo_properties.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
 #include "libparallel/halo_io.h"
 #include "libparallel/general.h"
-#else 
-#include "libio/halo_io.h"
 #endif
 
 int main(int argc, char **argv)
@@ -33,12 +32,16 @@ int main(int argc, char **argv)
 
 	if(ThisTask == 0)
 	{
-		Settings.thMass = 1.e10;
+		Settings.mass_min = 3.1e10;
 		Settings.nP_1D = 256;
 		Settings.box_size = 75;
-		Settings.thNum = 1e4;
+		Settings.n_min = 1e4;
+		Settings.n_bins = 10;
 		Cosmo.virial = 1.5;
 		Cosmo.spin = 0.15;
+		
+	initialize_halo_properties_structure();
+
 	}
 
 		MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
@@ -50,12 +53,10 @@ int main(int argc, char **argv)
 
 		pread_halo_file();
 
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	gather_haloes();
-	//if(ThisTask==0)
-	//for(j=0; j<NTask; j++)
-	//	fprintf(stdout, "\n_Task=%d, halo_url=%s\n", j, pUrls[j].halo_file);
+	set_halo_displacement();
+//	psort_shape_and_triaxiality();
+	if(ThisTask==0)
+		sort_shape_and_triaxiality();
 
 	MPI_Finalize();
 

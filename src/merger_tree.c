@@ -61,7 +61,6 @@ int main(int argc, char **argv){
 
 	read_halo_file(); fprintf(stderr, "Initialized halo file 1. \n");
 	
-	threshold_1=haloes_over_threshold(mass); 
 	MF.halos_over_threshold=threshold_1; 
 	fprintf(stderr, "Haloes over mass threshold: %d\n", threshold_1);
 
@@ -109,7 +108,6 @@ mass_1b[k]=haloes[k].Mvir;
 	cc_ids=read_cross_correlated_haloes(cc_file, n_haloes, cc_ids);
 
 	max=int_maximum(cc_ids, n_haloes);
-        threshold_2=haloes_over_threshold(mass);
 	fprintf(stderr, "Haloes over mass threshold: %d, max: %d\n", threshold_2, max);
 		
 if(max>threshold_2){

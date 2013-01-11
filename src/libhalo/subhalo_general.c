@@ -105,7 +105,7 @@ void copy_subhalo_properties(int host, int n_sub)
                 subhaloes[index].Eaz = haloes[n_sub].Eaz; 
                 subhaloes[index].Mvir = haloes[n_sub].Mvir; 
                 subhaloes[index].c = haloes[n_sub].c; 
-                subhaloes[index].c_a = haloes[n_sub].c_a; 
+                subhaloes[index].shape = haloes[n_sub].shape; 
                 subhaloes[index].aa = haloes[n_sub].aa; 
                 subhaloes[index].bb = haloes[n_sub].bb; 
                 subhaloes[index].cc = haloes[n_sub].cc; 
@@ -130,13 +130,13 @@ void avg_subhalo()
 	int totSub=0, i=0;
 	double avg_sub=0;
 
-		for (i=0; i<Settings.haloes_over_thnum; i++) 
+		for (i=0; i<Settings.n_threshold; i++) 
 			totSub += haloes[i].n_satellites;
 
-			avg_sub = (double) totSub /( (double) Settings.haloes_over_thnum );
+			avg_sub = (double) totSub /( (double) Settings.n_threshold );
 
 		fprintf(stdout, "\nThe average number of subhaloes for hosts above the %e mass limit is: %lf\n", 
-			Settings.thMass, avg_sub);
+			Settings.mass_min, avg_sub);
 
 		fprintf(stdout, "\nThere are %d subhaloes in total for the hosts above that mass limit.\n", 
 			totSub);
@@ -148,7 +148,7 @@ void avg_subhalo()
 
 void init_subhalo_struct()
 {
-	int i=0, totSub=0, totSubOverN=0, totHost=Settings.haloes_over_thnum; 
+	int i=0, totSub=0, totSubOverN=0, totHost=Settings.n_threshold; 
 
 		for (i=0; i< totHost; i++) 
 			totSub += haloes[i].n_satellites;
@@ -176,7 +176,7 @@ void load_subhalo_list()
 
 		for(i=0; i<Settings.n_haloes; i++)
 		{
-			if(haloes[i].host < Settings.haloes_over_thnum && haloes[i].host > -1)
+			if(haloes[i].host < Settings.n_threshold && haloes[i].host > -1)
 			{
 				copy_subhalo_properties(j, haloes[i].id);
 				j++;

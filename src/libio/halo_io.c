@@ -28,16 +28,23 @@ void determine_simulation_settings()
 
 		Settings.rho_c = (3*haloes[0].Mvir)/(4*3.14*haloes[0].Rvir*haloes[0].Rvir*haloes[0].Rvir*200);
 
-		fprintf(stderr, "\nThere are %d haloes over the %e mass threshold of which:\n\
+	if(Settings.use_n_min==1)
+	{
+		fprintf(stderr, "\nThere are %d haloes over the %d particles threshold of which:\n",
+			Settings.n_threshold, Settings.n_min);
+								} else {
+		fprintf(stderr, "\nThere are %d haloes over the %e mass threshold of which:\n", 
+			Settings.n_threshold, Settings.mass_min);
+	}
+		fprintf(stderr, "\
 		%d virialized\n\
 		%d with the right concentration\n\
 		%d satisfying the spin criterion\n\
-		and %d haloes with more than %d particles.\n", 
-		Settings.haloes_over_threshold,	Settings.thMass,
-		Settings.virialized_haloes,
-		Settings.virialized_concentration, 
-		Settings.spin_criterion,
-		Settings.haloes_over_thnum, Settings.thNum
+		and %d haloes that comply with all the criteria.\n", 
+		Settings.n_virialized,
+		Settings.n_concentration, 
+		Settings.n_spin,
+		Settings.n_all
 		);
 
 } 
@@ -47,18 +54,17 @@ void determine_simulation_settings()
 	 /* Set additional halo properties derived from the basic ones */
 void set_additional_halo_properties(int n)
 {
-	double cc, vv, c;
-
-	cc = haloes[n].cc;
-	vv = sqrt(haloes[n].Mvir/haloes[n].Rvir*Settings.Gn);
-	c = haloes[n].Rvir/haloes[n].r2;
+	double c = haloes[n].Rvir/haloes[n].r2;
 
 	haloes[n].c = c;
-	haloes[n].AngMom=haloes[n].lambda*sqrt(2)*haloes[n].Mvir*haloes[n].Rvir*vv;
-	haloes[n].c_a = haloes[n].cc/haloes[n].aa;
-	haloes[n].triax = (pow(haloes[n].aa, 2.0) - pow(haloes[n].bb, 2.0))/(pow(haloes[n].aa, 2.0) - cc);
+	haloes[n].AngMom = haloes[n].lambda*sqrt(2)*haloes[n].Mvir*haloes[n].Rvir *
+		sqrt(haloes[n].Mvir/haloes[n].Rvir);
+	haloes[n].shape = haloes[n].cc/haloes[n].aa;
+	haloes[n].triax = (pow(haloes[n].aa, 2.0) - pow(haloes[n].bb, 2.0))/
+		(pow(haloes[n].aa, 2.0) - pow(haloes[n].cc, 2.0));
 	haloes[n].ecc = sqrt(1 - 2*pow(haloes[n].lambdaE,2));
 	haloes[n].th_vir=2*haloes[n].Ekin/haloes[n].Epot;	
+	haloes[n].abs_th_vir=sqrt(haloes[n].th_vir*haloes[n].th_vir); 	
 	haloes[n].delta_c = (200/3)*c*c*c*(1./(log(1+c) - c/(1+c)));
 #ifdef GAS
 		haloes[n].N_dm = haloes[n].n_part - haloes[n].N_gas;
@@ -82,8 +88,8 @@ void set_additional_halo_properties(int n)
 
 void read_halo_file()
 {
-	int n=0, j=0, thr=0, vir=0, conc=0, spin=0;
-	double a, minMass;
+	int n=0, j=0, thr=0, vir=0, conc=0, spin=0, all=0, last=0;
+	double a=0; // Dummy variable for dummy columns
 	char dummyline[10000]; 
 	FILE *h_file=NULL;
 
@@ -98,7 +104,7 @@ void read_halo_file()
 		Settings.n_haloes = get_lines(h_file, Urls_internal.halo_file) - Settings.halo_skip;
 
 		haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
-		minMass = Settings.thMass;
+		last = Settings.n_haloes-1;
 
 		while(!feof(h_file))
 		{
@@ -214,13 +220,15 @@ void read_halo_file()
 #endif
 #endif
 		// Checking the various threshold conditions
-	if(haloes[n].Mvir>minMass) 
+
+
+	if(haloes[n].Mvir> Settings.mass_min) 
 	{
-	thr++;
+		thr++;
 
-		if(sqrt(haloes[n].th_vir*haloes[n].th_vir) < Cosmo.virial) 
+		if(haloes[n].abs_th_vir < Cosmo.virial) 
 		{
-
+			// Concentration is checked for virialized haloes only
 		if(haloes[n].c_nfw == -1) 
 		{
 			haloes[n].conc=0;		
@@ -246,25 +254,26 @@ void read_halo_file()
 	 	}
 	}
 
-		if(Settings.thNum < haloes[n].n_part)
-		{
-			Settings.haloes_over_thnum = haloes[n].id + 1;
-	}
-
-			print_counter(2000);
+		print_counter(2000);
 	
 			n++;
 			j++;
-		} else { // Skip this line
-		j++;
-	}
-} // Finished counting haloes over threshold conditions
+		
+				} else { // Skip this line
+			j++;
+		}
+	} // Finished counting haloes over threshold conditions
 
-		Settings.haloes_over_threshold=thr;
-		Settings.virialized_haloes=vir;
-		Settings.virialized_concentration=conc;
-		Settings.spin_criterion=spin;
+		if(haloes[last].Mvir > Settings.mass_min || 
+			haloes[last].n_part > Settings.n_min) 
+				thr--;
 
+			Settings.n_threshold=thr;
+			Settings.n_virialized=vir;
+			Settings.n_concentration=conc;
+			Settings.n_spin=spin;
+			Settings.n_all=all;
+	
 		determine_simulation_settings();	
 
 	fclose(h_file);
@@ -286,13 +295,12 @@ void read_profiles_file()
 			fprintf(stderr, "Found profiles file:%s\n", Urls_internal.profiles_file);
 
 		Settings.tick=0;
-		Settings.Gn=1.;
 		err_p=1; over3=500;
 
 		if(Cosmo.err >0. && Cosmo.err <5.) 
 			err_p = Cosmo.err;
 
-		while(counter < Settings.haloes_over_threshold)
+		while(counter < Settings.n_threshold)
 		{
 			fgets(dummyline, 4096, h_file);
 			if(j>= Settings.halo_skip) 
@@ -439,7 +447,7 @@ int* read_cross_correlated_haloes(char* halo_cc_list, int n_halos_comp, int* cc_
 		fgets(dummyline, 128, cc_list);
 		sscanf(dummyline,"%d %d", &aa, &bb); 
 
-		if(sqrt(haloes[bb].th_vir*haloes[bb].th_vir)<Cosmo.virial)
+		if(haloes[bb].abs_th_vir<Cosmo.virial)
 		{
 			cc_ids[hh] = bb;
 			hh++;

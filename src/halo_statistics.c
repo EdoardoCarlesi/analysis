@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 		initialize_halo_properties_structure();
 
 // TODO Check the number of haloes to use!!!!!!!!
-		Settings.haloes_over_thnum=39;
+		Settings.n_threshold=39;
 
 		read_halo_file();
 

@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <mpi.h>
 
+#include "general.h"
 #include "halo_properties.h"
-#include "subhalo_general.h"
 #include "../general_variables.h"
 #include "../general_functions.h"
 #include "../libmath/mathtools.h"
@@ -14,72 +15,7 @@
 #include "../libcosmo/mass_function.h"
 
 
-void initialize_halo_properties_structure()
-{
-	int rBins, nBins;
-
-	rBins=Settings.r_bins; 
-	nBins=Settings.n_bins;
-
-			// Halo axis alignment
-		HaloZ.r_bins=rBins-1; rBins--;
-		HaloZ.R = (double*) calloc(rBins, sizeof(double));
-		HaloZ.Th_p = (double*) calloc(rBins, sizeof(double));
-		HaloZ.Th_c = (double*) calloc(rBins, sizeof(double));
-		HaloZ.N_pairs = (int*) calloc(rBins, sizeof(double));
-			// Other halo properties
-		HaloZ.n_bins=nBins-1; nBins--;
-		HaloZ.c = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_c = (double*) calloc(nBins, sizeof(double));
-		HaloZ.l = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_l = (double*) calloc(nBins, sizeof(double));
-		HaloZ.err_p_l = (double*) calloc(nBins, sizeof(double));
-		HaloZ.shape = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_shape = (double*) calloc(nBins, sizeof(double));
-		HaloZ.n_shape = (int*) calloc(nBins, sizeof(double));
-		HaloZ.triax = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_triax = (double*) calloc(nBins, sizeof(double));
-		HaloZ.n_triax = (int*) calloc(nBins, sizeof(double));
-		HaloZ.mass = (double*) calloc(nBins, sizeof(double));
-		HaloZ.radVel = (double*) calloc(nBins, sizeof(double));
-		HaloZ.err_radVel = (double*) calloc(nBins, sizeof(double));
-
-#ifdef GAS
-	HaloZ.gas_T = (double*) calloc(nBins, sizeof(double));
-	HaloZ.gas_u = (double*) calloc(nBins, sizeof(double));
-	HaloZ.gas_fraction = (double*) calloc(nBins, sizeof(double));
-#endif
-}
-
-
-
-void free_halo_properties()
-{
-		free(HaloZ.c);
-		free(HaloZ.p_c);
-		free(HaloZ.l);
-		free(HaloZ.p_l);
-		free(HaloZ.err_p_l);
-		free(HaloZ.p_shape);
-		free(HaloZ.n_shape);
-		free(HaloZ.shape);
-		free(HaloZ.triax);
-		free(HaloZ.p_triax);
-		free(HaloZ.n_triax);
-		free(HaloZ.mass);
-		free(HaloZ.radVel);
-		free(HaloZ.err_radVel);
-		free(haloes);
-#ifdef GAS
-		free(HaloZ.gas_T);
-		free(HaloZ.gas_u);
-		free(HaloZ.gas_fraction);
-#endif 
-}
-
-
-
-void sort_axis_alignement()
+void psort_axis_alignement()
 {
 	int *Nbins, j=0, k=0, i=0, max_haloes, nBins, skip;
 	double *radius, *Rbins, *Abins, *Bbins; 
@@ -156,47 +92,75 @@ void sort_axis_alignement()
 
 
 
-void sort_shape_and_triaxiality()
+void psort_shape_and_triaxiality()
 {
-	int i=0, m=0, nBins=Settings.n_bins,  nHaloes=Settings.n_threshold;
+	int i=0, m=0, nBins=Settings.n_bins;
+	int nHaloes=Settings.n_haloes, p_nHaloes=pSettings[ThisTask].n_haloes;
 	int *array_shape_bin_y, *array_triax_bin_y;
 	double *array_shape, *array_triax, *array_shape_bin, *array_triax_bin; 
+	double *p_array_shape, *p_array_triax; 
 	double half_t, half_s, sMax, sMin, tMax, tMin, p_s, p_t;
 
-	fprintf(stdout, "\nSorting shape and triaxiality."); 
+	fprintf(stdout, "\nTask=%d, sorting shape and triaxiality\n.", ThisTask); 
 
 	Settings.tick=0;
-	array_shape = (double*) calloc(nHaloes, sizeof(double));	
-	array_triax = (double*) calloc(nHaloes, sizeof(double));	
-	array_shape_bin = (double*) calloc(nBins, sizeof(double));	
-	array_triax_bin = (double*) calloc(nBins, sizeof(double));	
-	array_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
-	array_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+		
+		p_array_shape = (double*) calloc(p_nHaloes, sizeof(double));	
+		p_array_triax = (double*) calloc(p_nHaloes, sizeof(double));	
 
-		for(i=0; i<nHaloes; i++)
+		if(ThisTask==0)
 		{
-			array_shape[i] = haloes[i].shape;
-			array_triax[i] = haloes[i].triax;
-			m++;
+			array_shape = (double*) calloc(nHaloes, sizeof(double));	
+			array_triax = (double*) calloc(nHaloes, sizeof(double));	
+			array_shape_bin = (double*) calloc(nBins, sizeof(double));	
+			array_triax_bin = (double*) calloc(nBins, sizeof(double));	
+			array_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+			array_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
 		}
 
+			for(i=0; i<p_nHaloes; i++)
+			{
+				p_array_shape[i] = pHaloes[ThisTask][i].shape;
+				p_array_triax[i] = pHaloes[ThisTask][i].triax;
+				m++;
+			}
+
+			MPI_Gatherv(p_array_triax, pSettings[ThisTask].n_haloes, MPI_DOUBLE, 
+				array_triax, SizeHaloes, SizeDispl, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+
+			MPI_Gatherv(p_array_shape, p_nHaloes, MPI_DOUBLE, 
+				array_shape, SizeHaloes, SizeDispl, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	
+		fprintf(stdout, "\nTask=%d, MPI_Gatherv() has gathered %d shapes and triaxialities.\n", 
+			ThisTask, nHaloes);
+
+		MPI_Barrier(MPI_COMM_WORLD);
+
+		free(p_array_shape); 
+		free(p_array_triax);
+
+		if(ThisTask==0)
+		{
 			HaloZ.s0 = average(array_shape, nHaloes);
 			HaloZ.t0 = average(array_triax, nHaloes);
+		
+				fprintf(stdout, "Halo.s0=%lf\n", HaloZ.s0);
+				fprintf(stdout, "Halo.t0=%lf\n", HaloZ.t0);
 
 				sMax = maximum(array_shape, nHaloes); 
 				sMin = minimum(array_shape, nHaloes);
 				tMax = maximum(array_triax, nHaloes); 
 				tMin = minimum(array_triax, nHaloes);
 
-			array_shape_bin = lin_stepper(sMin, sMax, nBins);
-			lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
+				array_shape_bin = lin_stepper(sMin, sMax, nBins);
+	//			lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
 
-			array_triax_bin = lin_stepper(tMin, tMax, nBins);
-			lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
+				array_triax_bin = lin_stepper(tMin, tMax, nBins);
+	//			lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
 
-			half_s = 0.5*(array_shape_bin[1]-array_shape_bin[0]);
-			half_t = 0.5*(array_triax_bin[1]-array_triax_bin[0]);
-
+				half_s = 0.5*(array_shape_bin[1]-array_shape_bin[0]);
+				half_t = 0.5*(array_triax_bin[1]-array_triax_bin[0]);
+/*
 			for(i=0; i<nBins-1; i++)	
 			{
 				p_s = (double) array_shape_bin_y[i]/nHaloes;
@@ -209,18 +173,21 @@ void sort_shape_and_triaxiality()
 				HaloZ.n_triax[i]=array_triax_bin_y[i];
 			}
 
-	free(array_shape); 
-	free(array_triax);
-	free(array_shape_bin); 
-	free(array_triax_bin);
-	free(array_shape_bin_y); 
-	free(array_triax_bin_y);
+		free(array_shape); 
+		free(array_triax);
+		free(array_shape_bin); 
+		free(array_triax_bin);
+		free(array_shape_bin_y); 
+		free(array_triax_bin_y);
+*/
+	}
+
 	fprintf(stderr, "\n");
 }
 
 
 
-void sort_radial_velocity()
+void psort_radial_velocity()
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0; 
 	double mMax = haloes[0].Mvir, mMin = haloes[nHaloes-1].Mvir;
@@ -262,7 +229,7 @@ void sort_radial_velocity()
 
 
 
-void sort_lambda()
+void psort_lambda()
 {
 	int nBins=Settings.n_bins, nHaloes, i=0, m=0, *lambda_int_y; 
 	double *bin_x, *params, *lambda, *lambda_bin_x, *lambda_err_y, *lambda_double_y;
@@ -336,7 +303,7 @@ void sort_lambda()
 
 
 
-void sort_concentration()
+void psort_concentration()
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, nHaloes_vir, i=0, m=0, *int_c_bin_y;
 	double *params, *params2, *conc, *bin_x, *c_bin_x, *c_bin_y, *c_err_y;
@@ -426,7 +393,7 @@ void sort_concentration()
 
 
 #ifdef GAS
-void sort_gas_fraction()
+void psort_gas_fraction()
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0, m=0;
 	double *gas_fraction, *gas_fraction_bin, *gas_fraction_error, *mass_bin, *mass;
@@ -467,7 +434,7 @@ void sort_gas_fraction()
 
 
 
-void sort_and_fit_mass_temperature_relation()
+void psort_and_fit_mass_temperature_relation()
 {
  	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0, m=0, *n_per_mass_bin;
 	double *a, *temperature, *temperature_bin, *temperature_error, *mass_bin, *mass;
@@ -520,7 +487,7 @@ void sort_and_fit_mass_temperature_relation()
 #endif // Gas
 
 
-void compute_halo_properties()
+void pcompute_halo_properties()
 {
 		initialize_halo_properties_structure();
 
@@ -531,16 +498,80 @@ void compute_halo_properties()
 
 		compute_numerical_mass_function();
 
-			sort_axis_alignement();
-			sort_shape_and_triaxiality();
-			sort_radial_velocity();
-			sort_lambda();
-			sort_concentration();
+			psort_axis_alignement();
+			psort_shape_and_triaxiality();
+			psort_radial_velocity();
+			psort_lambda();
+			psort_concentration();
 
 #ifdef GAS
-		sort_gas_fraction();
-		sort_and_fit_mass_temperature_relation();
+		psort_gas_fraction();
+		psort_and_fit_mass_temperature_relation();
 #endif
+}
+
+
+
+void pcompute_numerical_mass_function(void)
+{
+	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, p_nHaloes=pSettings[ThisTask].n_haloes;
+	int i=0, k=0; 
+	double dn_norm=1., cumHalo=0, volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
+	double *mass, *p_mass, *mass_bin; 
+	int *n_mass, *cum_n_mass;
+
+	fprintf(stdout, "\nTask=%d, sorting mass function for %d haloes.\n", ThisTask, p_nHaloes);
+	
+		Settings.tick=0;
+	
+	p_mass = (double*) calloc(p_nHaloes, sizeof(double));
+		
+		for(i=0; i<p_nHaloes; i++)
+			p_mass[i] = pHaloes[ThisTask][i].Mvir;			
+
+			MPI_Gatherv(p_mass, pSettings[ThisTask].n_haloes, MPI_DOUBLE, 
+				mass, SizeHaloes, SizeDispl, MPI_DOUBLE, 0, MPI_COMM_WORLD);
+	if(ThisTask==0)
+	{
+		mass = (double*) calloc(nHaloes, sizeof(double));
+		mass_bin = (double*) calloc(nBins, sizeof(double));
+		n_mass = (int*) calloc(nBins-1, sizeof(int));
+		cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
+	}
+		init_MF();
+	
+		mMin=haloes[nHaloes-1].Mvir*0.999;
+		mMax=haloes[0].Mvir*1.001;
+		mass_bin = log_stepper(mMin, mMax, nBins);
+	
+		lin_bin(mass, mass_bin, nBins, nHaloes, n_mass);	
+		
+		cum_bin(n_mass, cum_n_mass, nBins-1);
+
+			volume=Settings.box_size*Settings.box_size*Settings.box_size;
+
+		for(i=0; i<nBins-1; i++)
+		{
+			halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
+			dn_norm = 2*halfstep/nHaloes;
+			dM = mass_bin[i+1]-mass_bin[i];
+			MF.num_masses[i]=mass_bin[i];
+			MF.dn_num_masses[i]=mass_bin[i]+halfstep;
+			MF.dn[i]=n_mass[i]/(volume*dM);
+			MF.n[i]=cum_n_mass[i]/volume;
+			MF.err_dn[i]=sqrt(n_mass[i])/(volume*dM);
+			MF.err[i]=sqrt(cum_n_mass[i])/volume;
+
+			MF.n_bin[i]=n_mass[i];
+			MF.n_tot[i]=cum_n_mass[i];
+		}
+	
+		free(mass); 
+		free(mass_bin); 
+		free(n_mass); 
+		free(cum_n_mass);
+
+	fprintf(stdout, "\nSorting done.\n");
 }
 
 

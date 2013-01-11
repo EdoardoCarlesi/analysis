@@ -10,6 +10,10 @@
 #include "general_variables.h"
 #include "general_functions.h"
 
+#ifdef WITH_MPI
+#include <mpi.h>
+#endif
+
 void initialize_internal_variables(char **argv){
 	fprintf(stderr, "Initializing internal variables...\n");
 
@@ -31,16 +35,15 @@ void initialize_internal_variables(char **argv){
 	Settings.halo_skip=atoi(argv[URLS+5]);
 	Settings.fit = atoi(argv[URLS+6]);
 	Settings.zStart = atof(argv[URLS+7]);
-	Settings.thMass=atof(argv[URLS+8]);
+	Settings.mass_min=atof(argv[URLS+8]);
 	Settings.Mmin = atof(argv[URLS+9]);
 	Settings.Mmax = atof(argv[URLS+10]);
 	Settings.Rmin=atof(argv[URLS+11]);
 	Settings.Rmax=atof(argv[URLS+12]);
 	Settings.r_bins=atoi(argv[URLS+13]);
-	Settings.thNum=(int) atof(argv[URLS+14]);
-	Settings.n_min=atof(argv[URLS+15]);
+	Settings.n_min=atof(argv[URLS+14]);
 
-		int SET=15;
+		int SET=14;
 
 	Cosmo.h=atof(argv[SET+URLS+1]);
 	Cosmo.s8=atof(argv[SET+URLS+2]);
@@ -72,10 +75,12 @@ void initialize_internal_variables(char **argv){
 
 	// Setting extra useful variables
 	Cosmo.H_0=Cosmo.h*100;
+	Cosmo.Gn=6.672e-8;
 	AMF.Mmin=Settings.Mmin;
 	AMF.Mmax=Settings.Mmax;
-	Settings.Gn=6.672e-8;
 }
+
+
 
 void print_counter(int freq){
 		if(Settings.tick==freq) {
@@ -86,6 +91,8 @@ void print_counter(int freq){
 	Settings.tick++;
 	}
 }
+
+
 
 void normalize_to_one(char * url_in, char * url_out){
 
@@ -118,6 +125,8 @@ void normalize_to_one(char * url_in, char * url_out){
 	fclose(file_out);
 }
 
+
+
 char* merge_strings(char* str_1, char* str_2){
 
 	int dim = strlen(str_1) + strlen(str_2) + 2;
@@ -128,6 +137,8 @@ char* merge_strings(char* str_1, char* str_2){
 
 return str_3;
 };
+
+
 
 void compute_files_ratio(char *url1, char *url2, char *url_out, int bins, int skip, int logStep){
 

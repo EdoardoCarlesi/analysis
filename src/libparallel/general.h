@@ -2,11 +2,17 @@
 
 extern int ThisTask;
 extern int NTask;
-extern int TaskHaloes;
-extern int NHaloes;
 
-extern MPI_Datatype MPI_halo;
+extern int *SizeDisplStructHalo;
+extern int *SizeHaloesStructHalo;
 
-void init_pstructures();
+extern int *SizeDispl;
+extern int *SizeHaloes;
+extern int *SizeDisplThreshold;
+extern int *SizeHaloesThreshold;
+
+void mpi_bcast_size();
+
+void set_halo_displacement(void);
+void init_pstructures(void);
 void copy_url(char*);
-void create_mpi_halo_datatype();

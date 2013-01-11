@@ -200,7 +200,7 @@ void calculate_and_sort_chi2()
 {
 // TODO Make it more general
 /*
-	int massCut = Settings.haloes_over_threshold;
+	int massCut = Settings.n_threshold;
 	int nBins = NFW.bins;
 	double vir = Cosmo.virial; 
 	double *a_x; double *a_y; double v;

@@ -124,7 +124,7 @@ void sort_sub_shape_and_triaxiality()
 		{
 			if(subhaloes[i].n_part > Settings.n_min -1)
 			{
-				array_shape[j] = subhaloes[i].c_a;
+				array_shape[j] = subhaloes[i].shape;
 				array_triax[j] = subhaloes[i].triax;
 				j++;
 				}
@@ -181,7 +181,7 @@ void sort_sub_lambda()
 	fprintf(stdout, "\nSorting subhalo spin parameter.\n"); 
 
 	Settings.tick=0;
-	nHaloes=Settings.n_subhaloes_nmin; //spin_criterion;
+	nHaloes=Settings.n_subhaloes_nmin;
 	lambda = (double*) calloc(nHaloes, sizeof(double));	
 	params = (double*) calloc(2, sizeof(double));
 
@@ -197,7 +197,7 @@ void sort_sub_lambda()
 				lambda[m] = subhaloes[i].lambda;
 				m++;
 				}
-					}
+			}
 		
 					lambda = shellsort(lambda, nHaloes);
 
