@@ -1,16 +1,18 @@
-#include <mpi.h>
-
 extern int ThisTask;
 extern int NTask;
 
-extern int *SizeDisplStructHalo;
-extern int *SizeHaloesStructHalo;
+extern struct Cpu
+{
+  char name[4];
+
+} *cpu;
 
 extern int *SizeDispl;
 extern int *SizeHaloes;
-extern int *SizeDisplThreshold;
-extern int *SizeHaloesThreshold;
+extern int *SizeDisplStructHalo;
+extern int *SizeHaloesStructHalo;
 
+void init_cpu_struct(void);
 void gather_halo_structures(void);
 void init_comm_structures(void);
 void free_comm_structures(void);

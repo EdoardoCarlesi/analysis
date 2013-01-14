@@ -17,6 +17,8 @@ int *SizeHaloes;
 int *SizeDisplStructHalo;
 int *SizeHaloesStructHalo;
 
+struct Cpu *cpu;
+
 
 
 void copy_halo_url(char *url)
@@ -37,6 +39,33 @@ void init_comm_structures()
 	SizeHaloes = (int*) calloc(NTask, sizeof(int));
 	SizeDisplStructHalo = (int*) calloc(NTask, sizeof(int));			
 	SizeHaloesStructHalo = (int*) calloc(NTask, sizeof(int));
+}
+
+
+
+void init_cpu_struct()
+{
+	char num1[1];
+	char num2[2];
+	char num3[3];
+	char task[3];
+
+	sprintf(num1, "%s", "0");
+	sprintf(num2, "%s", "00");
+	sprintf(num3, "%s", "000");
+
+	sprintf(task, "%d", ThisTask);
+
+		cpu = (struct Cpu*) calloc(NTask, sizeof(struct Cpu));
+
+		if(ThisTask < 10) 
+		{
+			sprintf(cpu[ThisTask].name, "%s%s", num3, task);
+
+		} else if (ThisTask > 9 && ThisTask < 100) {
+
+			sprintf(cpu[ThisTask].name, "%s%s", num2, task);
+		}
 }
 
 
