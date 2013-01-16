@@ -10,10 +10,11 @@
 #					- 8
 #					- 9
 #					- 10 (theoretical_mass_function)
-#					- 11
+#		
 
-#letter='l'
-#model1='lcdm_features_'$letter
+use_mpi=$2
+n_procs=$3
+
 model1='lcdm'
 model2='ude'
 box_size=75
@@ -21,7 +22,7 @@ particle_number=256
 n_bins=20
 r_bins=7
 catalogue_z=0
-catalogue_number=28
+catalogue_number=028
 snap_zero=0
 tot_snaps=29
 use_snaps=32
@@ -62,13 +63,21 @@ zMax=3
 z0=0
 z1=1
 
+# Use pre-calculated pk = 0 ; calculate pk again = 1
+use_pk=0
+# Fit data = 1, use th. only = 0
+fit=0
+
 # Base directories
-#base_ahf=${HOME}/amiga_old/
 base_ahf=${HOME}/ahf-v1.0/
 base_data=${HOME}/data/dedm/
 base_analysis=${HOME}/Analysis/
 base_out=$base_analysis/output/
 base_temp=$base_analysis/temp/
+
+dir_ahf=ahf
+dir_snaps=snaps
+dir_halo=catalogues01
 
 # General file prefixes 
 prefix1=$base_out$model1'-'$box_size'-'$particle_number'-'
@@ -84,62 +93,64 @@ fi
 
 # Where the output redshift file for the snapshot is
 if [ $particle_number -eq 32 ] ; then
-#outputs=$base_data/outputs_lcdm_gas.txt
 outputs=$base_data/output_z20.txt
 fi
+
 if [ $particle_number -eq 64 ] ; then
-#outputs=$base_data/outputs_lcdm_gas.txt
 outputs=$base_data/output_z30.txt
 fi
+
 if [ $particle_number -eq 128 ] ; then
-#outputs=$base_data/outputs_lcdm_gas.txt
 outputs=$base_data/output_z40.txt
 fi
+
 if [ $particle_number -eq 256 ] ; then
 outputs=$base_data/$particle_number/$box_size/outputs_lcdm_gas.txt
 fi
+
 if [ $particle_number -eq 512 ] ; then
 outputs=$base_data/$particle_number/$box_size/outputs_new.txt
 fi
 
-# Use pre-calculated pk = 0 ; calculate pk again = 1
-use_pk=0
-# Fit data = 1, use th. only = 0
-fit=0
+if [ $particle_number -eq 1024 ] ; then
+outputs=$base_data/$particle_number/$box_size/outputs_new.txt
+fi
 
 DATA1=$base_data/$particle_number/$box_size/$model1/
 DATA2=$base_data/$particle_number/$box_size/$model2/
 
-snaps_dir1=$DATA1/snaps/
-snaps_dir2=$DATA2/snaps/
-halo_dir1=$DATA1/MERGED/
-halo_dir2=$DATA2/MERGED/
-halo_dir_ahf1=$DATA1/ahf/
-halo_dir_ahf2=$DATA2/ahf/
+snaps_dir1=$DATA1$dir_snaps/
+snaps_dir2=$DATA2$dir_snaps/
+halo_dir1=$DATA1$dir_halo/
+halo_dir2=$DATA2$dir_halo/
+halo_dir_ahf1=$DATA1$dir_ahf/
+halo_dir_ahf2=$DATA2$dir_ahf/
+
+zzzz='.z'
+
+if [ $use_mpi -eq 1 ] ; then
+zzzz='0000.z'
+fi
 
 cd $halo_dir1
-halo_name1=`ls *0$catalogue_number*_halos`
-halo_name2=`ls *0$catalogue_number*_halos`
+halo_name1=`ls *$catalogue_number*$zzzz*_halos`
+halo_name2=`ls *$catalogue_number*$zzzz*_halos`
 echo $halo_name1
 
 cd $halo_dir1
-profile_name1=`ls *0$catalogue_number*_profiles`
-profile_name2=`ls *0$catalogue_number*_profiles`
+profile_name1=`ls *$catalogue_number*$zzzz*_profiles`
+profile_name2=`ls *$catalogue_number*$zzzz*_profiles`
 echo $halo_name1
 
 pk_file_base1=$snaps_dir1/Pk*$particle_number
 pk_file_base2=$snaps_dir2/Pk*$particle_number
-#pk_file1=${HOME}/Spettri_Latta/P_$letter'_matterpower.dat'
-#pk_file1=${HOME}/Spettri_Latta/lcdm.dat
-pk_file1=${HOME}/Gadget-devel/N-GenIC/pks/cde099.dat
-#pk_file1=`ls $pk_file_base1*snap*$catalogue_number`
+pk_file1=`ls $pk_file_base1*snap*$catalogue_number`
 pk_file2=`ls $pk_file_base2*snap*$catalogue_number`
 
 halo_file1=$halo_dir1/$halo_name1
 halo_file2=$halo_dir2/$halo_name2
 profile_file1=$halo_dir1/$profile_name1
 profile_file2=$halo_dir2/$profile_name2
-
 
 # File where the output Pks list is printed
 pk_list_file=$base_analysis/temp/pk_files.list
@@ -149,9 +160,9 @@ subhalo_list=$base_temp/subhalo.list
 
 echo $pk_file_base1
 pkfilelist=`ls $pk_file_base1* > $pk_list_file` 
-halolist=`ls -r $halo_dir1/*halos > $halo_list` 
-profilelist=`ls -r $halo_dir1/*profiles > $profile_list` 
-subhalolist=`ls -r $halo_dir1/*substructure > $subhalo_list`
+halolist=`ls -r $halo_dir1/*$zzzz*halos > $halo_list` 
+profilelist=`ls -r $halo_dir1/*$zzzz*profiles > $profile_list` 
+subhalolist=`ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list`
 
 cd $base_analysis/src/
 make clean
@@ -160,68 +171,70 @@ url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_fil
 set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min
 cosmo_variables=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
 extra_variables=$k' '$zMax
-halo2_variables=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
 halo_evolution=$halo_list' '$profile_list' '$subhalo_list' '$use_snaps
+halo2_variables=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
 
 all_variables=$url_variables' '$set_variables' '$cosmo_variables' '$extra_variables' '
 
-#echo $all_variables
+execute=$base_analysis
+
+if [ $use_mpi -eq 1] ; then
+execute='mpiexec -n '$n_procs' '$base_analysis
+echo 'running mpi process: '$execute
+fi
 
 if [ $1 -eq 1 ] ; then
 make fit_nfw
-$base_analysis/bin/fit_nfw $all_variables$prefix1$prefix3$prefix4
+$execute/bin/fit_nfw $all_variables$prefix1$prefix3$prefix4
 fi
 
 if [ $1 -eq 2 ] ; then
-echo $base_analysis/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 $snap_zero $tot_snaps $particle_number
-$base_analysis/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 $snap_zero $tot_snaps $particle_number
+echo $execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 $snap_zero $tot_snaps $particle_number
+$execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 $snap_zero $tot_snaps $particle_number
 fi
 
 if [ $1 -eq 3 ] ; then
 find $snaps_dir1'/Pk-'$particle_number* -print > $list_file
 make growth_factor
-$base_analysis/bin/growth_factor $all_variables$prefix1$prefix2 $pk_list_file
+$execute/bin/growth_factor $all_variables$prefix1$prefix2 $pk_list_file
 fi
 
 if [ $1 -eq 4 ] ; then
 make mass_function
-$base_analysis/bin/mass_function $all_variables$prefix1$prefix3
+$execute/bin/mass_function $all_variables$prefix1$prefix3
 fi
 
 if [ $1 -eq 5 ] ; then
 make halo_statistics
-$base_analysis/bin/halo_statistics $all_variables$prefix1$prefix3$prefix4
+$execute/bin/halo_statistics $all_variables$prefix1$prefix3$prefix4
 fi
 
 if [ $1 -eq 6 ] ; then
 make number_density
-$base_analysis/bin/number_density $all_variables$prefix1$prefix4
+$execute/bin/number_density $all_variables$prefix1$prefix4
 fi
 
 if [ $1 -eq 7 ] ; then
 make halo_evolution
-$base_analysis/bin/halo_evolution $all_variables$prefix1$prefix6 $pk_list_file $halo_evolution
+$execute/bin/halo_evolution $all_variables$prefix1$prefix6 $pk_list_file $halo_evolution
 fi
 
 if [ $1 -eq 8 ] ; then
 make halo_comparison
-$base_analysis/bin/halo_comparison $all_variables$prefix1$prefix3$prefix4' '$halo2_variables
+$execute/bin/halo_comparison $all_variables$prefix1$prefix3$prefix4' '$halo2_variables
 fi
 
 if [ $1 -eq 9 ] ; then
 make subhalo_statistics 
-$base_analysis/bin/subhalo_statistics $all_variables$prefix1$prefix3$prefix5
+$execute/bin/subhalo_statistics $all_variables$prefix1$prefix3$prefix5
 fi
 
 if [ $1 -eq 10 ] ; then
 make theoretical_mass_function
-$base_analysis/bin/theoretical_mass_function  $all_variables$prefix1
+$execute/bin/theoretical_mass_function  $all_variables$prefix1
 fi
-
 
 if [ $1 -eq 11 ] ; then
 make test
-$base_analysis/src/test  $all_variables$prefix1$prefix4
+$execute/src/test  $all_variables$prefix1$prefix4
 fi
-
-#rm -rf $base_analysis/temp/*

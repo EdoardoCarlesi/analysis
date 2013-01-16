@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
 	init_comm_structures();
 			
-	generate_urls_for_tasks();	
+	generate_url_for_tasks();	
 			// TODO init halo urls differently
 		//copy_halo_url(halo_urls[ThisTask]);
 
