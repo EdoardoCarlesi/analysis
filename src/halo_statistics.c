@@ -29,10 +29,10 @@ int main(int argc, char **argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
 
 	init_comm_structures();
-			
-	generate_url_for_tasks();	
-			// TODO init halo urls differently
-		//copy_halo_url(halo_urls[ThisTask]);
+	
+	init_cpu_struct();	
+		
+		generate_url_for_tasks();	
 
 		MPI_Barrier(MPI_COMM_WORLD);
 

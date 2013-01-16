@@ -36,8 +36,6 @@ m_min=1.e+11
 m_max=1.e+15
 m_th=1.e+9
 
-#Particle number threshold
-num_th=1.e+2
 #Minimum particles per halo
 n_min=200
 
@@ -135,12 +133,10 @@ fi
 cd $halo_dir1
 halo_name1=`ls *$catalogue_number*$zzzz*_halos`
 halo_name2=`ls *$catalogue_number*$zzzz*_halos`
-echo $halo_name1
 
 cd $halo_dir1
 profile_name1=`ls *$catalogue_number*$zzzz*_profiles`
 profile_name2=`ls *$catalogue_number*$zzzz*_profiles`
-echo $halo_name1
 
 pk_file_base1=$snaps_dir1/Pk*$particle_number
 pk_file_base2=$snaps_dir2/Pk*$particle_number
@@ -153,16 +149,15 @@ profile_file1=$halo_dir1/$profile_name1
 profile_file2=$halo_dir2/$profile_name2
 
 # File where the output Pks list is printed
-pk_list_file=$base_analysis/temp/pk_files.list
+pk_list=$base_temp/pk.list
 halo_list=$base_temp/halo.list
 profile_list=$base_temp/profile.list
 subhalo_list=$base_temp/subhalo.list
 
-echo $pk_file_base1
-pkfilelist=`ls $pk_file_base1* > $pk_list_file` 
-halolist=`ls -r $halo_dir1/*$zzzz*halos > $halo_list` 
-profilelist=`ls -r $halo_dir1/*$zzzz*profiles > $profile_list` 
-subhalolist=`ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list`
+ls $pk_file_base1/* > $pk_list 
+ls -r $halo_dir1/*$zzzz*halos > $halo_list 
+ls -r $halo_dir1/*$zzzz*profiles > $profile_list
+ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
 
 cd $base_analysis/src/
 make clean
@@ -171,14 +166,14 @@ url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_fil
 set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min
 cosmo_variables=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
 extra_variables=$k' '$zMax
-halo_evolution=$halo_list' '$profile_list' '$subhalo_list' '$use_snaps
+halo_evolution=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$use_snaps
 halo2_variables=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
 
 all_variables=$url_variables' '$set_variables' '$cosmo_variables' '$extra_variables' '
 
 execute=$base_analysis
 
-if [ $use_mpi -eq 1] ; then
+if [ $use_mpi -eq 1 ] ; then
 execute='mpiexec -n '$n_procs' '$base_analysis
 echo 'running mpi process: '$execute
 fi
@@ -206,7 +201,7 @@ fi
 
 if [ $1 -eq 5 ] ; then
 make halo_statistics
-$execute/bin/halo_statistics $all_variables$prefix1$prefix3$prefix4
+$execute/bin/halo_statistics $all_variables$prefix1$prefix3$prefix4 $halo_evolution
 fi
 
 if [ $1 -eq 6 ] ; then

@@ -20,14 +20,13 @@ void initialize_internal_variables(char **argv){
 
 	Urls_internal.analysis_dir = argv[1];
 	Urls_internal.a_outputs = argv[2];
-	Urls_internal.pk_file = argv[3];
-	Urls_internal.halo_file = argv[4];
-	Urls_internal.profiles_file = argv[5];
-	Urls_internal.pk_root = argv[6];
-	Urls_internal.snaps_dir = argv[7];
-	Urls_internal.halo_dir = argv[8];
+	Urls_internal.halo_file = argv[3];
+	Urls_internal.profiles_file = argv[4];
+	Urls_internal.pk_file = argv[5];
+	Urls_internal.snaps_dir = argv[6];
+	Urls_internal.halo_dir = argv[7];
 
-		int URLS=8;
+		int URLS=7;
 
 	Settings.box_size = atof(argv[URLS+1]); 
 	Settings.nP_1D = atoi(argv[URLS+2]); 
@@ -58,17 +57,18 @@ void initialize_internal_variables(char **argv){
 
 		int COSMO=9;
 
-	// Extra analysis dependent parameters - set as the last one
+	fprintf(stderr, "Initializing internal variables...\n");
+	// Analysis dependent extra parameters - set as the last one
 	Urls_internal.output_prefix = argv[SET+COSMO+URLS+1];
-	Urls_internal.pk_list = argv[SET+COSMO+URLS+2];
-	Urls_internal.halo_list = argv[SET+COSMO+URLS+3];
-	Urls_internal.profile_list = argv[SET+COSMO+URLS+4];
-	Urls_internal.subhalo_list = argv[SET+COSMO+URLS+5];
+	Urls_internal.halo_list = argv[SET+COSMO+URLS+2];
+	Urls_internal.profile_list = argv[SET+COSMO+URLS+3];
+	Urls_internal.subhalo_list = argv[SET+COSMO+URLS+4];
+	Urls_internal.pk_list = argv[SET+COSMO+URLS+5];
 	FC.numFiles = atoi(argv[SET+COSMO+URLS+6]);
 
 #ifdef PRINT_INFO
 	int kk=0; 
-		fprintf(stderr, "settings: %d\n", FC.numFiles);
+//		fprintf(stderr, "settings: %d\n", FC.numFiles);
 
 		for(kk=1; kk<URLS+SET+COSMO+7; kk++) 
 			fprintf(stderr, "argv[%d]: %s \n", kk, argv[kk]);

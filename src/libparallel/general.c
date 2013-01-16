@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stddef.h>
+#include <ctype.h>
 #include <malloc.h>
 #include <mpi.h>
 #include "general.h"
@@ -36,40 +37,33 @@ void generate_url_for_tasks()
 	char subhalo_list_task[100];
 	char command[250];	
 
-	sprintf(halo_list_task, "%s.%s",Urls_internal.halo_list);
-	sprintf(profile_list_task, "%s.%s",Urls_internal.profile_list);
-	sprintf(subhalo_list_task, "%s.%s",Urls_internal.subhalo_list);
+		sprintf(halo_list_task, "%s.%s",Urls_internal.halo_list, cpu[ThisTask].name);
+		sprintf(profile_list_task, "%s.%s",Urls_internal.profile_list, cpu[ThisTask].name);
+		sprintf(subhalo_list_task, "%s.%s",Urls_internal.subhalo_list, cpu[ThisTask].name);
 
-	fprintf(stdout, "Task=%d is generating halo, profiles and subhalo lists...\n");
+			fprintf(stdout, "Task=%d is generating halo, profiles and subhalo lists...\n", ThisTask);
+	
+		sprintf(command, "%s s/%s/%s/ <%s >%s", 
+			"sed ", "0000", cpu[ThisTask].name, Urls_internal.halo_list, halo_list_task);
+				system(command);
 
-	sprintf(command, "%s /%s/%s/ >%s <%s", 
-			"sed s", "0000", cpu[ThisTask].name, Urls_internal.halo_list, halo_list_task);
+		sprintf(command, "%s s/%s/%s/ <%s >%s", 
+			"sed ", "0000", cpu[ThisTask].name, Urls_internal.profile_list, profile_list_task);
+				system(command);
 
-	sprintf(command, "%s /%s/%s/ >%s <%s", 
-			"sed s", "0000", cpu[ThisTask].name, Urls_internal.profile_list, profile_list_task);
-
-	sprintf(command, "%s /%s/%s/ >%s <%s", 
-			"sed s", "0000", cpu[ThisTask].name, Urls_internal.subhalo_list, subhalo_list_task);
+		sprintf(command, "%s s/%s/%s/ <%s >%s", 
+			"sed ", "0000", cpu[ThisTask].name, Urls_internal.subhalo_list, subhalo_list_task);
+				system(command);
 
 	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)-1, sizeof(char));
-	strcpy(pUrls[ThisTask].halo_file, halo_list_task);
+		strcpy(pUrls[ThisTask].halo_file, halo_list_task);
 
 	pUrls[ThisTask].profile_list = (char*) calloc(strlen(profile_list_task)-1, sizeof(char));
-	strcpy(pUrls[ThisTask].halo_file, profile_list_task);
+		strcpy(pUrls[ThisTask].halo_file, profile_list_task);
 
 	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)-1, sizeof(char));
-	strcpy(pUrls[ThisTask].halo_file, subhalo_list_task);
-/*
-	if(ThisTask==0)
-	{
-		pUrls[ThisTask].halo_list = Urls_internal.halo_list;
-		pUrls[ThisTask].profile_list = Urls_internal.halo_list;
-		pUrls[ThisTask].subhalo_list = Urls_internal.halo_list;
-	} else {
-	
-	
-	}
-*/
+		strcpy(pUrls[ThisTask].halo_file, subhalo_list_task);
+
 }
 
 
