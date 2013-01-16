@@ -40,6 +40,8 @@ void generate_url_for_tasks()
 	sprintf(profile_list_task, "%s.%s",Urls_internal.profile_list);
 	sprintf(subhalo_list_task, "%s.%s",Urls_internal.subhalo_list);
 
+	fprintf(stdout, "Task=%d is generating halo, profiles and subhalo lists...\n");
+
 	sprintf(command, "%s /%s/%s/ >%s <%s", 
 			"sed s", "0000", cpu[ThisTask].name, Urls_internal.halo_list, halo_list_task);
 
@@ -57,7 +59,7 @@ void generate_url_for_tasks()
 
 	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)-1, sizeof(char));
 	strcpy(pUrls[ThisTask].halo_file, subhalo_list_task);
-
+/*
 	if(ThisTask==0)
 	{
 		pUrls[ThisTask].halo_list = Urls_internal.halo_list;
@@ -67,7 +69,7 @@ void generate_url_for_tasks()
 	
 	
 	}
-
+*/
 }
 
 
