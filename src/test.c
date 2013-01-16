@@ -30,6 +30,7 @@ int main(int argc, char **argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
 
 	init_comm_structures();
+	init_cpu_struct();
 
 	if(ThisTask == 0)
 	{

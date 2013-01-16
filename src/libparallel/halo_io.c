@@ -411,10 +411,10 @@ void mpi_read_profiles_file()
 
 
 
-void pget_halo_files_urls()
+void mpi_get_halo_files_urls()
 {
 	int n=0;
-	char dummyline[100], *url_fc, *url_fc_pro, *url_fc_sub;
+	char dummyline[100], *root_dir, *url_fc, *url_fc_pro, *url_fc_sub;
 	FILE *fc=NULL, *fc_pro=NULL, *fc_sub=NULL;
 
 	fprintf(stdout, "\nget_halo_files_urls() for %d haloes.\n", FC.numFiles);
@@ -471,5 +471,3 @@ void pget_halo_files_urls()
 		}
 	fclose(fc_pro);
 }
-
-

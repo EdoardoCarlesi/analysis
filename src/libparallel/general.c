@@ -29,6 +29,49 @@ void copy_halo_url(char *url)
 
 
 
+void generate_url_for_tasks()
+{
+	char halo_list_task[100];
+	char profile_list_task[100];
+	char subhalo_list_task[100];
+	char command[250];	
+
+	sprintf(halo_list_task, "%s.%s",Urls_internal.halo_list);
+	sprintf(profile_list_task, "%s.%s",Urls_internal.profile_list);
+	sprintf(subhalo_list_task, "%s.%s",Urls_internal.subhalo_list);
+
+	sprintf(command, "%s /%s/%s/ >%s <%s", 
+			"sed s", "0000", cpu[ThisTask].name, Urls_internal.halo_list, halo_list_task);
+
+	sprintf(command, "%s /%s/%s/ >%s <%s", 
+			"sed s", "0000", cpu[ThisTask].name, Urls_internal.profile_list, profile_list_task);
+
+	sprintf(command, "%s /%s/%s/ >%s <%s", 
+			"sed s", "0000", cpu[ThisTask].name, Urls_internal.subhalo_list, subhalo_list_task);
+
+	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)-1, sizeof(char));
+	strcpy(pUrls[ThisTask].halo_file, halo_list_task);
+
+	pUrls[ThisTask].profile_list = (char*) calloc(strlen(profile_list_task)-1, sizeof(char));
+	strcpy(pUrls[ThisTask].halo_file, profile_list_task);
+
+	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)-1, sizeof(char));
+	strcpy(pUrls[ThisTask].halo_file, subhalo_list_task);
+
+	if(ThisTask==0)
+	{
+		pUrls[ThisTask].halo_list = Urls_internal.halo_list;
+		pUrls[ThisTask].profile_list = Urls_internal.halo_list;
+		pUrls[ThisTask].subhalo_list = Urls_internal.halo_list;
+	} else {
+	
+	
+	}
+
+}
+
+
+
 void init_comm_structures()
 {
 	pSettings = (struct general_settings *) calloc(NTask, sizeof(struct general_settings));
@@ -66,6 +109,8 @@ void init_cpu_struct()
 
 			sprintf(cpu[ThisTask].name, "%s%s", num2, task);
 		}
+	
+//	fprintf(stderr, "\nTask=%d corresponds to cpu.name = %s\n", ThisTask, cpu[ThisTask].name);
 }
 
 

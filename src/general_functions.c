@@ -12,6 +12,7 @@
 
 #ifdef WITH_MPI
 #include <mpi.h>
+#include "libparallel/general.h"
 #endif
 
 void initialize_internal_variables(char **argv){
@@ -78,6 +79,9 @@ void initialize_internal_variables(char **argv){
 	Cosmo.Gn=6.672e-8;
 	AMF.Mmin=Settings.Mmin;
 	AMF.Mmax=Settings.Mmax;
+
+#ifdef WITH_MPI
+#endif
 }
 
 
