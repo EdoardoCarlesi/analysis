@@ -14,14 +14,14 @@
 
 #letter='l'
 #model1='lcdm_features_'$letter
-model1='cde099b'
+model1='lcdm'
 model2='ude'
-box_size=80
-particle_number=128
+box_size=75
+particle_number=256
 n_bins=20
 r_bins=7
 catalogue_z=0
-catalogue_number=32
+catalogue_number=28
 snap_zero=0
 tot_snaps=29
 use_snaps=32
