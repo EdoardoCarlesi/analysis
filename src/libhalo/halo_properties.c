@@ -264,17 +264,24 @@ void sort_radial_velocity()
 
 void sort_lambda()
 {
-	int nBins=Settings.n_bins, nHaloes, i=0, m=0, *lambda_int_y; 
+	int nBins=Settings.n_bins, nHaloes_spin, nHaloes, i=0, m=0, *lambda_int_y; 
 	double *bin_x, *params, *lambda, *lambda_bin_x, *lambda_err_y, *lambda_double_y;
 	double l_0, sig, halfstep, lMax, lMin, delta_l, norm, value;
 
 	fprintf(stdout, "\nSorting spin parameter.\n"); 
 
 	Settings.tick=0;
-	nHaloes=Settings.n_spin;
+	nHaloes_spin=Settings.n_spin;
+
+#ifdef WITH_MPI
+// The loop has to be done using ALL the haloes, since they are not ordered
+		nHaloes=Settings.n_haloes; 
+#else
+		nHaloes=Settings.n_threshold; 
+#endif
 
 	bin_x = (double*) calloc(nBins, sizeof(double));	
-	lambda = (double*) calloc(nHaloes, sizeof(double));	
+	lambda = (double*) calloc(nHaloes_spin, sizeof(double));	
 	params = (double*) calloc(2, sizeof(double));
 	lambda_int_y = (int*) calloc(nBins-1, sizeof(int));	
 	lambda_bin_x = (double*) calloc(nBins-1, sizeof(double));	
@@ -287,30 +294,29 @@ void sort_lambda()
 			{
 				lambda[m] = haloes[i].lambda;
 				m++;
-					}
-						}	
+			}
+		}
 	
-				lambda = shellsort(lambda, nHaloes);
-
-				lMax = lambda[nHaloes-1];  
-				lMin = lambda[0];
+				lMax = maximum(lambda, nHaloes_spin);  
+				lMin = minimum(lambda, nHaloes_spin);
 				delta_l = (lMax-lMin)/nBins; 
-				norm = 1./(delta_l*nHaloes);
+				norm = 1./(delta_l*nHaloes_spin);
 	
 				bin_x = lin_stepper(lMin, lMax, nBins);
-				lin_bin(lambda, bin_x, nBins, nHaloes, lambda_int_y);	
+				lin_bin(lambda, bin_x, nBins, nHaloes_spin, lambda_int_y);	
 
 			halfstep=(bin_x[1]-bin_x[0])*0.5;
 
 			for(i=0; i<nBins-1; i++)
 			{	
-				value = lambda_int_y[i];
+				value = (double) lambda_int_y[i];
 				lambda_bin_x[i]=bin_x[i]+halfstep;
 				lambda_err_y[i]=sqrt(value*norm); 
 				lambda_double_y[i]=norm*value; 
 			}
 
-			params = best_fit_lognorm(lambda, nHaloes, nBins-1, lambda_bin_x, lambda_double_y, lambda_err_y);
+			params = best_fit_lognorm(lambda, nHaloes_spin, nBins-1, 
+					lambda_bin_x, lambda_double_y, lambda_err_y);
 
 			l_0 = params[0]; 
 			sig = params[1];
@@ -338,17 +344,23 @@ void sort_lambda()
 
 void sort_concentration()
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, nHaloes_vir, i=0, m=0, *int_c_bin_y;
+	int nBins=Settings.n_bins, nHaloes, nHaloes_conc, i=0, m=0, *int_c_bin_y;
 	double *params, *params2, *conc, *bin_x, *c_bin_x, *c_bin_y, *c_err_y;
-	double c_0, sig, max, halfstep, c_02, sig2, cMax, cMin, norm, thr_vir;
+	double value, c_0, sig, max, halfstep, c_02, sig2, cMax, cMin, norm;
 
 	fprintf(stdout, "\nSorting concentrations.\n");
 
 	Settings.tick=0;
-	thr_vir=Cosmo.virial;
-	nHaloes_vir=Settings.n_concentration;
+	nHaloes_conc=Settings.n_concentration;
 
-	conc = (double*) calloc(nHaloes_vir, sizeof(double));	
+#ifdef WITH_MPI
+// The loop has to be done using ALL the haloes, since they are not ordered
+		nHaloes=Settings.n_haloes; 
+#else
+		nHaloes=Settings.n_threshold; 
+#endif
+
+	conc = (double*) calloc(nHaloes_conc, sizeof(double));	
 	bin_x = (double*) calloc(nBins, sizeof(double));	
 	c_bin_x = (double*) calloc(nBins-1, sizeof(double));	
 	c_bin_y = (double*) calloc(nBins-1, sizeof(double));	
@@ -363,30 +375,38 @@ void sort_concentration()
 			{ 
 #ifdef AHF_v1
 				conc[m] = haloes[i].c_nfw;
-				if(conc[m] == -1) conc[m] = haloes[i].c;
+	
+					if(conc[m] == -1) 
+						conc[m] = haloes[i].c;
 #else
 				conc[m] = haloes[i].c;
 #endif
 				m++;
 				}
 					}
+		
+	
+			fprintf(stderr, "\nm=%d, nConc=%d, nThr=%d\n", m, nHaloes_conc, nHaloes);
 
-					conc = shellsort(conc, nHaloes_vir);
-					cMax = conc[nHaloes_vir-1]; cMin = conc[0]; 	
+					cMin = minimum(conc, nHaloes_conc);
+					cMax = maximum(conc, nHaloes_conc); 
+ 	
 					bin_x=lin_stepper(cMin,cMax,nBins);
-					lin_bin(conc,bin_x,nBins,nHaloes_vir,int_c_bin_y);	
+					lin_bin(conc,bin_x,nBins,nHaloes_conc,int_c_bin_y);	
 
-				norm=(nBins)/((cMax-cMin)*nHaloes_vir);
+				norm=(nBins)/((cMax-cMin)*nHaloes_conc);
 				halfstep=0.5*(bin_x[1]-bin_x[0]);
 
 			for(i=0; i<nBins-1; i++) 
 			{
+				value = (double) int_c_bin_y[i];
 				c_bin_x[i] = bin_x[i] + halfstep;
-				c_bin_y[i] = norm*int_c_bin_y[i];
-				c_err_y[i] = sqrt(norm*int_c_bin_y[i]);
+				c_bin_y[i] = norm*value;
+				c_err_y[i] = sqrt(norm*value);
 			}	
 
-				params = best_fit_lognorm(conc, nHaloes_vir, nBins-1, c_bin_x, c_bin_y, c_err_y);
+				params = best_fit_lognorm(conc, nHaloes_conc, nBins-1, 
+					c_bin_x, c_bin_y, c_err_y);
 
 				c_0 = params[0]; 
 				sig = params[1]; 
@@ -401,7 +421,7 @@ void sort_concentration()
 				HaloZ.p_c[i]=c_bin_y[i];
 			}
 
-			for(i=0; i<nHaloes_vir; i++) 
+			for(i=0; i<nHaloes_conc; i++) 
 				conc[i]/=c_0;
 
 		for(i=0; i<nBins-1; i++)
@@ -409,7 +429,7 @@ void sort_concentration()
 			c_bin_x[i]/=c_0;
 		}
 
-		params2 = best_fit_lognorm(conc, nHaloes_vir, nBins-1, c_bin_x, c_bin_y, c_err_y);
+		params2 = best_fit_lognorm(conc, nHaloes_conc, nBins-1, c_bin_x, c_bin_y, c_err_y);
 		c_02 = params2[0]; 
 		sig2 = params2[1];
 
