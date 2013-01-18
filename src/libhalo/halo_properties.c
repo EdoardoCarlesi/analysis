@@ -522,18 +522,15 @@ void sort_and_fit_mass_temperature_relation()
 
 void compute_halo_properties()
 {
-		initialize_halo_properties_structure();
+	initialize_halo_properties_structure();
 
-#ifdef VIRIAL_THEOREM
-		virial_theorem();
-#endif
 		avg_subhalo();
 
 		compute_numerical_mass_function();
 
 			sort_axis_alignement();
 			sort_shape_and_triaxiality();
-			sort_radial_velocity();
+			//sort_radial_velocity();
 			sort_lambda();
 			sort_concentration();
 

@@ -22,19 +22,11 @@ struct Cpu *cpu;
 
 
 
-void copy_halo_url(char *url)
-{
-	pUrls[ThisTask].halo_file = (char*) calloc(strlen(url)-1, sizeof(char));
-	strcpy(pUrls[ThisTask].halo_file, url);
-}
-
-
-
 void generate_url_for_tasks()
 {
-	char halo_list_task[100];
-	char profile_list_task[100];
-	char subhalo_list_task[100];
+	char halo_list_task[200];
+	char profile_list_task[200];
+	char subhalo_list_task[200];
 	char command[250];	
 
 		sprintf(halo_list_task, "%s.%s",Urls_internal.halo_list, cpu[ThisTask].name);
@@ -56,14 +48,15 @@ void generate_url_for_tasks()
 				system(command);
 
 	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)-1, sizeof(char));
-		strcpy(pUrls[ThisTask].halo_file, halo_list_task);
+		strcpy(pUrls[ThisTask].halo_list, halo_list_task);
 
 	pUrls[ThisTask].profile_list = (char*) calloc(strlen(profile_list_task)-1, sizeof(char));
-		strcpy(pUrls[ThisTask].halo_file, profile_list_task);
+		strcpy(pUrls[ThisTask].profile_list, profile_list_task);
 
 	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)-1, sizeof(char));
-		strcpy(pUrls[ThisTask].halo_file, subhalo_list_task);
+		strcpy(pUrls[ThisTask].subhalo_list, subhalo_list_task);
 
+	fprintf(stdout, "Task=%d has done generating halo, profiles and subhalo lists.\n", ThisTask);
 }
 
 
@@ -87,7 +80,7 @@ void init_cpu_struct()
 	char num1[1];
 	char num2[2];
 	char num3[3];
-	char task[3];
+	char task[4];
 
 	sprintf(num1, "%s", "0");
 	sprintf(num2, "%s", "00");
@@ -105,8 +98,6 @@ void init_cpu_struct()
 
 			sprintf(cpu[ThisTask].name, "%s%s", num2, task);
 		}
-	
-//	fprintf(stderr, "\nTask=%d corresponds to cpu.name = %s\n", ThisTask, cpu[ThisTask].name);
 }
 
 
@@ -182,5 +173,8 @@ void gather_halo_structures()
 
 	MPI_Gatherv(&pHaloes[ThisTask][0], pSettings[ThisTask].n_haloes*sizeof(struct halo), MPI_BYTE, 
 		haloes, SizeHaloesStructHalo, SizeDisplStructHalo, MPI_BYTE, 0, MPI_COMM_WORLD);
+	
+if(ThisTask==0)
+	fprintf(stdout, "\nDone gathering.\n");
 
 }

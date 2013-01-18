@@ -22,8 +22,8 @@ int main(int argc, char **argv)
 {
 	char *halo_urls[2];
 
-	halo_urls[0] = "/home/edoardo/snapshot_029.0000.z0.000.AHF_halos";
-	halo_urls[1] = "/home/edoardo/snapshot_029.0001.z0.000.AHF_halos";
+	halo_urls[0] = "/home/carlesi/snapshot_029.0000.z0.000.AHF_halos";
+	halo_urls[1] = "/home/carlesi/snapshot_029.0001.z0.000.AHF_halos";
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
@@ -46,7 +46,8 @@ int main(int argc, char **argv)
 		MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
 		MPI_Bcast(&Cosmo, sizeof(struct cosmology), MPI_BYTE, 0, MPI_COMM_WORLD);
 
-		copy_halo_url(halo_urls[ThisTask]);
+		pUrls[ThisTask].halo_file = (char *) calloc(strlen(halo_urls[ThisTask]), sizeof(char)); 
+		strcpy(pUrls[ThisTask].halo_file, halo_urls[ThisTask]);
 
 		MPI_Barrier(MPI_COMM_WORLD);
 

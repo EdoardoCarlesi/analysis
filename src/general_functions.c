@@ -15,6 +15,8 @@
 #include "libparallel/general.h"
 #endif
 
+
+
 void initialize_internal_variables(char **argv){
 	fprintf(stderr, "Initializing internal variables...\n");
 
@@ -42,8 +44,10 @@ void initialize_internal_variables(char **argv){
 	Settings.Rmax=atof(argv[URLS+12]);
 	Settings.r_bins=atoi(argv[URLS+13]);
 	Settings.n_min=atof(argv[URLS+14]);
+	Settings.use_n_min=atof(argv[URLS+15]);
+	Settings.n_haloes_to_use=atoi(argv[URLS+16]); 
 
-		int SET=14;
+		int SET=16;
 
 	Cosmo.h=atof(argv[SET+URLS+1]);
 	Cosmo.s8=atof(argv[SET+URLS+2]);
@@ -57,7 +61,6 @@ void initialize_internal_variables(char **argv){
 
 		int COSMO=9;
 
-	fprintf(stderr, "Initializing internal variables...\n");
 	// Analysis dependent extra parameters - set as the last one
 	Urls_internal.output_prefix = argv[SET+COSMO+URLS+1];
 	Urls_internal.halo_list = argv[SET+COSMO+URLS+2];
@@ -68,8 +71,6 @@ void initialize_internal_variables(char **argv){
 
 #ifdef PRINT_INFO
 	int kk=0; 
-//		fprintf(stderr, "settings: %d\n", FC.numFiles);
-
 		for(kk=1; kk<URLS+SET+COSMO+7; kk++) 
 			fprintf(stderr, "argv[%d]: %s \n", kk, argv[kk]);
 #endif

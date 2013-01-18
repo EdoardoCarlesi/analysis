@@ -36,7 +36,7 @@ void mpi_determine_simulation_settings()
 		(4*3.14*pHaloes[ThisTask][0].Rvir*pHaloes[ThisTask][0].Rvir*pHaloes[ThisTask][0].Rvir*200);
 	}
 
-		MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
+	//MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
 
 	if(Settings.use_n_min == 1)
 	{
@@ -73,46 +73,51 @@ void mpi_determine_simulation_settings()
 
 void mpi_read_halo_file()
 {
-	int n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
+	int b=0, n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
 	double a=0; // Dummy variable to read columns
-	char dummyline[LINE_SIZE]; 
-	FILE *h_file=NULL;
-	
+	char dummyline[4096]; 
+	FILE *h_file;
+
 	if(ThisTask==0)
 		skip = 1;
 	else
-		skip=0;
+		skip = 0;
 	
 	Settings.tick=0;
 	h_file = fopen(pUrls[ThisTask].halo_file, "r");
 
 	if(h_file==NULL) 
+	{
 		fprintf(stderr, "Task=%d, halo file not found:%s\n", ThisTask, pUrls[ThisTask].halo_file);
-	else
-		fprintf(stderr, "Task=%d, found halo file:%s\n", ThisTask, pUrls[ThisTask].halo_file);
 
+		} else {
+			fprintf(stderr, "Task=%d is reading from halo file:%s\n", ThisTask, pUrls[ThisTask].halo_file);
+		}
+		
 		pSettings[ThisTask].n_haloes = get_lines(h_file, pUrls[ThisTask].halo_file) - skip;
 
 		pHaloes[ThisTask] = (struct halo*) calloc(pSettings[ThisTask].n_haloes, sizeof(struct halo));
 
-		while(!feof(h_file))
-		{
-				fgets(dummyline, LINE_SIZE, h_file);
-		
+	fprintf(stdout, "\nTask=%d is allocating memory for %d haloes...\n",
+			ThisTask, pSettings[ThisTask].n_haloes);
+
+	while(!feof(h_file) && n < pSettings[ThisTask].n_haloes)
+	{
+		fgets(dummyline, 4096, h_file);
+			
 			if(j>=skip) 
 			{
-
-	sscanf(dummyline,
+				sscanf(dummyline,
 #ifndef GAS
-	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
 	 %lf %lf %lf \
-	", 
+	",
 #else // There is a gas component
 #ifndef EXTRA_GAS
-	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%ld  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -120,8 +125,8 @@ void mpi_read_halo_file()
 	 %d  %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	", 
-#else
-	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+#else	// Use extra gas columns
+	"%ld  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -130,10 +135,10 @@ void mpi_read_halo_file()
 	 %lf %lf %lf %lf %lf %lf %lf  %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf \
 	", 
-#endif
+#endif	// Extra Gas
 #endif // GAS
-	&pHaloes[ThisTask][n].id,	&pHaloes[ThisTask][n].host,	&pHaloes[ThisTask][n].n_satellites, 	
-	&pHaloes[ThisTask][n].Mvir, 	&pHaloes[ThisTask][n].n_part, 	&pHaloes[ThisTask][n].Xc, 	
+	&pHaloes[ThisTask][n].id,	&pHaloes[ThisTask][n].host,	&pHaloes[ThisTask][n].n_satellites,	
+	&pHaloes[ThisTask][n].Mvir, 	&pHaloes[ThisTask][n].n_part,	&pHaloes[ThisTask][n].Xc, 	
 	&pHaloes[ThisTask][n].Yc, 	&pHaloes[ThisTask][n].Zc, 	&pHaloes[ThisTask][n].VXc, 	
 	&pHaloes[ThisTask][n].VYc, 	&pHaloes[ThisTask][n].VZc, 	&pHaloes[ThisTask][n].Rvir, 
 	&pHaloes[ThisTask][n].Rmax, 	&pHaloes[ThisTask][n].r2, 	&a, 				
@@ -161,14 +166,13 @@ void mpi_read_halo_file()
 	&pHaloes[ThisTask][n].Cum_u_gas
 #endif
 #endif
-	);
-#ifdef  GAS
+	); // */
+#ifdef GAS
 #ifndef EXTRA_GAS
 	// The cumulative u has to be read from the profile catalogues
 	pHaloes[ThisTask][n].Cum_u_gas = 0.0;
 #endif
 #endif
-
 	// In the new catalogues haloes' major axis is normalized to one
 	pHaloes[ThisTask][n].aa = 1.0; 
 
@@ -196,9 +200,10 @@ void mpi_read_halo_file()
 	pHaloes[ThisTask][n].VX_dm *= 1.e-3;
 	pHaloes[ThisTask][n].VY_dm *= 1.e-3;
 	pHaloes[ThisTask][n].VZ_dm *= 1.e-3;
-#endif 
-#endif
-#endif
+#endif // Extra Gas
+#endif // Gas
+#endif // Use Mpc
+
 		// Checking the various threshold conditions
 	if(Settings.use_n_min == 1)
 		{
@@ -211,16 +216,14 @@ void mpi_read_halo_file()
 				condition = 1;
 					else 
 				condition = 0;
-				
 		}
 
 	if(condition==1)
 	{
-	thr++;
+		thr++;
 
 		if(pHaloes[ThisTask][n].abs_th_vir < Cosmo.virial) 
 		{
-
 			if(pHaloes[ThisTask][n].c_nfw == -1) 
 			{
 				pHaloes[ThisTask][n].conc=0;		
@@ -238,16 +241,11 @@ void mpi_read_halo_file()
 			}
 
 			vir++;
-
 		pHaloes[ThisTask][n].virial=1;
 		} else {
 			pHaloes[ThisTask][n].conc=0;
 			pHaloes[ThisTask][n].virial=0;
 	 	}
-	}
-
-			print_counter(2000);
-
 			if(	pHaloes[ThisTask][n].conc==1 &&
 				pHaloes[ThisTask][n].virial==1 &&
 				pHaloes[ThisTask][n].spin==1 ) 
@@ -258,24 +256,33 @@ void mpi_read_halo_file()
 					} else {
 				pHaloes[ThisTask][n].all = 0; 
 				}
+	}	// Condition == 1 */
 			n++;
 			j++;
 		} else { // Skip this line
 		j++;
 	}
 } // Finished counting haloes over threshold conditions
+
+	/*
 		if(pHaloes[ThisTask][pSettings[ThisTask].n_haloes-1].Mvir > Settings.mass_min) 
 			thr--;
-
+	
+		if(vir > thr)
+			vir=thr;
+	
+		if(spin > thr)
+			spin=thr;
+	*/
 		pSettings[ThisTask].n_threshold=thr;
 		pSettings[ThisTask].n_virialized=vir;
 		pSettings[ThisTask].n_concentration=conc;
 		pSettings[ThisTask].n_spin=spin;
 		pSettings[ThisTask].n_all=all;
-
+	
 		mpi_determine_simulation_settings();	
 
-	fclose(h_file);
+fclose(h_file);
 }
 
 
@@ -331,7 +338,7 @@ void mpi_read_profiles_file()
 	int nr=0, k=0, j=0, np1=0, np2=0, halo_bins=0, counter=0, kk=0;
 	double a, over, over1, over2, over3, radius1, radius2, err_p;
 	char dummyline[LINE_SIZE]; 
-	FILE *h_file=NULL;
+	FILE *h_file;
 
 		h_file = fopen(Urls_internal.profiles_file, "r");
 		if(h_file==NULL) 
@@ -413,15 +420,15 @@ void mpi_read_profiles_file()
 
 void mpi_get_halo_files_urls()
 {
-	int n=0;
-	char dummyline[100], *root_dir, *url_fc, *url_fc_pro, *url_fc_sub;
+	int n=0, lin=0, lin_pro=0, lin_sub=0;
+	char dummyline[200], url_fc[200], url_fc_pro[200], url_fc_sub[200];
 	FILE *fc=NULL, *fc_pro=NULL, *fc_sub=NULL;
 
-	fprintf(stdout, "\nget_halo_files_urls() for %d haloes.\n", FC.numFiles);
+	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", FC.numFiles);
 
-	url_fc=pUrls[ThisTask].halo_list;
-	url_fc_pro=pUrls[ThisTask].profile_list;
-	url_fc_sub=pUrls[ThisTask].subhalo_list; 
+	strcpy(url_fc, pUrls[ThisTask].halo_list);
+	strcpy(url_fc_pro, pUrls[ThisTask].profile_list);
+	strcpy(url_fc_sub, pUrls[ThisTask].subhalo_list); 
 
 	fc 	= fopen(url_fc,"r");
 	fc_pro  = fopen(url_fc_pro,"r");
@@ -436,38 +443,70 @@ void mpi_get_halo_files_urls()
 	if(fc_sub==NULL) 
 		fprintf(stderr, "%s %s\n","Could not find subhalo list file: ", url_fc_sub);
 
-	if(pFC[ThisTask].numFiles==0) 
-		pFC[ThisTask].numFiles = get_lines(fc, url_fc);
+		lin = get_lines(fc, url_fc);
+		lin_pro = get_lines(fc_pro, url_fc_pro);
+		lin_sub = get_lines(fc_sub, url_fc_sub);
+
+		pFC[ThisTask].numFiles = lin;
 
 		pFC[ThisTask].urls = (char **) calloc(pFC[ThisTask].numFiles, sizeof(char *));
 		pFC[ThisTask].urls_profiles = (char **) calloc(pFC[ThisTask].numFiles, sizeof(char *));
 		pFC[ThisTask].urls_satellites = (char **) calloc(pFC[ThisTask].numFiles, sizeof(char *));
 
+	if(lin > 0)
+	{
 		for(n=0; n<pFC[ThisTask].numFiles; n++)
 		{
-			fgets(dummyline,100,fc);
-			dummyline[strlen(dummyline)-1]='\0';
+			fgets(dummyline,200,fc);
 			pFC[ThisTask].urls[n] = (char*) calloc(strlen(dummyline), sizeof(char));
-			strcpy(pFC[ThisTask].urls[n],dummyline);
+			strcpy(pFC[ThisTask].urls[n], dummyline);
+			pFC[ThisTask].urls[n][strlen(dummyline)-1]='\0';
+		}
+	fclose(fc);
+
+		} else {
+			if(ThisTask==0)
+				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc);
 		}
 
-	fclose(fc);
-	
+	if(lin_sub > 0)
+	{
 		for(n=0; n<pFC[ThisTask].numFiles; n++)
 		{
-			fgets(dummyline,100,fc_sub);
-			dummyline[strlen(dummyline)-1]='\0';
+			fgets(dummyline,200,fc_sub);
 			pFC[ThisTask].urls_satellites[n] = (char*) calloc(strlen(dummyline), sizeof(char));
-			strcpy(pFC[ThisTask].urls_satellites[n],dummyline);
+			strcpy(pFC[ThisTask].urls_satellites[n], dummyline);
+			pFC[ThisTask].urls_satellites[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc_sub);
 
+		} else {
+			if(ThisTask==0)
+				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc_sub);
+		}
+
+	if(lin_pro > 0)
+	{
 		for(n=0; n<pFC[ThisTask].numFiles; n++)
 		{
-			fgets(dummyline,100,fc_pro);
-			dummyline[strlen(dummyline)-1]='\0';
+			fgets(dummyline,200,fc_pro);
 			pFC[ThisTask].urls_profiles[n] = (char*) calloc(strlen(dummyline), sizeof(char));
-			strcpy(pFC[ThisTask].urls_profiles[n],dummyline);
+			strcpy(pFC[ThisTask].urls_profiles[n], dummyline);
+			pFC[ThisTask].urls_profiles[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc_pro);
+
+		} else {
+			if(ThisTask==0)
+				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc_pro);
+		}
+
+}
+
+
+
+void mpi_use_halo_url(int n)
+{
+	pUrls[ThisTask].halo_file = (char*) calloc(strlen(pFC[ThisTask].urls[n])-1, sizeof(char));
+	strcpy(pUrls[ThisTask].halo_file, pFC[ThisTask].urls[n]);
 }

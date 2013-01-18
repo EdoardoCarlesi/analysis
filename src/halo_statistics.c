@@ -17,11 +17,10 @@
 
 int main(int argc, char **argv)
 {
-	fprintf(stderr, "\nmain(). Computing halo statistical properties.\n");
+	fprintf(stderr, "\nComputing halo statistical properties.\n");
 
 		initialize_internal_variables(argv);
-
-		initialize_halo_properties_structure();
+//		initialize_halo_properties_structure();
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
@@ -29,27 +28,27 @@ int main(int argc, char **argv)
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
 
 	init_comm_structures();
-	
 	init_cpu_struct();	
 		
-		generate_url_for_tasks();	
+	generate_url_for_tasks();	
+	
+	mpi_get_halo_files_urls();
+			
+			mpi_use_halo_url(0);
 
-		MPI_Barrier(MPI_COMM_WORLD);
+			mpi_read_halo_file();
 
-		mpi_read_halo_file();
+			MPI_Barrier(MPI_COMM_WORLD);
 
-		gather_halo_structures();
+			gather_halo_structures();
 
-		free_comm_structures();
+			free_comm_structures();
 	
 	if(ThisTask==0)
 	{
-#endif
-
-			// TODO Check the number of haloes to use!!!!!!!!
-		Settings.n_haloes_to_use=39;
-
+#else
 		read_halo_file();
+#endif
 
 		compute_halo_properties();
 
@@ -58,10 +57,15 @@ int main(int argc, char **argv)
 #ifdef WITH_MPI
 	}
 
+	MPI_Barrier(MPI_COMM_WORLD);
+
+		if(ThisTask == 0)
+#endif
+			fprintf(stderr, "\nHalo statistical properties computed.\n");
+
+#ifdef WITH_MPI
 	MPI_Finalize();
 #endif
-
-	fprintf(stderr, "\nmain(). Halo statistical properties computed.\n");
 
 return 0;
 }

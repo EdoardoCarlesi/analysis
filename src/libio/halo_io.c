@@ -114,7 +114,7 @@ void read_halo_file()
 #ifdef AHF_v1
 	sscanf(dummyline, 
 #ifndef GAS
-	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -122,7 +122,7 @@ void read_halo_file()
 	", 
 #else // There is a gas component
 #ifndef EXTRA_GAS
-	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -131,7 +131,7 @@ void read_halo_file()
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	", 
 #else
-	"%d  %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -220,7 +220,6 @@ void read_halo_file()
 #endif
 #endif
 		// Checking the various threshold conditions
-
 
 	if(haloes[n].Mvir> Settings.mass_min) 
 	{

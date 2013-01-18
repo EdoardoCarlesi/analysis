@@ -174,18 +174,16 @@ extern struct merger_tree
 
 extern struct halo
 {
+	long int id;
 	int n_part;
 	int n_satellites;
         int n_bins;
 	int neg_r_bins;
-	int id;
 	int host;
 	int virial;
 	int spin;
 	int conc;
 	int all;
-
-	int *id_satellites;
 
 	double Xc;
 	double Yc;
@@ -225,6 +223,8 @@ extern struct halo
 	double chi_nfw;
 	double rs_nfw;
 	double rho0_nfw;
+
+	int *id_satellites;
 
 	double *radius;
 	double *rho;

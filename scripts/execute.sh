@@ -10,44 +10,55 @@
 #					- 8
 #					- 9
 #					- 10 (theoretical_mass_function)
-#		
-
+#					- 11 (test)
+# MPI Settings - if using MPI
 use_mpi=$2
 n_procs=$3
 
+# Model and simulation ettings
 model1='lcdm'
 model2='ude'
 box_size=75
 particle_number=256
-n_bins=20
-r_bins=7
+tot_snaps=29
+
+# Catalogue settings when using one halo catalogue only
 catalogue_z=0
 catalogue_number=028
-snap_zero=0
-tot_snaps=29
-use_snaps=32
+
+# Number of bins for general distributions and for the radial alignment
+n_bins=20
+r_bins=7
+
+# Scale of P(k) for growth factor calculation
 k=0.13
-fit=0
+
+# Lines to skip when reading P(k) and mass function files
 pk_skip=11
 mf_skip=1
 
 #Minimum and maximum mass for the mass function computation
 m_min=1.e+11
 m_max=1.e+15
-m_th=1.e+9
+m_th=1.e+10
 
 #Minimum particles per halo
 n_min=200
 
+# use_n_min = 1 means we use particle number instead of mass as threshold criterion 
+use_n_min=1
+
+# use_n_haloes = 0 means use all haloes, otherwise as specified
+use_n_haloes=0
+
 #Computer settings
-cpus=6
 swap=0
 
-# Radius for the alignement
+# Radius for the halo alignement
 r_min=1
 r_max=50
 
-# Cosmo parameters
+# Cosmological parameters
 h=0.7
 s8=0.8
 om=0.27
@@ -57,12 +68,10 @@ virial=2.5
 spin=0.15
 
 # Integration redshifts
-zMax=3
 z0=0
 z1=1
+zMax=3
 
-# Use pre-calculated pk = 0 ; calculate pk again = 1
-use_pk=0
 # Fit data = 1, use th. only = 0
 fit=0
 
@@ -83,7 +92,7 @@ prefix2='k_'$k'-'
 prefix3='z_'$catalogue_z'-'
 prefix4='M_'$m_min'-'
 prefix5='N_'$n_min'_'
-prefix6='snaps_'$use_snaps
+prefix6='snaps_'$tot_snaps
 
 if [ $fit -eq 1 ] ; then 
 prefix1=$prefix1'fit-'
@@ -163,10 +172,10 @@ cd $base_analysis/src/
 make clean
 
 url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_file1' '$pk_file_base1' '$snaps_dir1' '$halo_dir1
-set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min
+set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min' '$use_n_min' '$use_n_haloes
 cosmo_variables=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
 extra_variables=$k' '$zMax
-halo_evolution=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$use_snaps
+halo_evolution=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
 halo2_variables=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
 
 all_variables=$url_variables' '$set_variables' '$cosmo_variables' '$extra_variables' '
@@ -174,8 +183,8 @@ all_variables=$url_variables' '$set_variables' '$cosmo_variables' '$extra_variab
 execute=$base_analysis
 
 if [ $use_mpi -eq 1 ] ; then
+#execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
 execute='mpiexec -n '$n_procs' '$base_analysis
-echo 'running mpi process: '$execute
 fi
 
 if [ $1 -eq 1 ] ; then
@@ -184,8 +193,8 @@ $execute/bin/fit_nfw $all_variables$prefix1$prefix3$prefix4
 fi
 
 if [ $1 -eq 2 ] ; then
-echo $execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 $snap_zero $tot_snaps $particle_number
-$execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 $snap_zero $tot_snaps $particle_number
+echo $execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 0 $tot_snaps $particle_number
+$execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 0 $tot_snaps $particle_number
 fi
 
 if [ $1 -eq 3 ] ; then
