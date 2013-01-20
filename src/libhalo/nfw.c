@@ -14,8 +14,15 @@
 #include "../general_variables.h"
 #include "../libmath/statistics.h"
 
+#ifdef WITH_MPI
+#include "../libparallel/general.h"
+#endif
 
 struct nfw NFW;
+
+
+void read_and_fit_profile(struct halo *);
+
 
 
 double nfw(double r, double r_s, double rho_0)
@@ -90,8 +97,8 @@ int d_nfw_f(const gsl_vector *x, void *data, gsl_matrix *J)
 		s = err[i];
 		r = vx[i]; 
 	
-		e1 = (3.*rs*rs*rho0)/(r*(rs+r)*(rs+r)) - (2.*rs*rs*rs*rho0)/(r*(rs+r)*(rs+r)*(rs+r));
-		e2 = 1./((r/rs)*(1.+r/rs)*(1.+r/rs));
+		e1 = nfw_drs(r, rs, rho0);
+		e2 = nfw_drho0(r, rs, rho0);
 
 	gsl_matrix_set(J,i,0,e1/s);
 	gsl_matrix_set(J,i,1,e2/s);
@@ -113,7 +120,8 @@ int fd_nfw_f(const gsl_vector *x, void *data, gsl_vector * f, gsl_matrix *J)
 
 
 
-double* best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, double *array_data_y, double *y_err)
+double* best_fit_nfw(double rho0, double rs, int nBins, 
+		double *array_data_x, double *array_data_y, double *y_err)
 {
 	double *params;
 	struct data dat;
@@ -150,7 +158,6 @@ double* best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, do
 	rs = gsl_vector_get(par.fitted_p,0);
 	rho0 = gsl_vector_get(par.fitted_p,1);
 
-
 			/* Return the best fit parameters*/
 		params = (double*) calloc(2, sizeof(double));
 		params[0]=rs;
@@ -164,71 +171,84 @@ double* best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, do
 
 
 
-void fit_and_store_nfw_parameters(int massCut)
+void fit_and_store_nfw_parameters()
 {
-	fprintf(stderr, "fit_and_store_nfw_parameters(). Using the first %d haloes.\n", massCut);
+	int k=0; 
+	int nHaloes;
 
-	double cc, mm, rr, rho0, rs, r2, chisq, *y_th; 
-	int bins, skip, k=0, j=0;
+	struct halo * HALO;
 
-		for(k=0; k<massCut; k++)
-	{
-			rr = haloes[k].Rvir;
-			cc = haloes[k].c; 
-			mm = haloes[k].Mvir;
-			bins = haloes[k].n_bins;
-			skip = haloes[k].neg_r_bins;
-			rho0 = cc*cc*cc*200/(3*(log(1+cc)-(cc/(1+cc))));
-			rs = haloes[k].r2;
-			r2 = haloes[k].r2;
+#ifdef WITH_MPI
+	HALO = pHaloes[ThisTask];
+	nHaloes = pSettings[ThisTask].n_threshold;
+#else 
+	HALO = haloes;
+	nHaloes = Settings.n_threshold;
+#endif
 
-				best_fit_nfw(rho0, rs, bins, haloes[k].radius, haloes[k].rho, haloes[k].err);
+	fprintf(stderr, "fit_and_store_nfw_parameters() is using %d haloes.\n", 
+			nHaloes);
 
-			y_th = (double*) calloc(haloes[k].n_bins,sizeof(double));
-			haloes[k].rs_nfw = NFW.rs;
-			haloes[k].rho0_nfw = NFW.rho0;
-
-			for(j=0; j<haloes[k].n_bins; j++) 
-				y_th[j] = nfw(haloes[k].radius[j], haloes[k].rs_nfw, haloes[k].rho0_nfw);
-	
-		chisq = chi_square(y_th,haloes[k].rho,haloes[k].err,bins,skip);
-		haloes[k].chi_nfw = chisq/(haloes[k].n_bins-haloes[k].neg_r_bins-1);
-	}
+		for(k=0; k<nHaloes; k++)
+			read_and_fit_profile(&HALO[k]);			
 }
 
 
 
-void fit_and_store_nfw_parameters_from_list(int massCut, int *list, int max)
+void fit_and_store_nfw_parameters_from_list(int *list, int max)
 {
 	fprintf(stderr, "fit_and_store_nfw_parameters_from_list().\n");
 
-	double cc, mm, rr, rho0, rs, chisq, *y_th;
-	int bins, skip, k=0, j=0, i=0;
+	int k=0, j=0;
+	int nHaloes;
 
-	for(j=0; j<massCut; j++)
+	struct halo * HALO;
+
+#ifdef WITH_MPI
+	HALO = pHaloes[ThisTask];
+	nHaloes = pSettings[ThisTask].n_threshold;
+#else 
+	HALO = haloes;
+	nHaloes = Settings.n_threshold;
+#endif
+	
+		for(j=0; j<nHaloes; j++)
 		{
 			k=list[j];
-			rr = haloes[k].Rvir;
-			cc = haloes[k].Rvir/haloes[k].r2;
-			mm = haloes[k].Mvir;
-			bins = haloes[k].n_bins;
-			skip = haloes[k].neg_r_bins;
-			rho0 = cc*cc*cc*200/(3*(log(1+cc)-(cc/(1+cc))));
-			rs = haloes[k].r2;
-		
-		if(k<max-1) 
-			{
-				best_fit_nfw(rho0, rs, bins, haloes[k].radius, haloes[k].rho, haloes[k].err);
-				haloes[k].rs_nfw = NFW.rs;
-				haloes[k].rho0_nfw = NFW.rho0;
-
-				y_th = (double*) calloc(haloes[k].n_bins,sizeof(double));
-
-			for(i=0; i<bins; i++) 
-				y_th[i] = nfw(haloes[k].radius[i], haloes[k].rs_nfw, haloes[k].rho0_nfw);
-
-			chisq = chi_square(y_th,haloes[k].rho,haloes[k].err,bins,skip);
-			haloes[k].chi_nfw = chisq /(haloes[k].n_bins-haloes[k].neg_r_bins-1);
-			}
+			read_and_fit_profile(&HALO[k]);			
 		}
 }
+
+
+
+void read_and_fit_profile(struct halo *HALO)
+{
+	double c=0, M=0, r=0, rho0, rs, chi_sq; 
+	double *y_th; 
+	int bins, skip, j=0;
+
+		r = HALO->Rvir;
+		c = HALO->c; 
+		M = HALO->Mvir;
+		bins = HALO->n_bins;
+		skip = HALO->neg_r_bins;
+
+		rho0 = HALO->rho0;
+		rs = HALO->r2;
+
+			best_fit_nfw(rho0, rs, bins, 
+				HALO->radius, HALO->rho, HALO->err);
+
+			y_th = (double*) calloc(bins-skip ,sizeof(double));
+			HALO->rs_nfw = NFW.rs;
+			HALO->rho0_nfw = NFW.rho0;
+
+		for(j=skip; j<HALO->n_bins; j++)
+			y_th[j] = nfw(HALO->radius[j], HALO->rs_nfw, HALO->rho0_nfw);
+	
+	chi_sq = chi_square(y_th,HALO->rho,HALO->err,bins,skip);
+
+	HALO->chi_nfw = chi_sq/(bins-skip-1);
+
+}
+

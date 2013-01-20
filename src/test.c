@@ -13,17 +13,18 @@
 
 #ifdef WITH_MPI
 #include <mpi.h>
-#include "libparallel/halo_io.h"
 #include "libparallel/general.h"
 #endif
 
 
 int main(int argc, char **argv)
 {
+	initialize_internal_variables(argv);
+
 	char *halo_urls[2];
 
-	halo_urls[0] = "/home/carlesi/snapshot_029.0000.z0.000.AHF_halos";
-	halo_urls[1] = "/home/carlesi/snapshot_029.0001.z0.000.AHF_halos";
+	halo_urls[0] = "/home/edoardo/snapshot_029.0000.z0.000.AHF_halos";
+	halo_urls[1] = "/home/edoardo/snapshot_029.0001.z0.000.AHF_halos";
 
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
@@ -37,7 +38,7 @@ int main(int argc, char **argv)
 		Settings.mass_min = 3.1e10;
 		Settings.nP_1D = 256;
 		Settings.box_size = 75;
-		Settings.n_min = 1e4;
+		Settings.n_min = 1e2;
 		Settings.n_bins = 10;
 		Cosmo.virial = 1.5;
 		Cosmo.spin = 0.15;
@@ -51,7 +52,7 @@ int main(int argc, char **argv)
 
 		MPI_Barrier(MPI_COMM_WORLD);
 
-		mpi_read_halo_file();
+		read_halo_file();
 
 	gather_halo_structures();
 
@@ -63,6 +64,8 @@ int main(int argc, char **argv)
 		sort_shape_and_triaxiality();
 		sort_lambda();
 		compute_numerical_mass_function();
+		sort_concentration();
+		print_all_halo_properties_to_one_file();
 	}
 
 	MPI_Finalize();

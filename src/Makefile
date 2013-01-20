@@ -12,12 +12,12 @@ INCLUDE += general_variables.h general_functions.h
 
 ifeq (${WITH_MPI}, "on")
 LIBS    += libparallel/libparallel.a
-INCLUDE += libparallel/general.h libparallel/halo_io.h
+INCLUDE += libparallel/general.h
 endif
 
-ifeq (${SYS}, "castor")
+#ifeq (${SYS}, "castor")
 LIBS	+= -lgsl -lgslcblas -lm
-endif
+#endif
 
 EXECS = nfw_fit growth_factor halo_comparison halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
 	mass_function number_density merger_tree

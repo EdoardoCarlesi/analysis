@@ -240,5 +240,5 @@ fi
 
 if [ $1 -eq 11 ] ; then
 make test
-$execute/src/test  $all_variables$prefix1$prefix4
+$execute/bin/test  $all_variables$prefix1$prefix4
 fi

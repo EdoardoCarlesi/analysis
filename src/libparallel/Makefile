@@ -8,7 +8,7 @@ AR?=ar
 
 .PHONY: all clean;
 
-OBJS = general.o halo_io.o
+OBJS = general.o
 
 all: libparallel.a
 

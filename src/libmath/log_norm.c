@@ -14,7 +14,7 @@
 #include "statistics.h"
 
 
-double lognorm_distribution(double l, double l_0, double sig)
+double lognorm(double l, double l_0, double sig)
 {
 	double p, norm, arg;
 
@@ -27,16 +27,16 @@ double lognorm_distribution(double l, double l_0, double sig)
 
 
 	/* Derivative of the distribution wrt the l_0 parameter */
-double dl_lognorm_distribution(double l, double l_0, double sig)
+double dl_lognorm(double l, double l_0, double sig)
 {
-	return -1./(2*sig*sig)*(2/l_0 - 2*log(l)/l_0)*lognorm_distribution(l,l_0,sig);
+	return -1./(2*sig*sig)*(2/l_0 - 2*log(l)/l_0)*lognorm(l,l_0,sig);
 }
 
 
 	/* Derivative of the distribution wrt the sig parameter */
-double ds_lognorm_distribution(double l, double l_0, double sig)
+double ds_lognorm(double l, double l_0, double sig)
 {	
-	return (-1./sig + pow(log(l/l_0),2)*pow(sig,-3))*lognorm_distribution(l,l_0,sig);
+	return (-1./sig + pow(log(l/l_0),2)*pow(sig,-3))*lognorm(l,l_0,sig);
 }
 
 
@@ -75,7 +75,8 @@ int lognorm_f(const gsl_vector *x, void *data, gsl_vector *f)
 int d_lognorm_f(const gsl_vector *x, void *data, gsl_matrix *J)
 {
 	size_t n=0, i=0;
-	double log_norm, e1, e2, arg, s, t, norm, l_0, sig, dl_lognorm, ds_lognorm, *vx, *err;
+	double log_norm, e1, e2, arg, s, t, norm, l_0, sig, dl_log_norm, ds_log_norm;
+	double *vx, *err;
 
 	n = ((struct data*)data)->n;	
 	vx = ((struct data *)data)->x;
@@ -89,14 +90,12 @@ int d_lognorm_f(const gsl_vector *x, void *data, gsl_matrix *J)
 		s = err[i];
 		t = vx[i]; 
 		
-		norm = 1./(t*sig*sqrt(2*3.14));
-		arg  = log(t/l_0)/sig;
-		log_norm = norm*exp(-arg*arg*0.5);
-		dl_lognorm =  -1./(2*sig*sig)*(2/l_0 - 2*log(t)/l_0)*log_norm;
-		ds_lognorm = (-1./sig + pow(log(t/l_0),2)*pow(sig,-3))*log_norm;
-	
-		e1 = dl_lognorm; 
-		e2 = ds_lognorm; 
+		log_norm = lognorm(t, l_0, sig);
+		dl_log_norm = dl_lognorm(t, l_0, sig);
+		ds_log_norm = ds_lognorm(t, l_0, sig);
+
+		e1 = dl_log_norm; 
+		e2 = ds_log_norm; 
 
 		gsl_matrix_set(J,i,0,e1/s);
 		gsl_matrix_set(J,i,1,e2/s);
@@ -117,8 +116,8 @@ int fd_lognorm_f(const gsl_vector *x, void *data, gsl_vector * f, gsl_matrix *J)
 
 
 
-double* best_fit_lognorm
-	(double *array_values, int nHaloes, int nBins, double *array_bins, double *array_values_bin, double *error) 
+double* best_fit_lognorm (double *array_values, int nHaloes, int nBins, 
+		 	double *array_bins, double *array_values_bin, double *error) 
 {
 	double *params, l_0, sig;
 	struct parameters par;

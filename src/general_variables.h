@@ -210,7 +210,7 @@ extern struct halo
 	double ecc;
 	double lambda;
 	double lambdaE;
-	double delta_c;
+	double rho0;
 	double c;
 	double r2;
 	double aa;
@@ -288,7 +288,6 @@ extern struct full_catalogue
 } FC, *pFC;
 
 
-
 extern struct internal_urls
 {
 	char *halo_dir;
@@ -308,7 +307,6 @@ extern struct internal_urls
 
 
 } Urls_internal, *pUrls;
-
 
 
 extern struct halo_properties

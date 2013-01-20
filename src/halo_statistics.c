@@ -10,7 +10,6 @@
 
 #ifdef WITH_MPI
 #include <mpi.h>
-#include "libparallel/halo_io.h"
 #include "libparallel/general.h"
 #endif
 
@@ -19,8 +18,7 @@ int main(int argc, char **argv)
 {
 	fprintf(stderr, "\nComputing halo statistical properties.\n");
 
-		initialize_internal_variables(argv);
-//		initialize_halo_properties_structure();
+	initialize_internal_variables(argv);
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
@@ -31,23 +29,23 @@ int main(int argc, char **argv)
 	init_cpu_struct();	
 		
 	generate_url_for_tasks();	
-	
-	mpi_get_halo_files_urls();
+#endif	
+
+			get_halo_files_urls();
 			
-			mpi_use_halo_url(0);
+			use_halo_url(0);
 
-			mpi_read_halo_file();
+			read_halo_file();
 
-			MPI_Barrier(MPI_COMM_WORLD);
+#ifdef WITH_MPI
+		MPI_Barrier(MPI_COMM_WORLD);
 
-			gather_halo_structures();
+		gather_halo_structures();
 
-			free_comm_structures();
+		free_comm_structures();
 	
 	if(ThisTask==0)
 	{
-#else
-		read_halo_file();
 #endif
 
 		compute_halo_properties();
