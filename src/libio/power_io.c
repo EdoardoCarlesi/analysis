@@ -42,18 +42,18 @@ void read_pk_snapshots()
 
 		if(Settings.use_one_pk == 1)
 		{
-			fprintf(stderr, "\nReading one P(k) from: %s\n", Urls_internal.pk_file);
-				Pks[0].url = Urls_internal.pk_file;
+			fprintf(stderr, "\nReading one P(k) from: %s\n", Urls.pk_file);
+				Pks[0].url = Urls.pk_file;
 			
 		} else {
 
-			fprintf(stderr, "\nReading pk file list from: %s\n", Urls_internal.pk_list);
-				pk = fopen(Urls_internal.pk_list,"r");
+			fprintf(stderr, "\nReading pk file list from: %s\n", Urls.pk_list);
+				pk = fopen(Urls.pk_list,"r");
 		if(pk==NULL) 
-				fprintf(stderr, "Could not find pk.list file: %s\n", Urls_internal.pk_list);
+				fprintf(stderr, "Could not find pk.list file: %s\n", Urls.pk_list);
 
 		// Check that redshifts and snapshot number match
-	nPkSnaps = get_lines(pk, Urls_internal.pk_list);
+	nPkSnaps = get_lines(pk, Urls.pk_list);
 	rewind(pk);
 
 	if(nPkSnaps != Settings.n_pk_files) 
@@ -109,8 +109,8 @@ void init_pks()
 
 				if(Settings.use_one_pk > 1)
 				{
-					Pks[m].z = GF.z[m];
-					Pks[m].a = GF.a[m];
+					Pks[m].z = GrowthFac.z[m];
+					Pks[m].a = GrowthFac.a[m];
 				}
 
 		fill_pk_file(m);

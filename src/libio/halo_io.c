@@ -26,7 +26,7 @@ void determine_simulation_settings()
 	SETTINGS = &pSettings[ThisTask];
 #else
 	int ThisTask = 0;
-	HALO = haloes;
+	HALO = Haloes;
 	SETTINGS = &Settings;
 #endif
 
@@ -92,7 +92,7 @@ void set_additional_halo_properties(int n)
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
 #else
-	HALO = haloes;
+	HALO = Haloes;
 #endif
 
 	c = HALO[n].Rvir/HALO[n].r2;
@@ -150,14 +150,14 @@ void get_halo_files_urls()
 	struct full_catalogue *FULLCATALOGUE;
 	struct internal_urls *URLS;
 
-	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", FC.numFiles);
+	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", FullCat.numFiles);
 
 #ifdef WITH_MPI
-	FULLCATALOGUE =	&pFC[ThisTask];
+	FULLCATALOGUE =	&pFullCat[ThisTask];
 	URLS = &pUrls[ThisTask];
 #else
-	FULLCATALOGUE = &FC;
-	URLS = &Urls_internal;
+	FULLCATALOGUE = &FullCat;
+	URLS = &Urls;
 #endif
 
 	strcpy(url_fc, URLS->halo_list);
@@ -251,11 +251,11 @@ void use_halo_url(int n)
 	struct full_catalogue *FULLCATALOGUE;
 
 #ifdef WITH_MPI
-	FULLCATALOGUE =	&pFC[ThisTask];
+	FULLCATALOGUE =	&pFullCat[ThisTask];
 	URLS = &pUrls[ThisTask];
 #else
-	FULLCATALOGUE = &FC;
-	URLS = &Urls_internal;
+	FULLCATALOGUE = &FullCat;
+	URLS = &Urls;
 #endif
 
 	URLS->halo_file = (char*) calloc(strlen(FULLCATALOGUE->urls[n])-1, sizeof(char));
@@ -288,7 +288,7 @@ void read_halo_file()
 #else
 	int ThisTask = 0;
 	skip = 1;
-	URLS = &Urls_internal;
+	URLS = &Urls;
 	SETTINGS = &Settings;
 #endif
 
@@ -300,8 +300,8 @@ void read_halo_file()
 				sizeof(struct halo));
 		HALO = pHaloes[ThisTask];
 #else
-		haloes = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
-		HALO = haloes;
+		Haloes = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
+		HALO = Haloes;
 #endif
 
 	if(h_file==NULL) 
@@ -511,7 +511,7 @@ void read_profiles_file()
 	URLS = &pUrls[ThisTask];
 	SETTINGS = &pSettings[ThisTask];
 #else
-	URLS = &Urls_internal;
+	URLS = &Urls;
 	SETTINGS = &Settings;
 #endif
 
@@ -528,7 +528,7 @@ void read_profiles_file()
 #ifdef WITH_MPI
 		HALO = pHaloes[ThisTask];
 #else
-		HALO = haloes;
+		HALO = Haloes;
 #endif
 
 		Settings.tick=0;
@@ -630,7 +630,7 @@ int* read_cross_correlated_haloes(char* halo_cc_list, int n_halos_comp, int* cc_
 		fgets(dummyline, 128, cc_list);
 		sscanf(dummyline,"%d %d", &aa, &bb); 
 
-		if(haloes[bb].abs_th_vir<Cosmo.virial)
+		if(Haloes[bb].abs_th_vir<Cosmo.virial)
 		{
 			cc_ids[hh] = bb;
 			hh++;

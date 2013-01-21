@@ -20,15 +20,12 @@
 void initialize_internal_variables(char **argv){
 	fprintf(stderr, "Initializing internal variables...\n");
 
-	Urls_internal.analysis_dir = argv[1];
-	Urls_internal.a_outputs = argv[2];
-	Urls_internal.halo_file = argv[3];
-	Urls_internal.profiles_file = argv[4];
-	Urls_internal.pk_file = argv[5];
-	Urls_internal.snaps_dir = argv[6];
-	Urls_internal.halo_dir = argv[7];
+	Urls.a_outputs = argv[1];
+	Urls.halo_file = argv[2];
+	Urls.profiles_file = argv[3];
+	Urls.pk_file = argv[4];
 
-		int URLS=7;
+		int URLS=4;
 
 	Settings.box_size = atof(argv[URLS+1]); 
 	Settings.nP_1D = atoi(argv[URLS+2]); 
@@ -56,18 +53,18 @@ void initialize_internal_variables(char **argv){
 	Cosmo.delta_c=atof(argv[SET+URLS+5]);
 	Cosmo.spin=atof(argv[SET+URLS+6]);
 	Cosmo.virial=atof(argv[SET+URLS+7]);
-	GF.scale_k=atof(argv[SET+URLS+8]);
-	ND.zMax=atof(argv[SET+URLS+9]);
+	GrowthFac.scale_k=atof(argv[SET+URLS+8]);
+	NumDen.zMax=atof(argv[SET+URLS+9]);
 
 		int COSMO=9;
 
 	// Analysis dependent extra parameters - set as the last one
-	Urls_internal.output_prefix = argv[SET+COSMO+URLS+1];
-	Urls_internal.halo_list = argv[SET+COSMO+URLS+2];
-	Urls_internal.profile_list = argv[SET+COSMO+URLS+3];
-	Urls_internal.subhalo_list = argv[SET+COSMO+URLS+4];
-	Urls_internal.pk_list = argv[SET+COSMO+URLS+5];
-	FC.numFiles = atoi(argv[SET+COSMO+URLS+6]);
+	Urls.output_prefix = argv[SET+COSMO+URLS+1];
+	Urls.halo_list = argv[SET+COSMO+URLS+2];
+	Urls.profile_list = argv[SET+COSMO+URLS+3];
+	Urls.subhalo_list = argv[SET+COSMO+URLS+4];
+	Urls.pk_list = argv[SET+COSMO+URLS+5];
+	FullCat.numFiles = atoi(argv[SET+COSMO+URLS+6]);
 
 #ifdef PRINT_INFO
 	int kk=0; 

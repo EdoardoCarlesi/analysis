@@ -171,7 +171,8 @@ ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
 cd $base_analysis/src/
 make clean
 
-url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_file1' '$pk_file_base1' '$snaps_dir1' '$halo_dir1
+#url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_file1' '$pk_file_base1' '$snaps_dir1' '$halo_dir1
+url_variables=$outputs' '$pk_file1' '$halo_file1' '$profile_file1' '$pk_file_base1
 set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min' '$use_n_min' '$use_n_haloes
 cosmo_variables=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
 extra_variables=$k' '$zMax

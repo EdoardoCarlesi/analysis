@@ -4,7 +4,6 @@
 #include <math.h>
 
 #include "../libmath/log_norm.h"
-#include "../libhalo/nfw.h"
 #include "../general_variables.h"
 #include "../general_functions.h"
 
@@ -13,9 +12,9 @@
 
 void print_number_densities()
 {
-		int k=0, count=1, N=ND.npts; 
+		int k=0, count=1, N=NumDen.npts; 
 		double M=Settings.mass_min;
-		char *out  = merge_strings(Urls_internal.output_prefix,"number_density.dat");
+		char *out  = merge_strings(Urls.output_prefix,"number_density.dat");
 		FILE *fout = fopen(out, "w");
 
 		fprintf(stdout, "\nWriting number_density() output to: %s \n", out);
@@ -29,9 +28,9 @@ void print_number_densities()
 
 			for(k=0; k<N; k++) 
 			{
-			fprintf(fout,"%lf", ND.z[k]);
-			fprintf(fout,"\t%e", ND.n_tin[k]);
-			fprintf(fout,"\t%e", ND.n_num[k]);
+			fprintf(fout,"%lf", NumDen.z[k]);
+			fprintf(fout,"\t%e", NumDen.n_tin[k]);
+			fprintf(fout,"\t%e", NumDen.n_num[k]);
 			fprintf(fout, "\n");
 			}
 
@@ -43,38 +42,31 @@ void print_number_densities()
 void print_all_subhalo_properties_to_one_file()
 {
 	int i=0, count=1, nBins=SubHaloZ.n_bins;
-	char* out  = merge_strings(Urls_internal.output_prefix, "all_sub_statistics.dat");
+	char* out  = merge_strings(Urls.output_prefix, "all_sub_statistics.dat");
 	FILE* fout = fopen(out,"w");
 
 	fprintf(stdout, "\nWriting subhalo_properties() output to:%s\n", out);
 
 		fprintf(fout,"#");
-		FILE_HEADER(fout, "lambda", count);
-		FILE_HEADER(fout, "P(l)", count);
-		FILE_HEADER(fout, "shape", count);
-		FILE_HEADER(fout, "P(s)", count);
-		FILE_HEADER(fout, "triax", count);
-		FILE_HEADER(fout, "P(t)", count);
-		FILE_HEADER(fout, "Cos(theta)", count);
-		FILE_HEADER(fout, "P(c(th))", count);
-		FILE_HEADER(fout, "Cos(phi)", count);
-		FILE_HEADER(fout, "P(c(phi))", count);
-		FILE_HEADER(fout, "sub(r)/R_vir", count);
-		FILE_HEADER(fout, "n(r)", count);
-		FILE_HEADER(fout, "n(>r)", count);
-		FILE_HEADER(fout, "V_sub", count);
-		FILE_HEADER(fout, "P(V_sub)", count);
-		FILE_HEADER(fout, "Mass", count);
-		FILE_HEADER(fout, "n(>M)", count);
-		FILE_HEADER(fout, "subset(r)", count);
+		FILE_HEADER(fout, "lambda       ", count);
+		FILE_HEADER(fout, "P(l)         ", count);
+		FILE_HEADER(fout, "shape        ", count);
+		FILE_HEADER(fout, "P(s)         ", count);
+		FILE_HEADER(fout, "triax        ", count);
+		FILE_HEADER(fout, "P(t)         ", count);
+		FILE_HEADER(fout, "Cos(th)      ", count);
+		FILE_HEADER(fout, "P(c(th))     ", count);
+		FILE_HEADER(fout, "Cos(phi)     ", count);
+		FILE_HEADER(fout, "P(c(phi))    ", count);
+		FILE_HEADER(fout, "sub(r)/R_vir ", count);
+		FILE_HEADER(fout, "n(r)         ", count);
+		FILE_HEADER(fout, "n(>r)        ", count);
+		FILE_HEADER(fout, "V_sub        ", count);
+		FILE_HEADER(fout, "P(V_sub)     ", count);
+		FILE_HEADER(fout, "Mass         ", count);
+		FILE_HEADER(fout, "n(>M)        ", count);
+		FILE_HEADER(fout, "subset(r)    ", count);
 		FILE_HEADER(fout, "subset(n(>r))", count);
-		fprintf(fout, "\n");
-
-		fprintf(fout, "#lambda_0   :%lf\n", SubHaloZ.l_0);
-		fprintf(fout, "#cos(th_0)  :%lf\n", SubHaloZ.costh0);
-		fprintf(fout, "#cos(phi_0) :%lf\n", SubHaloZ.cosphi0);
-		fprintf(fout, "#t0   :%lf\n", SubHaloZ.t0);
-		fprintf(fout, "#s0   :%lf\n", SubHaloZ.s0);
 		fprintf(fout, "\n");
 
 		for(i=0; i<nBins; i++)	
@@ -106,9 +98,8 @@ void print_all_subhalo_properties_to_one_file()
 
 void print_virial_theorem()
 {	
-	int k, N, count=1; 
-	double vir;
-	char *fName=merge_strings(Urls_internal.output_prefix,"virial_theorem.dat");
+	int k=0, nTot=0, count=1; 
+	char *fName=merge_strings(Urls.output_prefix,"virial_theorem.dat");
 	FILE *fout = fopen(fName, "w");
 
 		fprintf(fout,"#");
@@ -116,13 +107,12 @@ void print_virial_theorem()
 		FILE_HEADER(fout, "VirialRatio", count);
 		fprintf(fout, "\n");
 
-		N = Settings.n_haloes;
+		nTot = Settings.n_haloes;
 
-			for(k=0; k<N; k++) 
+			for(k=0; k<nTot; k++) 
 			{
-				vir = haloes[k].th_vir;
-				fprintf(fout,"%e", haloes[k].Mvir);
-				fprintf(fout,"\t%lf", sqrt(vir*vir));
+				fprintf(fout,"%e", Haloes[k].Mvir);
+				fprintf(fout,"\t%lf", Haloes[k].abs_th_vir);
 				fprintf(fout, "\n");
 			}
 
@@ -133,34 +123,35 @@ void print_virial_theorem()
 
 void print_theoretical_mass_function(double z)
 {
-	double diff_tin, tin, n_num, dn_num, n_mass, err, th_mass;
-	int k=0, count=1; 
-	char z_num[50], *th_mf, *out_file;
+	double diff_tin=0, tin=0, n_num=0, dn_num=0, n_mass=0, err=0, th_mass=0;
+	int k=0, count=1, nTot=0; 
+	char out_file[200];
 	FILE *fout=NULL;
 
-	n_num = dn_num = n_mass = err = 0;
-	th_mf=Urls_internal.output_prefix;
-	sprintf(z_num,"z_%lf", z);
-	out_file=merge_strings(th_mf, merge_strings(z_num, "_theoretical_mass_function.dat"));
+	nTot=ThMassFunc.bins-1;
+
+	sprintf(out_file, "%s%f%s", 
+		Urls.output_prefix, z, "_theoretical_mass_function.dat");
+
 	fout=fopen(out_file, "w");
 
 	fprintf(stderr, "Mass function output file:%s \n", out_file);
 
 		fprintf(fout,"#");
-		FILE_HEADER(fout, "Mass", count);
-		FILE_HEADER(fout, "dn Tinker", count);
+		FILE_HEADER(fout, "Mass        ", count);
+		FILE_HEADER(fout, "dn Tinker   ", count);
 		FILE_HEADER(fout, "n(>M) Tinker", count);
 		fprintf(fout, "\n");
 
-			for(k=0; k<AMF.bins-1; k++)
+			for(k=0; k<nTot; k++)
 			{
-				th_mass=AMF.th_masses[k];
-				tin=AMF.tin[k];
-				diff_tin=AMF.diff_tin[k];	
+				th_mass=ThMassFunc.th_masses[k];
+				tin=ThMassFunc.tin[k];
+				diff_tin=ThMassFunc.diff_tin[k];	
 				fprintf(fout,"%e", th_mass);
 				fprintf(fout,"\t%e", diff_tin);
 				fprintf(fout,"\t%e", tin);
-				fprintf(fout, "\n");
+				fprintf(fout,"\n");
 			}
 
 	fclose(fout);
@@ -174,12 +165,12 @@ void print_correlation_function()
 	char *fileName; 
 	FILE *fout;
 
-		fileName=merge_strings(Urls_internal.output_prefix, "correlation_function.dat");
+		fileName=merge_strings(Urls.output_prefix, "correlation_function.dat");
 		fout=fopen(fileName,"w");
 
 		fprintf(fout,"#");
-		FILE_HEADER(fout, "R", count);
-		FILE_HEADER(fout, "Xi", count);
+		FILE_HEADER(fout, "R     ", count);
+		FILE_HEADER(fout, "Xi    ", count);
 		FILE_HEADER(fout, "Xi fit", count);
 		fprintf(fout, "\n");
 	
@@ -197,10 +188,12 @@ fclose(fout);
 
 void print_nfw()
 {
-	int k=0, count=1;
+	int k=0, count=1, nTot=0;
 	double rr, od, rs, r0, nnffww;
-	FILE * out_nfw = fopen("nfw_test.dat", "w");
-		
+	FILE * out_nfw = fopen(merge_strings(Urls.output_prefix, "nfw_test.dat"), "w");
+
+	nTot = NFW.bins;		
+
 	fprintf(out_nfw, "#");
 	FILE_HEADER(out_nfw, "r", count);
 	FILE_HEADER(out_nfw, "rho_{NFW}", count);
@@ -208,7 +201,7 @@ void print_nfw()
 	FILE_HEADER(out_nfw, "err", count);
 	fprintf(out_nfw, "\n");
 
-		for(k=0; k<NFW.bins; k++)
+		for(k=0; k<nTot; k++)
 		{
 			rr=NFW.radius[k];
 			od=NFW.overd[k];
@@ -236,8 +229,8 @@ void print_growth_factor()
 
 	fprintf(stderr,"print_growth_factors().\n");
 
-	dim_eff = GF.npts;
-	fileName=merge_strings(Urls_internal.output_prefix, "growth_factor.dat");
+	dim_eff = GrowthFac.npts;
+	fileName=merge_strings(Urls.output_prefix, "growth_factor.dat");
 	output=fopen(fileName,"w");
 	
 		fprintf(output, "#");
@@ -248,9 +241,9 @@ void print_growth_factor()
 	
 		for (k=0; k<dim_eff; k++) 
 		{
-			fprintf(output,"%lf", GF.z[k]);
-			fprintf(output,"\t%lf", GF.gf_z[k]);
-			fprintf(output,"\t%lf", GF.gf_over_a_z[k]);
+			fprintf(output,"%lf", GrowthFac.z[k]);
+			fprintf(output,"\t%lf", GrowthFac.gf_z[k]);
+			fprintf(output,"\t%lf", GrowthFac.gf_over_a_z[k]);
 			fprintf(output,"\n");
 		}
 
@@ -262,9 +255,11 @@ void print_growth_factor()
 
 void print_evolution_to_file()
 {
-	int j=0, count=1, tot=FC.numFiles-1;
-	char *out = merge_strings(Urls_internal.output_prefix, "halo_subhalo_evolution.dat");
+	int j=0, count=1, nTot=0; 
+	char *out = merge_strings(Urls.output_prefix, "halo_subhalo_evolution.dat");
 	FILE *f_out = fopen(out, "w");
+
+	nTot=FullCat.numFiles-1;
 	
 	fprintf(f_out,"#");
 	FILE_HEADER(f_out, "z", count);
@@ -283,7 +278,7 @@ void print_evolution_to_file()
 	FILE_HEADER(f_out, "sub_avg_Mass", count);
 	fprintf(f_out,"\n");
 
-		for(j=0; j<tot; j++)
+		for(j=0; j<nTot; j++)
 		{ 
 			fprintf(f_out, "%lf", HaloProperties[j].z);   
 			fprintf(f_out, "\t%lf", HaloProperties[j].c_0);   
@@ -310,20 +305,20 @@ void print_evolution_to_file()
 void print_all_halo_properties_to_one_file()
 {
 	int i=0, count=1, nBins=HaloZ.n_bins;
-	char* out_url=merge_strings(Urls_internal.output_prefix,"all_halo_statistical_properties.dat");
+	char* out_url=merge_strings(Urls.output_prefix,"all_halo_statistical_properties.dat");
 	FILE* out=fopen(out_url,"w");
 	
 		fprintf(out, "#");
-		FILE_HEADER(out, "Mass", count);
+		FILE_HEADER(out, "Mass ", count);
 		FILE_HEADER(out, "n(>M)", count);
-		FILE_HEADER(out, "conc", count);
-		FILE_HEADER(out, "p_conc", count);
+		FILE_HEADER(out, "c    ", count);
+		FILE_HEADER(out, "P(c)   ", count);
 		FILE_HEADER(out, "lambda", count);
-		FILE_HEADER(out, "p_lambda", count);
+		FILE_HEADER(out, "P(l)", count);
 		FILE_HEADER(out, "triax", count);
-		FILE_HEADER(out, "p_triax", count);
+		FILE_HEADER(out, "P(t)", count);
 		FILE_HEADER(out, "shape", count);
-		FILE_HEADER(out, "p_shape", count);
+		FILE_HEADER(out, "P(s)", count);
 #ifdef GAS
 		FILE_HEADER(out, "gas_temp", count);
 		FILE_HEADER(out, "gas_frac", count);
@@ -344,8 +339,8 @@ void print_all_halo_properties_to_one_file()
 
 			for(i=0; i<nBins; i++)	
 			{
-				fprintf(out, "%e", MF.num_masses[i]);
-				fprintf(out, "\t%e", MF.n[i]);
+				fprintf(out, "%e", MassFunc.num_masses[i]);
+				fprintf(out, "\t%e", MassFunc.n[i]);
 				fprintf(out, "\t%lf", HaloZ.c[i]);
 				fprintf(out, "\t%lf", HaloZ.p_c[i]);
 				fprintf(out, "\t%lf", HaloZ.l[i]);
@@ -370,7 +365,7 @@ void print_all_halo_properties_to_one_file()
 void print_axis_alignment()
 {
 	int i=0, count=1, nBins=HaloZ.r_bins;
-	char *file_out = merge_strings(Urls_internal.output_prefix,"axis_alignement.dat");
+	char *file_out = merge_strings(Urls.output_prefix,"axis_alignement.dat");
 	FILE *output = fopen(file_out, "w");
 
 	fprintf(output, "#");
@@ -396,8 +391,8 @@ void print_axis_alignment()
 
 void print_numerical_mass_function()
 {
-	int i=0, count=1, nBins=MF.bins;
-	char *file_out = merge_strings(Urls_internal.output_prefix,"numerical_mass_function.dat");
+	int i=0, count=1, nBins=MassFunc.bins;
+	char *file_out = merge_strings(Urls.output_prefix,"numerical_mass_function.dat");
 	FILE *output = fopen(file_out, "w");
 
 		fprintf(output,"#");
@@ -413,14 +408,14 @@ void print_numerical_mass_function()
 
 			for(i=0; i<nBins; i++) 
 			{
-				fprintf(output, "%e", MF.num_masses[i]);
-				fprintf(output, "\t%e", MF.n[i]);
-				fprintf(output, "\t%d", MF.n_tot[i]);
-				fprintf(output, "\t%e", MF.err[i]);
-				fprintf(output, "\t%e", MF.dn_num_masses[i]);
-				fprintf(output, "\t%e", MF.dn[i]);
-				fprintf(output, "\t%d", MF.n_bin[i]);
-				fprintf(output, "\t%e", MF.err_dn[i]);
+				fprintf(output, "%e", MassFunc.num_masses[i]);
+				fprintf(output, "\t%e", MassFunc.n[i]);
+				fprintf(output, "\t%d", MassFunc.n_tot[i]);
+				fprintf(output, "\t%e", MassFunc.err[i]);
+				fprintf(output, "\t%e", MassFunc.dn_num_masses[i]);
+				fprintf(output, "\t%e", MassFunc.dn[i]);
+				fprintf(output, "\t%d", MassFunc.n_bin[i]);
+				fprintf(output, "\t%e", MassFunc.err_dn[i]);
 				fprintf(output,"\n");
 			}
 	fclose(output);
@@ -430,4 +425,16 @@ void print_numerical_mass_function()
 
 void print_best_fit_results(){
 // TODO
+
+/*
+		fprintf(fout, "#lambda_0  = %lf\n", SubHaloZ.l_0);
+		fprintf(fout, "#cos(th_0) = %lf\n", SubHaloZ.costh0);
+		fprintf(fout, "#cos(phi_0)= %lf\n", SubHaloZ.cosphi0);
+		fprintf(fout, "#t0 = %lf\n", SubHaloZ.t0);
+		fprintf(fout, "#s0 = %lf\n", SubHaloZ.s0);
+		fprintf(fout, "\n");
+
+
+*/
+
 }

@@ -17,7 +17,8 @@
 	/* Interpolated P(k) */
 double power_k(double k, int index)
 {
-	return get_interpolated_value(Pks[index].k, Pks[index].pk, Pks[index].n_pk_entries, k);
+	return get_interpolated_value(Pks[index].k, Pks[index].pk, 
+		Pks[index].n_pk_entries, k);
 }
 
 
@@ -46,7 +47,7 @@ void compute_growth_factor()
 		double norm=1., pk_norm=1., delta=1., delta_a, a, z, pk, K, kk; 
 
 			kk = Pks[0].k[0];
-			K = GF.scale_k, 
+			K = GrowthFac.scale_k, 
 			dim_eff = Settings.n_pk_files;
 			pkNorm  = dim_eff - 1;
 
@@ -58,7 +59,7 @@ void compute_growth_factor()
 					K = kk; 
 				}
 					// pk0 is the highest redshift power spectrum
-					// pkNorm is the z at which we want the GF to be exactly one
+					// pkNorm is the z at which we want the GrowthFac to be exactly one
 				pk_norm = power_k(K, pk0);
 				norm = power_k(K, pkNorm);
 
@@ -74,11 +75,11 @@ void compute_growth_factor()
 			delta_a = delta/a;
 
 #ifdef PRINT_INFO
-		fprintf(stderr, "GF.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta_a);
+		fprintf(stderr, "GrowthFac.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta_a);
 #endif
 
-			GF.gf_z[i] = delta;
-			GF.gf_over_a_z[i] = delta_a;
+			GrowthFac.gf_z[i] = delta;
+			GrowthFac.gf_over_a_z[i] = delta_a;
 		}
 }
 

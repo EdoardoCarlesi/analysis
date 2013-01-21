@@ -32,9 +32,9 @@ growth_factor : growth_factor.c ${LIBS} ${SRCS}
 	$(CC) $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS) ${LIBS} -o growth_factor growth_factor.c ${SRCS} ${LIBS} ${LIBS};
 	mv growth_factor ${HOME_DIR}/bin/
 
-halo_comparison : halo_comparison.c ${LIBS} ${SRCS}
-	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o halo_comparison halo_comparison.c  ${SRCS} ${LIBS} ${LIBS};
-		mv halo_comparison ${HOME_DIR}/bin/		
+#halo_comparison : halo_comparison.c ${LIBS} ${SRCS}
+#	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o halo_comparison halo_comparison.c  ${SRCS} ${LIBS} ${LIBS};
+#		mv halo_comparison ${HOME_DIR}/bin/		
 		
 halo_statistics : halo_statistics.c ${LIBS} ${SRCS}
 	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o halo_statistics halo_statistics.c ${SRCS} ${LIBS} ${LIBS};
@@ -48,9 +48,9 @@ mass_function : mass_function.c ${LIBS} ${SRCS}
 	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o mass_function mass_function.c ${SRCS} ${LIBS} ${LIBS};
 		mv mass_function ${HOME_DIR}/bin/		
 
-merger_tree : merger_tree.c ${LIBS} ${SRCS}
-	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o merger_tree merger_tree.c ${SRCS} ${LIBS} ${LIBS};
-		mv merger_tree ${HOME_DIR}/bin/		
+#merger_tree : merger_tree.c ${LIBS} ${SRCS}
+#	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o merger_tree merger_tree.c ${SRCS} ${LIBS} ${LIBS};
+#		mv merger_tree ${HOME_DIR}/bin/		
 
 number_density : number_density.c ${LIBS} ${SRCS}
 	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o number_density number_density.c ${SRCS} ${LIBS} ${LIBS};

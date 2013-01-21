@@ -18,8 +18,6 @@
 #include "../libparallel/general.h"
 #endif
 
-struct nfw NFW;
-
 
 void read_and_fit_profile(struct halo *);
 

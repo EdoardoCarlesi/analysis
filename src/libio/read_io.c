@@ -36,31 +36,31 @@ void read_redshift_file()
 	char dummyline[50];
 	FILE *redshifts_file = NULL;
 
-		redshifts_file = fopen(Urls_internal.a_outputs, "r");
+		redshifts_file = fopen(Urls.a_outputs, "r");
 
 		if(redshifts_file == NULL) 
-			fprintf(stderr, "\nError opening redshift file %s\n", Urls_internal.a_outputs);
+			fprintf(stderr, "\nError opening redshift file %s\n", Urls.a_outputs);
 		else 
-			fprintf(stderr, "Redshift file opened correctly:%s\n", Urls_internal.a_outputs);
+			fprintf(stderr, "Redshift file opened correctly:%s\n", Urls.a_outputs);
 
-			size = get_lines(redshifts_file, Urls_internal.a_outputs);
+			size = get_lines(redshifts_file, Urls.a_outputs);
 
 			Settings.n_pk_files = size;
-			GF.npts = size;
-			GF.z = (double *) calloc(size, sizeof(double));
-			GF.a = (double *) calloc(size, sizeof(double));
-			GF.gf_z = (double *) calloc(size, sizeof(double));
-			GF.gf_over_a_z = (double *) calloc(size, sizeof(double));
+			GrowthFac.npts = size;
+			GrowthFac.z = (double *) calloc(size, sizeof(double));
+			GrowthFac.a = (double *) calloc(size, sizeof(double));
+			GrowthFac.gf_z = (double *) calloc(size, sizeof(double));
+			GrowthFac.gf_over_a_z = (double *) calloc(size, sizeof(double));
 
 
 				for(i=0; i<size; i++) 
 				{
 					fgets(dummyline, 50, redshifts_file);
 					sscanf(dummyline, "%lf", &aa);
-					GF.a[i] = aa;
-					GF.z[i] = 1./aa - 1.;
+					GrowthFac.a[i] = aa;
+					GrowthFac.z[i] = 1./aa - 1.;
 #ifdef PRINT_INFO
-			fprintf(stderr, "%d) a:%lf z:%lf\n", i, aa, GF.z[i]);
+			fprintf(stderr, "%d) a:%lf z:%lf\n", i, aa, GrowthFac.z[i]);
 #endif
 		}
 }		
@@ -73,9 +73,9 @@ void read_hubble()
 	char dummyline[512];
 	FILE *hub;
 
-	fprintf(stderr, "\nread_hubble(). Using file: %s \n", Urls_internal.hubble_file);
-	hub = fopen(Urls_internal.hubble_file, "r");
-	n = get_lines(hub, Urls_internal.hubble_file);
+	fprintf(stderr, "\nread_hubble(). Using file: %s \n", Urls.hubble_file);
+	hub = fopen(Urls.hubble_file, "r");
+	n = get_lines(hub, Urls.hubble_file);
 
 	Cosmo.npts = n;
 	Cosmo.a_hub = (double *) calloc(n, sizeof(double));
@@ -117,7 +117,8 @@ void read_cosmology(char *curl)
 			for(k=0; k<dim; k++)
 			{
 				fgets(line, 512, cfile);
-				sscanf(line, "%lf  %lf  %lf", &Cosmo.z_hub[k], &Cosmo.Hubble[k], &Cosmo.w[k]);
+				sscanf(line, "%lf  %lf  %lf", &Cosmo.z_hub[k], 
+					&Cosmo.Hubble[k], &Cosmo.w[k]);
 				Cosmo.a_hub[k] = 1/(1+Cosmo.z_hub[k]);
 			}
 
@@ -134,14 +135,15 @@ void read_numerical_mass_function(char *URL)
 		fprintf(stderr, "\nread_numerical_mass_function() from file:%s\n", URL);
 
 		dim = get_lines(nmf, URL);
-		MF.bins  =  dim;
-		MF.n = (double*) calloc(dim, sizeof(double));
-		MF.num_masses  = (double*) calloc(dim, sizeof(double));
+		MassFunc.bins  =  dim;
+		MassFunc.n = (double*) calloc(dim, sizeof(double));
+		MassFunc.num_masses  = (double*) calloc(dim, sizeof(double));
 
 			for(k=0; k<dim; k++)
 			{
 				fgets(lines, 512, nmf);
-				sscanf(lines, "%lf %lf", &MF.num_masses[k], &MF.n[k]);
+				sscanf(lines, "%lf %lf", &MassFunc.num_masses[k], 
+					&MassFunc.n[k]);
 			}
 	fclose(nmf);
 }

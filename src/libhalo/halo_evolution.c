@@ -12,9 +12,9 @@
 
 void compute_halo_and_subhalo_statistics(int j)
 {
-	fprintf(stdout, "Reading halo url[%d]: %s\n", j, FC.urls[j]);
+	fprintf(stdout, "Reading halo url[%d]: %s\n", j, FullCat.urls[j]);
 
-	strcpy(Urls_internal.halo_file,FC.urls[j]);
+	use_halo_url(j);
 
 		read_halo_file();
 
@@ -54,16 +54,16 @@ void stdout_halo_status(int j)
 
 void initialize_halo_storage()
 {
-	int k=0, j=0, tot=FC.numFiles;
+	int k=0, j=0, tot=FullCat.numFiles;
 
-	HaloProperties = (struct halo_properties *) calloc(FC.numFiles, sizeof(struct halo_properties));
-	SubHaloProperties = (struct halo_properties *) calloc(FC.numFiles, sizeof(struct halo_properties));
+	HaloProperties = (struct halo_properties *) calloc(FullCat.numFiles, sizeof(struct halo_properties));
+	SubHaloProperties = (struct halo_properties *) calloc(FullCat.numFiles, sizeof(struct halo_properties));
 
 		for(j=0; j<tot; j++)
 		{
-			k = GF.npts - j - 1;
-			HaloProperties[j].z = GF.z[k];
-			SubHaloProperties[j].z = GF.z[k];
+			k = GrowthFac.npts - j - 1;
+			HaloProperties[j].z = GrowthFac.z[k];
+			SubHaloProperties[j].z = GrowthFac.z[k];
 		}
 }
 
@@ -71,14 +71,14 @@ void initialize_halo_storage()
 
 void copy_halo_and_subhalo_properties(int j)
 {
-	fprintf(stdout, "\nStoring halo average properties at z=%lf.\n", GF.z[j]);
+	fprintf(stdout, "\nStoring halo average properties at z=%lf.\n", GrowthFac.z[j]);
 	HaloProperties[j].avgSub = HaloZ.avgSub;
 	HaloProperties[j].l_0 = HaloZ.l_0;
 	HaloProperties[j].c_0 = HaloZ.c_0;
 	HaloProperties[j].t0 = HaloZ.t0;
 	HaloProperties[j].s0 = HaloZ.s0;
 
-	fprintf(stdout, "\nStoring subhalo average properties at z=%lf.\n", GF.z[j]);
+	fprintf(stdout, "\nStoring subhalo average properties at z=%lf.\n", GrowthFac.z[j]);
 	SubHaloProperties[j].l_0 = SubHaloZ.l_0;
 	SubHaloProperties[j].t0 = SubHaloZ.t0;
 	SubHaloProperties[j].s0 = SubHaloZ.s0;

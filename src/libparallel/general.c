@@ -21,7 +21,6 @@ int *SizeHaloesStructHalo;
 struct Cpu *cpu;
 
 
-
 void generate_url_for_tasks()
 {
 	char halo_list_task[200];
@@ -29,22 +28,22 @@ void generate_url_for_tasks()
 	char subhalo_list_task[200];
 	char command[250];	
 
-		sprintf(halo_list_task, "%s.%s",Urls_internal.halo_list, cpu[ThisTask].name);
-		sprintf(profile_list_task, "%s.%s",Urls_internal.profile_list, cpu[ThisTask].name);
-		sprintf(subhalo_list_task, "%s.%s",Urls_internal.subhalo_list, cpu[ThisTask].name);
+		sprintf(halo_list_task, "%s.%s",Urls.halo_list, cpu[ThisTask].name);
+		sprintf(profile_list_task, "%s.%s",Urls.profile_list, cpu[ThisTask].name);
+		sprintf(subhalo_list_task, "%s.%s",Urls.subhalo_list, cpu[ThisTask].name);
 
-			fprintf(stdout, "Task=%d is generating halo, profiles and subhalo lists...\n", ThisTask);
+		fprintf(stdout, "Task=%d is generating lists...\n", ThisTask);
 	
 		sprintf(command, "%s s/%s/%s/ <%s >%s", 
-			"sed ", "0000", cpu[ThisTask].name, Urls_internal.halo_list, halo_list_task);
+			"sed ", "0000", cpu[ThisTask].name, Urls.halo_list, halo_list_task);
 				system(command);
 
 		sprintf(command, "%s s/%s/%s/ <%s >%s", 
-			"sed ", "0000", cpu[ThisTask].name, Urls_internal.profile_list, profile_list_task);
+			"sed ", "0000", cpu[ThisTask].name, Urls.profile_list, profile_list_task);
 				system(command);
 
 		sprintf(command, "%s s/%s/%s/ <%s >%s", 
-			"sed ", "0000", cpu[ThisTask].name, Urls_internal.subhalo_list, subhalo_list_task);
+			"sed ", "0000", cpu[ThisTask].name, Urls.subhalo_list, subhalo_list_task);
 				system(command);
 
 	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)-1, sizeof(char));
@@ -66,7 +65,7 @@ void init_comm_structures()
 	pSettings = (struct general_settings *) calloc(NTask, sizeof(struct general_settings));
 	pHaloes = (struct halo **) calloc(NTask, sizeof(struct halo *));
 	pUrls = (struct internal_urls *) calloc(NTask, sizeof(struct internal_urls));
-	pFC = (struct full_catalogue *) calloc(NTask, sizeof(struct full_catalogue));
+	pFullCat = (struct full_catalogue *) calloc(NTask, sizeof(struct full_catalogue));
 	SizeDispl = (int*) calloc(NTask, sizeof(int));			
 	SizeHaloes = (int*) calloc(NTask, sizeof(int));
 	SizeDisplStructHalo = (int*) calloc(NTask, sizeof(int));			
@@ -109,7 +108,7 @@ void free_comm_structures()
 	free(pSettings);
 	free(pHaloes);
 	free(pUrls);
-	free(pFC);
+	free(pFullCat);
 	free(SizeDispl);
 	free(SizeDisplStructHalo);
 	free(SizeHaloes);
@@ -153,7 +152,7 @@ void gather_halo_structures()
 			SizeDispl[0] = 0;
 			SizeDisplStructHalo[0] = 0;
 	
-			haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
+			Haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
 		}
 
 		MPI_Gather(&pSettings[ThisTask].n_haloes, 1, MPI_INT, SizeHaloes, 1, MPI_INT, 0, MPI_COMM_WORLD);	
@@ -172,7 +171,7 @@ void gather_halo_structures()
 			}
 
 	MPI_Gatherv(&pHaloes[ThisTask][0], pSettings[ThisTask].n_haloes*sizeof(struct halo), MPI_BYTE, 
-		haloes, SizeHaloesStructHalo, SizeDisplStructHalo, MPI_BYTE, 0, MPI_COMM_WORLD);
+		Haloes, SizeHaloesStructHalo, SizeDisplStructHalo, MPI_BYTE, 0, MPI_COMM_WORLD);
 	
 if(ThisTask==0)
 	fprintf(stdout, "\nDone gathering.\n");

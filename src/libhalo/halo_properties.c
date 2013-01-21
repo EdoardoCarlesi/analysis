@@ -69,7 +69,7 @@ void free_halo_properties()
 		free(HaloZ.mass);
 		free(HaloZ.radVel);
 		free(HaloZ.err_radVel);
-		free(haloes);
+		free(Haloes);
 #ifdef GAS
 		free(HaloZ.gas_T);
 		free(HaloZ.gas_u);
@@ -109,22 +109,22 @@ void sort_axis_alignement()
 				{
 					A = 0; B = 0; R = 0;
 					R = sqrt(
-						pow(haloes[j].Xc - haloes[k].Xc,2) +
-						pow(haloes[j].Yc - haloes[k].Yc,2) +
-						pow(haloes[j].Zc - haloes[k].Zc,2) );
+						pow(Haloes[j].Xc - Haloes[k].Xc,2) +
+						pow(Haloes[j].Yc - Haloes[k].Yc,2) +
+						pow(Haloes[j].Zc - Haloes[k].Zc,2) );
 
 					print_counter(500000);
 
 				if(R > Rmin && R < Rmax)
 				{
 					A = 
-						haloes[j].Eax*haloes[k].Eax +
-						haloes[j].Eay*haloes[k].Eay + 
-						haloes[j].Eaz*haloes[k].Eaz;
+						Haloes[j].Eax*Haloes[k].Eax +
+						Haloes[j].Eay*Haloes[k].Eay + 
+						Haloes[j].Eaz*Haloes[k].Eaz;
 					B = (
-						haloes[j].Eax*(haloes[j].Xc - haloes[k].Xc) +
-						haloes[j].Eay*(haloes[j].Yc - haloes[k].Yc) + 
-						haloes[j].Eaz*(haloes[j].Zc - haloes[k].Zc) ) / R;
+						Haloes[j].Eax*(Haloes[j].Xc - Haloes[k].Xc) +
+						Haloes[j].Eay*(Haloes[j].Yc - Haloes[k].Yc) + 
+						Haloes[j].Eaz*(Haloes[j].Zc - Haloes[k].Zc) ) / R;
 
 				for(i=0; i<nBins-1; i++) 
 				{
@@ -175,8 +175,8 @@ void sort_shape_and_triaxiality()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			array_shape[i] = haloes[i].shape;
-			array_triax[i] = haloes[i].triax;
+			array_shape[i] = Haloes[i].shape;
+			array_triax[i] = Haloes[i].triax;
 			m++;
 		}
 
@@ -223,7 +223,7 @@ void sort_shape_and_triaxiality()
 void sort_radial_velocity()
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0; 
-	double mMax = haloes[0].Mvir, mMin = haloes[nHaloes-1].Mvir;
+	double mMax, mMin;
 	double *radial_velocity_bin, *radial_velocity_error, *mass, *radial_velocity, *mass_bin; 
 
 	fprintf(stdout, "\nSorting halo radial velocities.\n");
@@ -238,8 +238,8 @@ void sort_radial_velocity()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			radial_velocity[i] = haloes[i].Vmax;
-			mass[i] = haloes[i].Mvir; 	
+			radial_velocity[i] = Haloes[i].Vmax;
+			mass[i] = Haloes[i].Mvir; 	
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
@@ -290,15 +290,15 @@ void sort_lambda()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			if(haloes[i].spin==1) 
+			if(Haloes[i].spin==1) 
 			{
-				lambda[m] = haloes[i].lambda;
+				lambda[m] = Haloes[i].lambda;
 				m++;
 			}
 		}
 	
-				lMax = maximum(lambda, nHaloes_spin);  
-				lMin = 1.01*minimum(lambda, nHaloes_spin);
+				lMax = 1.01*maximum(lambda, nHaloes_spin);  
+				lMin = minimum(lambda, nHaloes_spin);
 				delta_l = (lMax-lMin)/nBins; 
 				norm = 1./(delta_l*nHaloes_spin);
 	
@@ -371,16 +371,12 @@ void sort_concentration()
 
 		for(i=0; i<nHaloes; i++) 
 		{
-			if(haloes[i].virial==1 && haloes[i].conc==1)
+			if(Haloes[i].virial==1 && Haloes[i].conc==1)
 			{ 
-#ifdef AHF_v1
-				conc[m] = haloes[i].c_nfw;
+				conc[m] = Haloes[i].c_nfw;
 	
 					if(conc[m] == -1) 
-						conc[m] = haloes[i].c;
-#else
-				conc[m] = haloes[i].c;
-#endif
+						conc[m] = Haloes[i].c;
 				m++;
 				}
 					}
@@ -454,7 +450,7 @@ void sort_gas_fraction()
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0, m=0;
 	double *gas_fraction, *gas_fraction_bin, *gas_fraction_error, *mass_bin, *mass;
-	double mMax = haloes[0].Mvir, mMin = haloes[nHaloes-1].Mvir;
+	double mMax, mMin;
 	
 	fprintf(stdout, "\nSorting halo gas fraction.\n");
 
@@ -470,7 +466,7 @@ void sort_gas_fraction()
 			mass[i] = haloes[i].Mvir;
 			gas_fraction[i] = haloes[i].b_fraction;
 		}
-
+	
 			mass_bin = log_stepper(mMin, mMax, nBins);
 			average_bin(mass, gas_fraction, gas_fraction_error, mass_bin, 
 					gas_fraction_bin, nBins, nHaloes);
@@ -495,7 +491,7 @@ void sort_and_fit_mass_temperature_relation()
 {
  	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0, m=0, *n_per_mass_bin;
 	double *a, *temperature, *temperature_bin, *temperature_error, *mass_bin, *mass;
-	double M_0, mMax = haloes[0].Mvir, mMin = haloes[nHaloes-1].Mvir;
+	double M_0, mMax, mMin;
 	
 	fprintf(stdout, "\nSorting and fitting mass temperature relation.\n");
 	

@@ -5,6 +5,7 @@
 #include "../general_variables.h"
 
 
+
 void initialize_subhalo_properties_structure()
 {
 	int rBins, nBins;
@@ -91,34 +92,34 @@ void copy_subhalo_properties(int host, int n_sub)
 
 	fprintf(stdout,"\nCopying (sub)halo properties into subhalo structures.\n");
 
-		subhaloes[index].Rvir = haloes[n_sub].Rvir; 
-		subhaloes[index].Vmax = haloes[n_sub].Vmax; 
-                subhaloes[index].n_part = haloes[n_sub].n_part; 
-                subhaloes[index].Xc = haloes[n_sub].Xc; 
-                subhaloes[index].Yc = haloes[n_sub].Yc; 
-                subhaloes[index].Zc = haloes[n_sub].Zc; 
-                subhaloes[index].VXc = haloes[n_sub].VXc; 
-                subhaloes[index].VYc = haloes[n_sub].VYc; 
-                subhaloes[index].VZc = haloes[n_sub].VZc; 
-                subhaloes[index].Eax = haloes[n_sub].Eax; 
-                subhaloes[index].Eay = haloes[n_sub].Eay; 
-                subhaloes[index].Eaz = haloes[n_sub].Eaz; 
-                subhaloes[index].Mvir = haloes[n_sub].Mvir; 
-                subhaloes[index].c = haloes[n_sub].c; 
-                subhaloes[index].shape = haloes[n_sub].shape; 
-                subhaloes[index].aa = haloes[n_sub].aa; 
-                subhaloes[index].bb = haloes[n_sub].bb; 
-                subhaloes[index].cc = haloes[n_sub].cc; 
-                subhaloes[index].triax = haloes[n_sub].triax; 
-                subhaloes[index].lambda = haloes[n_sub].lambda; 
-                subhaloes[index].c_nfw = haloes[n_sub].c_nfw; 
-                subhaloes[index].rs_nfw = haloes[n_sub].rs_nfw; 
-                subhaloes[index].host = haloes[n_sub].host; 
-                subhaloes[index].id = haloes[n_sub].id; 
-                subhaloes[index].Epot = haloes[n_sub].Epot; 
-                subhaloes[index].Ekin = haloes[n_sub].Ekin; 
-                subhaloes[index].AngMom = haloes[n_sub].AngMom; 
-                subhaloes[index].Jcirc = haloes[n_sub].Jcirc; 
+		SubHaloes[index].Rvir = Haloes[n_sub].Rvir; 
+		SubHaloes[index].Vmax = Haloes[n_sub].Vmax; 
+                SubHaloes[index].n_part = Haloes[n_sub].n_part; 
+                SubHaloes[index].Xc = Haloes[n_sub].Xc; 
+                SubHaloes[index].Yc = Haloes[n_sub].Yc; 
+                SubHaloes[index].Zc = Haloes[n_sub].Zc; 
+                SubHaloes[index].VXc = Haloes[n_sub].VXc; 
+                SubHaloes[index].VYc = Haloes[n_sub].VYc; 
+                SubHaloes[index].VZc = Haloes[n_sub].VZc; 
+                SubHaloes[index].Eax = Haloes[n_sub].Eax; 
+                SubHaloes[index].Eay = Haloes[n_sub].Eay; 
+                SubHaloes[index].Eaz = Haloes[n_sub].Eaz; 
+                SubHaloes[index].Mvir = Haloes[n_sub].Mvir; 
+                SubHaloes[index].c = Haloes[n_sub].c; 
+                SubHaloes[index].shape = Haloes[n_sub].shape; 
+                SubHaloes[index].aa = Haloes[n_sub].aa; 
+                SubHaloes[index].bb = Haloes[n_sub].bb; 
+                SubHaloes[index].cc = Haloes[n_sub].cc; 
+                SubHaloes[index].triax = Haloes[n_sub].triax; 
+                SubHaloes[index].lambda = Haloes[n_sub].lambda; 
+                SubHaloes[index].c_nfw = Haloes[n_sub].c_nfw; 
+                SubHaloes[index].rs_nfw = Haloes[n_sub].rs_nfw; 
+                SubHaloes[index].host = Haloes[n_sub].host; 
+                SubHaloes[index].id = Haloes[n_sub].id; 
+                SubHaloes[index].Epot = Haloes[n_sub].Epot; 
+                SubHaloes[index].Ekin = Haloes[n_sub].Ekin; 
+                SubHaloes[index].AngMom = Haloes[n_sub].AngMom; 
+                SubHaloes[index].Jcirc = Haloes[n_sub].Jcirc; 
 
 	fprintf(stdout,"\n");
 }
@@ -131,14 +132,14 @@ void avg_subhalo()
 	double avg_sub=0;
 
 		for (i=0; i<Settings.n_threshold; i++) 
-			totSub += haloes[i].n_satellites;
+			totSub += Haloes[i].n_satellites;
 
 			avg_sub = (double) totSub /( (double) Settings.n_threshold );
 
-		fprintf(stdout, "\nThe average number of subhaloes for hosts above the %e mass limit is: %lf\n", 
+		fprintf(stdout, "\nThe average number of SubHaloes for hosts above the %e mass limit is: %lf\n", 
 			Settings.mass_min, avg_sub);
 
-		fprintf(stdout, "\nThere are %d subhaloes in total for the hosts above that mass limit.\n", 
+		fprintf(stdout, "\nThere are %d SubHaloes in total for the hosts above that mass limit.\n", 
 			totSub);
 
 	HaloZ.avgSub=avg_sub;
@@ -151,21 +152,21 @@ void init_subhalo_struct()
 	int i=0, totSub=0, totSubOverN=0, totHost=Settings.n_threshold; 
 
 		for (i=0; i< totHost; i++) 
-			totSub += haloes[i].n_satellites;
+			totSub += Haloes[i].n_satellites;
 
 		for(i=0; i<Settings.n_haloes; i++)
-			if(haloes[i].host > -1 && haloes[i].host < totHost && haloes[i].n_part > Settings.n_min-1) 
+			if(Haloes[i].host > -1 && Haloes[i].host < totHost && Haloes[i].n_part > Settings.n_min-1) 
 				totSubOverN++;
 
-			fprintf(stdout, "\nThere are %d sub haloes in total.\n", 
+			fprintf(stdout, "\nThere are %d sub Haloes in total.\n", 
 				totSub);
 
-			fprintf(stdout, "\nThere are %d sub haloes in total with more than %d particles.\n", 
+			fprintf(stdout, "\nThere are %d sub Haloes in total with more than %d particles.\n", 
 				totSubOverN, Settings.n_min);
 
 	Settings.n_subhaloes = totSub;
 	Settings.n_subhaloes_nmin = totSubOverN;
-	subhaloes = (struct halo*) calloc(totSub, sizeof(struct halo));
+	SubHaloes = (struct halo*) calloc(totSub, sizeof(struct halo));
 }
 
 
@@ -176,9 +177,9 @@ void load_subhalo_list()
 
 		for(i=0; i<Settings.n_haloes; i++)
 		{
-			if(haloes[i].host < Settings.n_threshold && haloes[i].host > -1)
+			if(Haloes[i].host > 0)
 			{
-				copy_subhalo_properties(j, haloes[i].id);
+				copy_subhalo_properties(j, Haloes[i].id);
 				j++;
 			}
 		}

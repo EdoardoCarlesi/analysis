@@ -1,18 +1,20 @@
 #include "general_variables.h"
 
 struct general_settings Settings, *pSettings;
-struct internal_urls Urls_internal, *pUrls;
-struct full_catalogue FC, *pFC;
+struct internal_urls Urls, *pUrls;
+struct full_catalogue FullCat, *pFullCat;
 struct cosmology Cosmo;
 
-struct halo *haloes, *subhaloes, **pHaloes;
+struct nfw NFW;
+
+struct halo *Haloes, *SubHaloes, **pHaloes;
 struct halo_properties SubHaloZ, HaloZ, *HaloProperties, *SubHaloProperties;
 
-struct merger_tree *MTree;
+struct merger_tree *MergerTree;
 
-struct mass_function MF, AMF, *mf;
-struct num_density ND;
+struct mass_function MassFunc, ThMassFunc, *MassFuncZ;
+struct num_density NumDen;
 
 struct correlation_function Xi, *Xis;
 struct power_spectrum *Pks;
-struct growth_factor GF;
+struct growth_factor GrowthFac;

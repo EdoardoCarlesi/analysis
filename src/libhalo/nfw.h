@@ -9,16 +9,6 @@
 #include "../general_variables.h"
 #endif
 
-extern struct nfw
-{
-	int bins;
-	double *radius;
-	double *overd;
-	double *err;
-	double rs;
-	double rho0;
-	double *chi2r;
-} NFW;
 
 double nfw(double, double, double);
 double nfw_drs(double, double, double);

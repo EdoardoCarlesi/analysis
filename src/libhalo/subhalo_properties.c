@@ -15,10 +15,14 @@
 
 void sort_host_axis_alignment_and_spatial_anisotropy()
 {
-	int i=0, j=0, k=0, totSub = Settings.n_subhaloes, totSubNmin = Settings.n_subhaloes_nmin, nBins = Settings.n_bins; 
+	int i=0, j=0, k=0, totSub=0, totSubNmin=0, nBins=0;
 	int *costh_bin_y, *cosphi_bin_y;
 	double R, cMax, cMin, halfstep, cpMax, cpMin, halfstep2, ct, anis;
 	double *costh, *costh_bin, *cosphi, *cosphi_bin; 
+
+	totSub = Settings.n_subhaloes;
+	totSubNmin = Settings.n_subhaloes_nmin;
+	nBins = Settings.n_bins; 
 
 	fprintf(stdout, "\nSorting sub halo radial alignment for %d sub haloes\n", 
 		totSubNmin);
@@ -36,26 +40,26 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 
 		for(i=0; i< totSub; i++)
 		{
-			k = subhaloes[i].host;
+			k = SubHaloes[i].host;
 
 			R = sqrt (
-				pow(subhaloes[i].Xc - haloes[k].Xc,2) +
-				pow(subhaloes[i].Yc - haloes[k].Yc,2) +
-				pow(subhaloes[i].Zc - haloes[k].Zc,2) );
+				pow(SubHaloes[i].Xc - Haloes[k].Xc,2) +
+				pow(SubHaloes[i].Yc - Haloes[k].Yc,2) +
+				pow(SubHaloes[i].Zc - Haloes[k].Zc,2) );
 
 			ct = (
-				subhaloes[i].Eax*(subhaloes[i].Xc - haloes[k].Xc)+
-				subhaloes[i].Eay*(subhaloes[i].Yc - haloes[k].Yc)+ 
-				subhaloes[i].Eaz*(subhaloes[i].Zc - haloes[k].Zc)
+				SubHaloes[i].Eax*(SubHaloes[i].Xc - Haloes[k].Xc)+
+				SubHaloes[i].Eay*(SubHaloes[i].Yc - Haloes[k].Yc)+ 
+				SubHaloes[i].Eaz*(SubHaloes[i].Zc - Haloes[k].Zc)
 				) / R; 
 	
 			anis = (
-				haloes[k].Eax*(subhaloes[i].Xc - haloes[k].Xc)+
-				haloes[k].Eay*(subhaloes[i].Yc - haloes[k].Yc)+ 
-				haloes[k].Eaz*(subhaloes[i].Zc - haloes[k].Zc)
+				Haloes[k].Eax*(SubHaloes[i].Xc - Haloes[k].Xc)+
+				Haloes[k].Eay*(SubHaloes[i].Yc - Haloes[k].Yc)+ 
+				Haloes[k].Eaz*(SubHaloes[i].Zc - Haloes[k].Zc)
 				) / R;
 			
-				if(subhaloes[i].n_part > Settings.n_min-1)
+				if(SubHaloes[i].n_part > Settings.n_min-1)
 				{
 					costh[j] = sqrt(ct*ct);
 					j++;
@@ -64,10 +68,11 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 					cosphi[i] = sqrt(anis*anis); // sqrt(ct*ct);
 				}
 
-			costh = shellsort(costh, totSubNmin);
-			cosphi = shellsort(cosphi, totSub);
-			cMax = costh[totSubNmin-1]; cMin = costh[0];
-			cpMax = cosphi[totSub-1]; cpMin = cosphi[0];
+
+			cMax = 1.01*maximum(costh, totSubNmin); 
+			cMin = minumum(costh, totSubNmin); 
+			cpMax = 1.01*maximum(cosphi, totSub); 
+			cpMin = minimum(cosphi, totSub);
 
 			costh_bin   = lin_stepper(cMin, cMax, nBins);
 			lin_bin(costh, costh_bin, nBins, totSubNmin, costh_bin_y);
@@ -122,10 +127,10 @@ void sort_sub_shape_and_triaxiality()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			if(subhaloes[i].n_part > Settings.n_min -1)
+			if(SubHaloes[i].n_part > Settings.n_min -1)
 			{
-				array_shape[j] = subhaloes[i].shape;
-				array_triax[j] = subhaloes[i].triax;
+				array_shape[j] = SubHaloes[i].shape;
+				array_triax[j] = SubHaloes[i].triax;
 				j++;
 				}
 					}
@@ -192,9 +197,9 @@ void sort_sub_lambda()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			if(subhaloes[i].n_part > Settings.n_min-1)
+			if(SubHaloes[i].n_part > Settings.n_min-1)
 			{
-				lambda[m] = subhaloes[i].lambda;
+				lambda[m] = SubHaloes[i].lambda;
 				m++;
 				}
 			}
@@ -245,10 +250,13 @@ void sort_sub_lambda()
 
 double *generate_average_from_random_set(double* all_r)
 {
-	int n=0, j=0, i=0, k=0, host=0, subDim=Settings.min_subhaloes, totSub=Settings.n_subhaloes, TOT_ITER=10, *subset=NULL; 
+	int n=0, j=0, i=0, k=0, host=0, TOT_ITER=10, subDim=0, totSub=0,*subset=NULL; 
 	double r=0, *all_r_new=NULL; 
 
-	fprintf(stdout, "\nGenerating random subset from complete set of subhaloes.\n");
+	subDim=Settings.min_subhaloes; 
+	totSub=Settings.n_subhaloes;
+
+	fprintf(stdout, "\nGenerating random subset from complete set of SubHaloes.\n");
 
 	subset = (int*) calloc(subDim, sizeof(int)); 
 	all_r = (double*) calloc(subDim, sizeof(double));
@@ -261,13 +269,13 @@ double *generate_average_from_random_set(double* all_r)
 	
 			for(i=0; i<totSub; i++)
 			{
-				host = subhaloes[i].host;
-				if(i==subset[k] && host != subhaloes[i].id) 
+				host = SubHaloes[i].host;
+				if(i==subset[k] && host != SubHaloes[i].id) 
 				{
-					r = sqrt(pow(haloes[host].Xc - subhaloes[i].Xc, 2) 
-						+ pow(haloes[host].Yc - subhaloes[i].Yc, 2) 
-						+ pow(haloes[host].Zc - subhaloes[i].Zc, 2));
-					all_r[k] = r/haloes[host].Rvir;
+					r = sqrt(pow(Haloes[host].Xc - SubHaloes[i].Xc, 2) 
+						+ pow(Haloes[host].Yc - SubHaloes[i].Yc, 2) 
+						+ pow(Haloes[host].Zc - SubHaloes[i].Zc, 2));
+					all_r[k] = r/Haloes[host].Rvir;
 					k++;
 				}
 			}
@@ -296,8 +304,11 @@ double *generate_average_from_random_set(double* all_r)
 
 void n_r_subhalo_subset()
 {
-	int i, cumul=0, subDim=Settings.min_subhaloes, nBins=Settings.n_bins, *n_r, *cum_n_r; 
+	int i, cumul=0, subDim=0, nBins=0, *n_r=NULL, *cum_n_r=NULL; 
 	double *all_r=NULL, *R=NULL, rMin, rMax;
+
+	subDim=Settings.min_subhaloes;
+	nBins=Settings.n_bins;
 
 	fprintf(stdout, "\nSubhalo subset N(<R)\n");
 
@@ -338,8 +349,13 @@ void n_r_subhalo_subset()
 
 void n_r_subhalo()
 {
-	int i=0, *cum_n_r, host, cumul=0, totSub = Settings.n_subhaloes, nBins = Settings.n_bins, *n_r; 
-	double *all_r, r, *R, rMin, rMax;
+	int i=0, host=0, cumul=0, totSub=0, nBins=0; 
+	int *cum_n_r=NULL, *n_r=NULL; 
+	double r, rMin, rMax;
+	double *R=NULL, *all_r=NULL;
+
+	totSub = Settings.n_subhaloes;
+	nBins = Settings.n_bins;
 
 	fprintf(stdout, "\nSubhalo N(<R)\n");
 	Settings.tick=0;
@@ -351,13 +367,13 @@ void n_r_subhalo()
 
 		for(i=0; i<totSub; i++)
 		{
-			host = subhaloes[i].host;
-			if(host != subhaloes[i].id) 
+			host = SubHaloes[i].host;
+			if(host != SubHaloes[i].id) 
 			{
-				r = sqrt(pow(haloes[host].Xc - subhaloes[i].Xc, 2) 
-					+ pow(haloes[host].Yc - subhaloes[i].Yc, 2) 
-					+ pow(haloes[host].Zc - subhaloes[i].Zc, 2));
-				all_r[i] = r/haloes[host].Rvir;
+				r = sqrt(pow(Haloes[host].Xc - SubHaloes[i].Xc, 2) 
+					+ pow(Haloes[host].Yc - SubHaloes[i].Yc, 2) 
+					+ pow(Haloes[host].Zc - SubHaloes[i].Zc, 2));
+				all_r[i] = r/Haloes[host].Rvir;
 				}
 			}
 
@@ -391,9 +407,13 @@ void n_r_subhalo()
 
 void sort_velocity_distribution()
 {
-	int totSub = Settings.n_subhaloes, nBins=Settings.n_bins, i=0, k=0, *vel_y=NULL;	
-	double *vel, *vel_x;
-	double vHost, vel_0, halfstep, velMax, velMin, vDiff; 
+	int totSub=0, i=0, k=0, nBins=0;
+	int *vel_y=NULL;	
+	double vHost=0, vel_0=0, halfstep=0, velMax=0, velMin=0, vDiff=0; 
+	double *vel=NULL, *vel_x=NULL;
+
+	totSub = Settings.n_subhaloes;
+	nBins = Settings.n_bins;
 	
 	fprintf(stdout, "\nSorting sub halo velocity distribution.\n");
 	Settings.tick=0;
@@ -404,14 +424,14 @@ void sort_velocity_distribution()
 
 		for(i=0; i<totSub; i++) 
 		{
-			k = subhaloes[i].host;
-			if(k != subhaloes[i].id) 
+			k = SubHaloes[i].host;
+			if(k != SubHaloes[i].id) 
 			{
-				vHost = sqrt(pow(haloes[k].VXc, 2) + pow(haloes[k].VYc, 2) + pow(haloes[k].VZc, 2));
+				vHost = sqrt(pow(Haloes[k].VXc, 2) + pow(Haloes[k].VYc, 2) + pow(Haloes[k].VZc, 2));
 				vDiff = sqrt( 
-						pow(haloes[k].VXc - subhaloes[i].VXc, 2)+
-						pow(haloes[k].VYc - subhaloes[i].VYc, 2)+
-						pow(haloes[k].VZc - subhaloes[i].VZc, 2)
+						pow(Haloes[k].VXc - SubHaloes[i].VXc, 2)+
+						pow(Haloes[k].VYc - SubHaloes[i].VYc, 2)+
+						pow(Haloes[k].VZc - SubHaloes[i].VZc, 2)
 					);
 				vel[i]=vDiff/vHost;
 				}	
@@ -459,7 +479,7 @@ void sort_sub_mass_function()
 	cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
 			
 	for(i=0; i<totSub; i++) 
-		mass[i] = subhaloes[i].Mvir;
+		mass[i] = SubHaloes[i].Mvir;
 
 		mass = shellsort(mass, totSub);
 		mMin = mass[0]; 
@@ -547,7 +567,7 @@ void compute_subhalo_properties()
 	
 	init_subhalo_struct(); // Allocates memory for the N subhalo structures
 
-	load_subhalo_list(); // Selects within the halo catalogue the subhaloes and copies their properties into subhalo struct
+	load_subhalo_list(); // Selects within the halo catalogue the SubHaloes and copies their properties into subhalo struct
 			
 			/* Do the actual computation of the properties */
 		sort_host_axis_alignment_and_spatial_anisotropy();

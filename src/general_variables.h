@@ -1,4 +1,3 @@
-
 extern struct power_spectrum 
 {
 	int n_pk_entries;
@@ -35,7 +34,7 @@ extern struct growth_factor
 	double *gf_over_a_z;
 	//double *ln_gf_a;
 	//double *ln_gf_z;
-} GF;
+} GrowthFac;
 
 
 extern struct general_settings
@@ -145,7 +144,7 @@ extern struct mass_function
 	double *diff_tin;
 	double *tin;
 
-} MF, AMF, *mf;
+} MassFunc, ThMassFunc, *MassFuncZ;
 
 
 extern struct num_density
@@ -157,7 +156,20 @@ extern struct num_density
 	double *n_tin;
 	double *n_num;
 
-} ND; 
+} NumDen; 
+
+
+extern struct nfw
+{
+	int bins;
+	double rs;
+	double rho0;
+	double *radius;
+	double *overd;
+	double *err;
+	double *chi2r;
+
+} NFW;
 
 
 extern struct merger_tree
@@ -169,7 +181,7 @@ extern struct merger_tree
 	double *M;
 	double *c;
 
-} *MTree;
+} *MergerTree;
 
 
 extern struct halo
@@ -272,7 +284,7 @@ extern struct halo
 	double VZ_gas;
 #endif
 #endif  // GAS
-} *haloes, *subhaloes, **pHaloes;
+} *Haloes, *SubHaloes, **pHaloes, **pSubHaloes;
 
 
 extern struct full_catalogue
@@ -285,19 +297,15 @@ extern struct full_catalogue
 	char **urls_satellites;
 	char **urls_particles;
 
-} FC, *pFC;
+} FullCat, *pFullCat;
 
 
 extern struct internal_urls
 {
-	char *halo_dir;
-	char *snaps_dir;
-	char *analysis_dir;
 	char *halo_file;
 	char *profiles_file;
 	char *pk_file;
 	char *a_outputs;
-	char *pk_root;
 	char *output_prefix;
 	char *hubble_file;
 	char *pk_list;
@@ -305,8 +313,7 @@ extern struct internal_urls
 	char *profile_list;
 	char *subhalo_list;
 
-
-} Urls_internal, *pUrls;
+} Urls, *pUrls;
 
 
 extern struct halo_properties
