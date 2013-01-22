@@ -331,6 +331,7 @@ extern struct halo_properties
 	double c_sig2;
 	double *c;
 	double *c_c0;
+	double *c_avg_mass;
 	double *p_c;
 	double *err_p_c;
 

@@ -1,4 +1,4 @@
-void print_theoretical_mass_function(double);
+void print_theoretical_mass_function(float);
 void print_numerical_mass_function(void);
 void print_number_densities(void);
 

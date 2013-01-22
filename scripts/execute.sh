@@ -27,7 +27,7 @@ catalogue_z=0
 catalogue_number=028
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=20
+n_bins=10
 r_bins=7
 
 # Scale of P(k) for growth factor calculation
