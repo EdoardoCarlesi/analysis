@@ -15,7 +15,7 @@ LIBS    += libparallel/libparallel.a
 INCLUDE += libparallel/general.h
 endif
 
-ifeq (${SYS}, "castor")
+ifeq (${ADD_LIB}, "on")
 LIBS	+= -lgsl -lgslcblas -lm
 endif
 
