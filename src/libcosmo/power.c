@@ -42,24 +42,24 @@ void normalize_all_power_spectra_to_sigma8()
 
 void compute_growth_factor()
 {
-		fprintf(stderr,"compute_growth_factor().\n");
+	fprintf(stderr,"compute_growth_factor().\n");
 
-		int i=0, pk0=0, pkNorm=0, dim_eff=0; 
-		double norm=1., pk_norm=1., delta=1.;
-		double a=0, z=0, pk=0, K=0, kk=0; 
+	int i=0, pk0=0, pkNorm=0, dim_eff=0; 
+	double norm=1., pk_norm=1., delta=1.;
+	double a=0, z=0, pk=0, K=0, kk=0; 
 
-			kk = Pks[0].k[0];
-			K = GrowthFac.scale_k, 
-			dim_eff = Urls.nPkFiles;
-			pkNorm  = dim_eff - 1;
+		kk = Pks[0].k[0];
+		K = GrowthFac.scale_k, 
 
-				if(K < kk) 
-				{
-					fprintf(stderr, 
-					"\n**Chosen k (%lf) is smaller than the numerical range. Setting k=%lf.\n", 
-					K, kk);
-					K = kk; 
-				}
+		dim_eff = Urls.nPkFiles;
+		pkNorm  = dim_eff - 1;
+
+			if(K < kk) 
+			{
+				fprintf(stderr, 
+				"\n**Chosen k (%lf) is smaller than the numerical range. Setting k=%lf.\n", K, kk);
+				K = kk; 
+			}
 					// pk0 is the highest redshift power spectrum
 					// pkNorm is the z at which we want the GrowthFac to be exactly one
 				pk_norm = power_k(K, pk0);
@@ -72,7 +72,7 @@ void compute_growth_factor()
 			pk = power_k(K, i);
 			delta = sqrt(pk/pk_norm);
 			delta *= sqrt(pk_norm/norm);
-			a = Pks[i].a;
+			a = GrowthFac.a[i];
 			z = 1./a - 1;
 
 #ifdef PRINT_INFO

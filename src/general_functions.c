@@ -85,12 +85,14 @@ void initialize_internal_variables(char **argv){
 
 
 void print_counter(int freq){
-		if(Settings.tick==freq) {
-	fprintf(stderr,"."); 
-	Settings.tick=0;
-		}
-	else {
-	Settings.tick++;
+
+	if(Settings.tick==freq) 
+	{
+		fprintf(stderr,"."); 
+		Settings.tick=0;
+	} else {
+
+		Settings.tick++;
 	}
 }
 

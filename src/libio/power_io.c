@@ -22,6 +22,10 @@ void fill_pk_file(int num)
 			if(i>=skip)
 			{
 				sscanf(dummyline, "%lf  %lf", &kk, &ppkk);
+#ifdef USE_UNIT_MPC
+				kk *= 1.e3;
+				ppkk *= 1.e-9;
+#endif
 				Pks[num].k[i-skip] = kk;
 				Pks[num].pk[i-skip] = ppkk;
 			}
