@@ -30,6 +30,7 @@ void initialize_halo_properties_structure()
 			// Other halo properties
 		HaloZ.n_bins=nBins-1; nBins--;
 		HaloZ.c = (double*) calloc(nBins, sizeof(double));
+		HaloZ.c_avg_mass = (double*) calloc(nBins, sizeof(double));
 		HaloZ.p_c = (double*) calloc(nBins, sizeof(double));
 		HaloZ.l = (double*) calloc(nBins, sizeof(double));
 		HaloZ.p_l = (double*) calloc(nBins, sizeof(double));
@@ -223,7 +224,7 @@ void sort_shape_and_triaxiality()
 void sort_radial_velocity()
 {
 	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0; 
-	double mMax = haloes[0].Mvir, mMin = haloes[nHaloes-1].Mvir;
+	double mMax, mMin;
 	double *radial_velocity_bin, *radial_velocity_error, *mass, *radial_velocity, *mass_bin; 
 
 	fprintf(stdout, "\nSorting halo radial velocities.\n");
@@ -242,9 +243,12 @@ void sort_radial_velocity()
 			mass[i] = haloes[i].Mvir; 	
 		}
 
+			mMax = maximum(mass, nHaloes);
+			mMin = minimum(mass, nHaloes);
+
 			mass_bin = log_stepper(mMin, mMax, nBins);
-			average_bin(mass, radial_velocity, mass_bin, radial_velocity_bin, radial_velocity_error,
-				nBins, nHaloes);
+			average_bin(mass, radial_velocity, mass_bin, radial_velocity_bin, 
+				radial_velocity_error, nBins, nHaloes);
 
 			for(i=0; i<nBins; i++)	
 			{
@@ -252,11 +256,11 @@ void sort_radial_velocity()
 				HaloZ.err_radVel[i]=radial_velocity_error[i];
 			}
 	
-	free(mass);
-	free(mass_bin);
-	free(radial_velocity); 
-	free(radial_velocity_bin); 
 	free(radial_velocity_error); 
+	free(radial_velocity_bin); 
+	free(radial_velocity); 
+	free(mass_bin);
+	free(mass);
 	fprintf(stdout, "\n");
 }
 
@@ -345,7 +349,8 @@ void sort_lambda()
 void sort_concentration()
 {
 	int nBins=Settings.n_bins, nHaloes, nHaloes_conc, i=0, m=0, *int_c_bin_y;
-	double *params, *params2, *conc, *bin_x, *c_bin_x, *c_bin_y, *c_err_y;
+	double mMax, mMin, M_0, *c_err_mass, *params, *params2, *params3;
+	double *conc, *mass, *c_avg_mass, *mass_bin, *bin_x, *c_bin_x, *c_bin_y, *c_err_y;
 	double value, c_0, sig, max, halfstep, c_02, sig2, cMax, cMin, norm;
 
 	fprintf(stdout, "\nSorting concentrations.\n");
@@ -361,39 +366,47 @@ void sort_concentration()
 #endif
 
 	conc = (double*) calloc(nHaloes_conc, sizeof(double));	
+	mass = (double*) calloc(nHaloes_conc, sizeof(double));	
 	bin_x = (double*) calloc(nBins, sizeof(double));	
 	c_bin_x = (double*) calloc(nBins-1, sizeof(double));	
 	c_bin_y = (double*) calloc(nBins-1, sizeof(double));	
-	int_c_bin_y = (int*) calloc(nBins-1, sizeof(int));	
 	c_err_y = (double*) calloc(nBins-1, sizeof(double));	
+	int_c_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+	mass_bin = (double*) calloc(nBins, sizeof(double));	
+	c_avg_mass = (double*) calloc(nBins-1, sizeof(double));	
+	c_err_mass = (double*) calloc(nBins-1, sizeof(double));	
 	params = (double*) calloc(2, sizeof(double));
 	params2 = (double*) calloc(2, sizeof(double));
+	params3 = (double*) calloc(2, sizeof(double));
 
 		for(i=0; i<nHaloes; i++) 
 		{
 			if(haloes[i].virial==1 && haloes[i].conc==1)
 			{ 
+				mass[m] = haloes[i].Mvir;
 #ifdef AHF_v1
-				conc[m] = haloes[i].c_nfw;
+				//conc[m] = haloes[i].c_nfw;
 	
-					if(conc[m] == -1) 
+				//	if(conc[m] == -1) 
 						conc[m] = haloes[i].c;
 #else
 				conc[m] = haloes[i].c;
 #endif
+				fprintf(stdout, "mass: %e, conc: %f\n", mass[m], conc[m]);
 				m++;
-				}
-					}
+			}
+		}
 		
 	
 			fprintf(stderr, "\nm=%d, nConc=%d, nThr=%d\n", m, nHaloes_conc, nHaloes);
 
 					cMin = minimum(conc, nHaloes_conc);
+					mMin = minimum(mass, nHaloes_conc);
 					cMax = maximum(conc, nHaloes_conc); 
- 	
+					mMax = maximum(mass, nHaloes_conc); 
+ 		
 					bin_x=lin_stepper(cMin,cMax,nBins);
 					lin_bin(conc,bin_x,nBins,nHaloes_conc,int_c_bin_y);	
-
 				norm=(nBins)/((cMax-cMin)*nHaloes_conc);
 				halfstep=0.5*(bin_x[1]-bin_x[0]);
 
@@ -429,11 +442,36 @@ void sort_concentration()
 			c_bin_x[i]/=c_0;
 		}
 
-		params2 = best_fit_lognorm(conc, nHaloes_conc, nBins-1, c_bin_x, c_bin_y, c_err_y);
+		params2 = best_fit_lognorm(conc, nHaloes_conc, nBins-1, 
+			c_bin_x, c_bin_y, c_err_y);
+
 		c_02 = params2[0]; 
 		sig2 = params2[1];
 
+			for(i=0; i<nHaloes_conc; i++) 
+				conc[i]*=c_0;
+
+			mass_bin = log_stepper(mMin, mMax, nBins);
+			average_bin(mass, conc, mass_bin, c_avg_mass,
+				c_err_mass, nBins, nHaloes_conc);
+
+			for(i=0; i<nBins-1; i++)
+			{
+				HaloZ.c_avg_mass[i]=c_avg_mass[i];
+			}
+	
+/*	
+			params3[0] = 1.5; 
+			params3[1] = pow(10.e-14, params[0]);
+			params3=best_fit_power_law(mass_bin, c_avg_mass, c_err_y, nBins-1, params3);
+
+		M_0 = -log(params3[1])/params3[0];
+		fprintf(stdout, "M-Conc    a:%lf   M_0 10e+%f SM\n",params3[0],M_0/log(10));
+*/
 	free(conc); 
+	free(mass); 
+	free(c_avg_mass); 
+	free(c_err_mass); 
 	free(int_c_bin_y);
 	free(bin_x); 
 	free(c_bin_x); 
@@ -441,6 +479,7 @@ void sort_concentration()
 	free(c_err_y);
 	free(params);
 	free(params2);
+	free(params3);
 	fprintf(stdout, "\n");
 }
 
@@ -468,13 +507,13 @@ void sort_gas_fraction()
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
-			average_bin(mass, gas_fraction, gas_fraction_error, mass_bin, 
-					gas_fraction_bin, nBins, nHaloes);
+			average_bin(mass, gas_fraction, mass_bin, gas_fraction_bin,  
+					gas_fraction_error, nBins, nHaloes);
 
 		for(i=0; i<nBins-1; i++)
 		{
-			HaloZ.gas_fraction[i]=gas_fraction_bin[i];
 			HaloZ.mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
+			HaloZ.gas_fraction[i]=gas_fraction_bin[i];
 		}
 
 	free(mass);
@@ -513,7 +552,6 @@ void sort_and_fit_mass_temperature_relation()
 			average_bin(mass, temperature, mass_bin, temperature_bin
 					temperature_error, nBins, nHaloes);
 
-
 			for(i=0; i<nBins-1; i++)
 			{
 				HaloZ.gas_T[i]=temperature_bin[i];
@@ -542,13 +580,11 @@ void sort_and_fit_mass_temperature_relation()
 
 void compute_halo_properties()
 {
-	initialize_halo_properties_structure();
-
 		avg_subhalo();
 
 		compute_numerical_mass_function();
 
-			sort_axis_alignement();
+			//sort_axis_alignement();
 			sort_shape_and_triaxiality();
 			//sort_radial_velocity();
 			sort_lambda();

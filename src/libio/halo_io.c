@@ -50,7 +50,6 @@ void determine_simulation_settings()
 } 
 
 
-
 	 /* Set additional halo properties derived from the basic ones */
 void set_additional_halo_properties(int n)
 {

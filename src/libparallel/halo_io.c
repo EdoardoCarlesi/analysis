@@ -264,16 +264,6 @@ void mpi_read_halo_file()
 	}
 } // Finished counting haloes over threshold conditions
 
-	/*
-		if(pHaloes[ThisTask][pSettings[ThisTask].n_haloes-1].Mvir > Settings.mass_min) 
-			thr--;
-	
-		if(vir > thr)
-			vir=thr;
-	
-		if(spin > thr)
-			spin=thr;
-	*/
 		pSettings[ThisTask].n_threshold=thr;
 		pSettings[ThisTask].n_virialized=vir;
 		pSettings[ThisTask].n_concentration=conc;

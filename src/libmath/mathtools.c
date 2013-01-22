@@ -216,7 +216,7 @@ void average_bin (double* array_x, double* array_y, double* bins, double* binned
 			gsl_histogram_accumulate (g, array_x[i], array_y[i]);
 		}
 
-		for(j=0; j<array_size; j++)
+		for(j=0; j<bin_size-1; j++)
 		{
 			binned_array[j] = g->bin[j]/h->bin[j];
 			if(h->bin[j]>0)	// Assuming poissonian error

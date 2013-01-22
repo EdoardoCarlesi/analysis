@@ -20,7 +20,6 @@ int main(int argc, char **argv)
 	fprintf(stderr, "\nComputing halo statistical properties.\n");
 
 		initialize_internal_variables(argv);
-//		initialize_halo_properties_structure();
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
@@ -49,6 +48,8 @@ int main(int argc, char **argv)
 #else
 		read_halo_file();
 #endif
+	
+		initialize_halo_properties_structure();
 
 		compute_halo_properties();
 
