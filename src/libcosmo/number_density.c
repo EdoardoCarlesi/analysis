@@ -108,7 +108,7 @@ void compute_number_density()
 	fprintf(stderr, "\ncompute_number_density().\n");
 
 	nPk = Pks[0].n_pk_entries;
-	nFc = FullCat.numFiles;
+	nFc = Urls.numFiles;
 	nBin= MassFunc.bins;
 	
 	init_pks();
@@ -121,8 +121,9 @@ void compute_number_density()
 			Settings.zStart = zz;
 
 			fprintf(stderr,"\nstep %d, analyzing snapshot at redshift z: %lf\n", m, zz);
-
- 			Urls.halo_file = FullCat.urls[nFc-m-1];
+	
+			Urls.halo_file = (char *) calloc(strlen(Urls.urls[nFc-m-1]), sizeof(char));
+ 			strcpy(Urls.halo_file, Urls.urls[nFc-m-1]);
 			read_halo_file();
 
 #ifndef TH_ONLY

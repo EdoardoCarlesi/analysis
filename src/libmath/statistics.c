@@ -179,7 +179,7 @@ void print_state (size_t iter, gsl_multifit_fdfsolver * s)
 	int size = s->x->size;
 	
 		for(i=0; i<size; i++) 
-			fprintf(stdout, "%d. s->x[%d] %lf ", iter, i,  gsl_vector_get(s->x, i));
+			fprintf(stdout, "%zu. s->x[%d] %f ", iter, i,  gsl_vector_get(s->x, i));
 
 	fprintf(stderr, "\n");
 }

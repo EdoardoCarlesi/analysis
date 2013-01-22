@@ -259,7 +259,7 @@ void print_evolution_to_file()
 	char *out = merge_strings(Urls.output_prefix, "halo_subhalo_evolution.dat");
 	FILE *f_out = fopen(out, "w");
 
-	nTot=FullCat.numFiles-1;
+	nTot = Urls.numFiles-1;
 	
 	fprintf(f_out,"#");
 	FILE_HEADER(f_out, "z           ", count);

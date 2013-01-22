@@ -12,7 +12,7 @@
 
 void compute_halo_and_subhalo_statistics(int j)
 {
-	fprintf(stdout, "Reading halo url[%d]: %s\n", j, FullCat.urls[j]);
+	fprintf(stdout, "Reading halo url[%d]: %s\n", j, Urls.urls[j]);
 
 	use_halo_url(j);
 
@@ -54,12 +54,13 @@ void stdout_halo_status(int j)
 
 void initialize_halo_storage()
 {
-	int k=0, j=0, tot=FullCat.numFiles;
+	int k=0, j=0, nTot=0;
+	nTot = Urls.numFiles;
 
-	HaloProperties = (struct halo_properties *) calloc(FullCat.numFiles, sizeof(struct halo_properties));
-	SubHaloProperties = (struct halo_properties *) calloc(FullCat.numFiles, sizeof(struct halo_properties));
+	HaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
+	SubHaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
 
-		for(j=0; j<tot; j++)
+		for(j=0; j< nTot; j++)
 		{
 			k = GrowthFac.npts - j - 1;
 			HaloProperties[j].z = GrowthFac.z[k];

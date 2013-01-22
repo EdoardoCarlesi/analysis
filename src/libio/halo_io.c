@@ -46,8 +46,7 @@ void determine_simulation_settings()
 	fprintf(stderr, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
 #endif
 
-		Settings.rho_c = 
-			(3*HALO[0].Mvir) /
+		Settings.rho_c = (3*HALO[0].Mvir) /
 		(4*3.14*HALO[0].Rvir*HALO[0].Rvir*HALO[0].Rvir*200);
 	}
 
@@ -97,7 +96,7 @@ void set_additional_halo_properties(int n)
 
 	c = HALO[n].Rvir/HALO[n].r2;
 
-		// NFW approximate parameters
+		// NFW initial guess parameters
 	HALO[n].c = c;
 	HALO[n].rho0 = (200/3)*c*c*c*(1./(log(1+c) - c/(1+c)));
 	HALO[n].AngMom = HALO[n].lambda * sqrt(2)*HALO[n].Mvir *
@@ -147,16 +146,13 @@ void get_halo_files_urls()
 	char dummyline[200], url_fc[200], url_fc_pro[200], url_fc_sub[200];
 	FILE *fc=NULL, *fc_pro=NULL, *fc_sub=NULL;
 
-	struct full_catalogue *FULLCATALOGUE;
 	struct internal_urls *URLS;
 
-	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", FullCat.numFiles);
+	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", Urls.numFiles);
 
 #ifdef WITH_MPI
-	FULLCATALOGUE =	&pFullCat[ThisTask];
 	URLS = &pUrls[ThisTask];
 #else
-	FULLCATALOGUE = &FullCat;
 	URLS = &Urls;
 #endif
 
@@ -181,24 +177,24 @@ void get_halo_files_urls()
 		lin_pro = get_lines(fc_pro, url_fc_pro);
 		lin_sub = get_lines(fc_sub, url_fc_sub);
 
-		FULLCATALOGUE->numFiles = lin;
+		URLS->numFiles = lin;
 
-		FULLCATALOGUE->urls = 
-			(char **) calloc(FULLCATALOGUE->numFiles, sizeof(char *));
-		FULLCATALOGUE->urls_profiles = 
-			(char **) calloc(FULLCATALOGUE->numFiles, sizeof(char *));
-		FULLCATALOGUE->urls_satellites = 
-			(char **) calloc(FULLCATALOGUE->numFiles, sizeof(char *));
+		URLS->urls = 
+			(char **) calloc(URLS->numFiles, sizeof(char *));
+		URLS->urls_profiles = 
+			(char **) calloc(URLS->numFiles, sizeof(char *));
+		URLS->urls_satellites = 
+			(char **) calloc(URLS->numFiles, sizeof(char *));
 
 	if(lin > 0)
 	{
-		for(n=0; n<FULLCATALOGUE->numFiles; n++)
+		for(n=0; n<URLS->numFiles; n++)
 		{
 			fgets(dummyline,200,fc);
-			FULLCATALOGUE->urls[n] = 
+			URLS->urls[n] = 
 				(char*) calloc(strlen(dummyline), sizeof(char));
-			strcpy(FULLCATALOGUE->urls[n], dummyline);
-			FULLCATALOGUE->urls[n][strlen(dummyline)-1]='\0';
+			strcpy(URLS->urls[n], dummyline);
+			URLS->urls[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc);
 
@@ -209,13 +205,13 @@ void get_halo_files_urls()
 
 	if(lin_sub > 0)
 	{
-		for(n=0; n<FULLCATALOGUE->numFiles; n++)
+		for(n=0; n<URLS->numFiles; n++)
 		{
 			fgets(dummyline,200,fc_sub);
-			FULLCATALOGUE->urls_satellites[n] = 
+			URLS->urls_satellites[n] = 
 				(char*) calloc(strlen(dummyline), sizeof(char));
-			strcpy(FULLCATALOGUE->urls_satellites[n], dummyline);
-			FULLCATALOGUE->urls_satellites[n][strlen(dummyline)-1]='\0';
+			strcpy(URLS->urls_satellites[n], dummyline);
+			URLS->urls_satellites[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc_sub);
 
@@ -226,13 +222,13 @@ void get_halo_files_urls()
 
 	if(lin_pro > 0)
 	{
-		for(n=0; n<FULLCATALOGUE->numFiles; n++)
+		for(n=0; n<URLS->numFiles; n++)
 		{
 			fgets(dummyline,200,fc_pro);
-			FULLCATALOGUE->urls_profiles[n] = 
+			URLS->urls_profiles[n] = 
 				(char*) calloc(strlen(dummyline), sizeof(char));
-			strcpy(FULLCATALOGUE->urls_profiles[n], dummyline);
-			FULLCATALOGUE->urls_profiles[n][strlen(dummyline)-1]='\0';
+			strcpy(URLS->urls_profiles[n], dummyline);
+			URLS->urls_profiles[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc_pro);
 
@@ -248,18 +244,15 @@ void get_halo_files_urls()
 void use_halo_url(int n)
 {
 	struct internal_urls *URLS;
-	struct full_catalogue *FULLCATALOGUE;
 
 #ifdef WITH_MPI
-	FULLCATALOGUE =	&pFullCat[ThisTask];
 	URLS = &pUrls[ThisTask];
 #else
-	FULLCATALOGUE = &FullCat;
 	URLS = &Urls;
 #endif
 
-	URLS->halo_file = (char*) calloc(strlen(FULLCATALOGUE->urls[n])-1, sizeof(char));
-	strcpy(URLS->halo_file, FULLCATALOGUE->urls[n]);
+	URLS->halo_file = (char*) calloc(strlen(URLS->urls[n])-1, sizeof(char));
+	strcpy(URLS->halo_file, URLS->urls[n]);
 }
 
 

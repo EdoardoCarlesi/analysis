@@ -64,7 +64,7 @@ void initialize_internal_variables(char **argv){
 	Urls.profile_list = argv[SET+COSMO+URLS+3];
 	Urls.subhalo_list = argv[SET+COSMO+URLS+4];
 	Urls.pk_list = argv[SET+COSMO+URLS+5];
-	FullCat.numFiles = atoi(argv[SET+COSMO+URLS+6]);
+	Urls.numFiles = atoi(argv[SET+COSMO+URLS+6]);
 
 #ifdef PRINT_INFO
 	int kk=0; 

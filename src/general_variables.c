@@ -2,7 +2,6 @@
 
 struct general_settings Settings, *pSettings;
 struct internal_urls Urls, *pUrls;
-struct full_catalogue FullCat, *pFullCat;
 struct cosmology Cosmo;
 
 struct nfw NFW;

@@ -65,7 +65,6 @@ void init_comm_structures()
 	pSettings = (struct general_settings *) calloc(NTask, sizeof(struct general_settings));
 	pHaloes = (struct halo **) calloc(NTask, sizeof(struct halo *));
 	pUrls = (struct internal_urls *) calloc(NTask, sizeof(struct internal_urls));
-	pFullCat = (struct full_catalogue *) calloc(NTask, sizeof(struct full_catalogue));
 	SizeDispl = (int*) calloc(NTask, sizeof(int));			
 	SizeHaloes = (int*) calloc(NTask, sizeof(int));
 	SizeDisplStructHalo = (int*) calloc(NTask, sizeof(int));			
@@ -108,7 +107,6 @@ void free_comm_structures()
 	free(pSettings);
 	free(pHaloes);
 	free(pUrls);
-	free(pFullCat);
 	free(SizeDispl);
 	free(SizeDisplStructHalo);
 	free(SizeHaloes);

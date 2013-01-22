@@ -287,21 +287,12 @@ extern struct halo
 } *Haloes, *SubHaloes, **pHaloes, **pSubHaloes;
 
 
-extern struct full_catalogue
+extern struct internal_urls
 {
 	int numFiles;
 	int *numHaloes;
 	double *z;
-	char **urls;
-	char **urls_profiles;
-	char **urls_satellites;
-	char **urls_particles;
 
-} FullCat, *pFullCat;
-
-
-extern struct internal_urls
-{
 	char *halo_file;
 	char *profiles_file;
 	char *pk_file;
@@ -312,6 +303,11 @@ extern struct internal_urls
 	char *halo_list;
 	char *profile_list;
 	char *subhalo_list;
+
+	char **urls;
+	char **urls_profiles;
+	char **urls_satellites;
+	char **urls_particles;
 
 } Urls, *pUrls;
 
