@@ -11,8 +11,8 @@ void normalize_sigma8(void);
 void store_mf(int);
 double mf_normalization(double);
 
-void init_MF(void);
-void init_AMF(void);
+void init_MassFunc(void);
+void init_ThMassFunc(void);
 void init_sigmas(void);
 void init_dlnsdlnm(void);
 

@@ -15,18 +15,21 @@ LIBS    += libparallel/libparallel.a
 INCLUDE += libparallel/general.h
 endif
 
-#ifeq (${SYS}, "castor")
+ifeq (${SYS}, "castor")
 LIBS	+= -lgsl -lgslcblas -lm
-#endif
+endif
 
-EXECS = nfw_fit growth_factor halo_comparison halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
+#EXECS = nfw_fit growth_factor halo_comparison halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
 	mass_function number_density merger_tree
+
+EXECS = growth_factor halo_comparison halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
+	mass_function number_density
 
 all:	${EXECS}
 
-nfw_fit : nfw_fit.c ${LIBS} ${SRCS}
-	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS) $(CFLAGS) ${LIBS} -o nfw_fit nfw_fit.c ${SRCS} ${LIBS} ${LIBS};
-	mv nfw_fit ${HOME_DIR}/bin/		
+#nfw_fit : nfw_fit.c ${LIBS} ${SRCS}
+#	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS) $(CFLAGS) ${LIBS} -o nfw_fit nfw_fit.c ${SRCS} ${LIBS} ${LIBS};
+#	mv nfw_fit ${HOME_DIR}/bin/		
 
 growth_factor : growth_factor.c ${LIBS} ${SRCS}
 	$(CC) $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS) ${LIBS} -o growth_factor growth_factor.c ${SRCS} ${LIBS} ${LIBS};

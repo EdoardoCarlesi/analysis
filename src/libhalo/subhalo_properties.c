@@ -70,7 +70,7 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 
 
 			cMax = 1.01*maximum(costh, totSubNmin); 
-			cMin = minumum(costh, totSubNmin); 
+			cMin = minimum(costh, totSubNmin); 
 			cpMax = 1.01*maximum(cosphi, totSub); 
 			cpMin = minimum(cosphi, totSub);
 

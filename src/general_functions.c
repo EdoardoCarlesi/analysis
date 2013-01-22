@@ -75,8 +75,8 @@ void initialize_internal_variables(char **argv){
 	// Setting extra useful variables
 	Cosmo.H_0=Cosmo.h*100;
 	Cosmo.Gn=6.672e-8;
-	AMF.Mmin=Settings.Mmin;
-	AMF.Mmax=Settings.Mmax;
+	ThMassFunc.Mmin=Settings.Mmin;
+	ThMassFunc.Mmax=Settings.Mmax;
 
 #ifdef WITH_MPI
 #endif

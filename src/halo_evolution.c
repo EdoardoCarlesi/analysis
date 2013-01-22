@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
 		initialize_halo_storage();
 
-			for (i=0; i<FC.numFiles-1; i++) 
+			for (i=0; i<FullCat.numFiles-1; i++) 
 				compute_halo_and_subhalo_statistics(i);
 
 		print_evolution_to_file();

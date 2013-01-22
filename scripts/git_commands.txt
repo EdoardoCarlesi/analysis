@@ -1,0 +1,30 @@
+git config --list
+
+// Initialize a project
+cd /project/dir
+git init
+git add *.files
+git commit -m 'message whatever'
+
+git status
+
+// Clone a repository
+git clone git://url.com/cazzo.git mydir
+git clone user@server.com:/path.git
+
+
+// Create a server
+$ sudo adduser git
+$ su git
+$ cd
+$ mkdir .ssh
+
+$ cd project.git
+$ git --bare init
+
+$ git init
+$ git add .
+$ git commit -m 'initial commit'
+$ git remote add origin git@gitserver:/opt/git/project.git
+$ git push origin master
+

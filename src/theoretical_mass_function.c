@@ -15,7 +15,7 @@ int main(int arg, char **argv)
 
 	initialize_internal_variables(argv);
 
-	AMF.bins = Settings.n_bins-1;
+	ThMassFunc.bins = Settings.n_bins-1;
 	
 			// First guess parameters and fits for the different mass functions
 		T_mf.A = 0.186; T_mf.a = 1.47; T_mf.b = 2.57; T_mf.c = 1.19;

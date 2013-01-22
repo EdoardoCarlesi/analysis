@@ -11,8 +11,8 @@ int main(int arg, char **argv)
 	fprintf(stdout, "\nComputing the mass function, starting the main().\n");
 
 	initialize_internal_variables(argv);
-	MF.bins  = Settings.n_bins-1; 
-	AMF.bins = Settings.n_bins-1;
+	MassFunc.bins  = Settings.n_bins-1; 
+	ThMassFunc.bins = Settings.n_bins-1;
 	
 		// First guess parameters and fits for the different mass functions
 	T_mf.A = 0.186; 
