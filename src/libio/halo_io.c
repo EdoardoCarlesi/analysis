@@ -83,11 +83,7 @@ void determine_simulation_settings()
 }
 
 
-<<<<<<< HEAD
-
-=======
 	 /* Set additional halo properties derived from the basic ones */
->>>>>>> debda4f552a3a42475da31cd89cf66a7c2ee615e
 void set_additional_halo_properties(int n)
 {
 	double c = 0.0; 

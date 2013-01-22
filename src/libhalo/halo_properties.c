@@ -359,7 +359,7 @@ void sort_concentration()
 	nHaloes_conc=Settings.n_concentration;
 
 #ifdef WITH_MPI
-// The loop has to be done using ALL the haloes, since they are not ordered
+// The loop has to be done using ALL the Haloes, since they are not ordered
 		nHaloes=Settings.n_haloes; 
 #else
 		nHaloes=Settings.n_threshold; 
@@ -388,7 +388,7 @@ void sort_concentration()
 					if(conc[m] == -1) 
 						conc[m] = Haloes[i].c;
 
-				mass[m] = haloes[i].Mvir;
+				mass[m] = Haloes[i].Mvir;
 				fprintf(stdout, "mass: %e, conc: %f\n", mass[m], conc[m]);
 				m++;
 			}
@@ -502,8 +502,8 @@ void sort_gas_fraction()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			mass[i] = haloes[i].Mvir;
-			gas_fraction[i] = haloes[i].b_fraction;
+			mass[i] = Haloes[i].Mvir;
+			gas_fraction[i] = Haloes[i].b_fraction;
 		}
 	
 			mass_bin = log_stepper(mMin, mMax, nBins);
@@ -544,8 +544,8 @@ void sort_and_fit_mass_temperature_relation()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			mass[i] = haloes[i].Mvir;
-			temperature[i] = haloes[i].T_gas;
+			mass[i] = Haloes[i].Mvir;
+			temperature[i] = Haloes[i].T_gas;
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);

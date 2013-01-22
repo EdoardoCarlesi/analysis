@@ -48,7 +48,6 @@ void print_all_subhalo_properties_to_one_file()
 	fprintf(stdout, "\nWriting subhalo_properties() output to:%s\n", out);
 
 		fprintf(fout,"#");
-<<<<<<< HEAD
 		FILE_HEADER(fout, "lambda       ", count);
 		FILE_HEADER(fout, "P(l)         ", count);
 		FILE_HEADER(fout, "shape        ", count);
@@ -70,36 +69,6 @@ void print_all_subhalo_properties_to_one_file()
 		FILE_HEADER(fout, "subset(n(>r))", count);
 		fprintf(fout, "\n");
 
-=======
-		FILE_HEADER(fout, "lambda   ", count);
-		FILE_HEADER(fout, "P(l)     ", count);
-		FILE_HEADER(fout, "shape    ", count);
-		FILE_HEADER(fout, "P(s)     ", count);
-		FILE_HEADER(fout, "triax    ", count);
-		FILE_HEADER(fout, "P(t)     ", count);
-		FILE_HEADER(fout, "Cos(th)  ", count);
-		FILE_HEADER(fout, "P(c(th)) ", count);
-		FILE_HEADER(fout, "Cos(phi) ", count);
-		FILE_HEADER(fout, "P(c(phi))", count);
-		FILE_HEADER(fout, "sub(r)/Rv", count);
-		FILE_HEADER(fout, "n(r)     ", count);
-		FILE_HEADER(fout, "n(>r)    ", count);
-		FILE_HEADER(fout, "V_sub    ", count);
-		FILE_HEADER(fout, "P(V_sub) ", count);
-		FILE_HEADER(fout, "Mass     ", count);
-		FILE_HEADER(fout, "n(>M)    ", count);
-		FILE_HEADER(fout, "ss       ", count);
-		FILE_HEADER(fout, "ss(n(>r))", count);
-		fprintf(fout, "\n");
-/*
-		fprintf(fout, "#lambda_0 = %lf\n", SubHaloZ.l_0);
-		fprintf(fout, "#cos(th_0) = %lf\n", SubHaloZ.costh0);
-		fprintf(fout, "#cos(phi_0) = %lf\n", SubHaloZ.cosphi0);
-		fprintf(fout, "#t0 = %lf\n", SubHaloZ.t0);
-		fprintf(fout, "#s0 = %lf\n", SubHaloZ.s0);
-		fprintf(fout, "\n");
-*/
->>>>>>> debda4f552a3a42475da31cd89cf66a7c2ee615e
 		for(i=0; i<nBins; i++)	
 		{
 			fprintf(fout, "%lf"  , SubHaloZ.l[i]);
@@ -159,18 +128,11 @@ void print_theoretical_mass_function(float z)
 	char out_file[200];
 	FILE *fout=NULL;
 
-<<<<<<< HEAD
 	nTot=ThMassFunc.bins-1;
 
 	sprintf(out_file, "%s%f%s", 
 		Urls.output_prefix, z, "_theoretical_mass_function.dat");
 
-=======
-	n_num = dn_num = n_mass = err = 0;
-	th_mf=Urls_internal.output_prefix;
-	sprintf(z_num,"z_%f", z);
-	out_file=merge_strings(th_mf, merge_strings(z_num, "_theoretical_mass_function.dat"));
->>>>>>> debda4f552a3a42475da31cd89cf66a7c2ee615e
 	fout=fopen(out_file, "w");
 
 	fprintf(stderr, "Mass function output file:%s \n", out_file);
@@ -347,18 +309,6 @@ void print_all_halo_properties_to_one_file()
 	FILE* out=fopen(out_url,"w");
 	
 		fprintf(out, "#");
-<<<<<<< HEAD
-		FILE_HEADER(out, "Mass ", count);
-		FILE_HEADER(out, "n(>M)", count);
-		FILE_HEADER(out, "c    ", count);
-		FILE_HEADER(out, "P(c)   ", count);
-		FILE_HEADER(out, "lambda", count);
-		FILE_HEADER(out, "P(l)", count);
-		FILE_HEADER(out, "triax", count);
-		FILE_HEADER(out, "P(t)", count);
-		FILE_HEADER(out, "shape", count);
-		FILE_HEADER(out, "P(s)", count);
-=======
 		FILE_HEADER(out, "Mass  ", count);
 		FILE_HEADER(out, "n(>M) ", count);
 		FILE_HEADER(out, "avg_c ", count);
@@ -370,7 +320,6 @@ void print_all_halo_properties_to_one_file()
 		FILE_HEADER(out, "P(t)  ", count);
 		FILE_HEADER(out, "shape ", count);
 		FILE_HEADER(out, "P(s)  ", count);
->>>>>>> debda4f552a3a42475da31cd89cf66a7c2ee615e
 #ifdef GAS
 		FILE_HEADER(out, "gas_temp", count);
 		FILE_HEADER(out, "gas_frac", count);
@@ -379,14 +328,9 @@ void print_all_halo_properties_to_one_file()
 
 			for(i=0; i<nBins; i++)	
 			{
-<<<<<<< HEAD
 				fprintf(out, "%e", MassFunc.num_masses[i]);
 				fprintf(out, "\t%e", MassFunc.n[i]);
-=======
-				fprintf(out, "%e", MF.num_masses[i]);
-				fprintf(out, "\t%e", MF.n[i]);
 				fprintf(out, "\t%lf", HaloZ.c_avg_mass[i]);
->>>>>>> debda4f552a3a42475da31cd89cf66a7c2ee615e
 				fprintf(out, "\t%lf", HaloZ.c[i]);
 				fprintf(out, "\t%lf", HaloZ.p_c[i]);
 				fprintf(out, "\t%lf", HaloZ.l[i]);
@@ -471,9 +415,17 @@ void print_numerical_mass_function()
 
 void print_best_fit_results(){
 // TODO
-<<<<<<< HEAD
+	int i=0, count=1, nBins=HaloZ.n_bins;
+	char* out_url=merge_strings(Urls.output_prefix,"all_halo_best_fit_distributions.dat");
+	FILE* fout=fopen(out_url,"w");
+	
+		fprintf(fout, "#Concentration distribution best fit values, c_0=%lf, c_sig  :%lf \n", 
+			HaloZ.c_0,HaloZ.c_sig );
+		fprintf(fout, "#Lambda parameter distribution best fit values, l_0  :%lf, l_sig  :%lf \n", 
+			HaloZ.l_0,HaloZ.l_sig );
+		fprintf(fout, "#Average shape parameter s_0  :%lf, average triaxiality t_0    :%lf \n", 
+			HaloZ.s0,HaloZ.t0);
 
-/*
 		fprintf(fout, "#lambda_0  = %lf\n", SubHaloZ.l_0);
 		fprintf(fout, "#cos(th_0) = %lf\n", SubHaloZ.costh0);
 		fprintf(fout, "#cos(phi_0)= %lf\n", SubHaloZ.cosphi0);
@@ -481,27 +433,8 @@ void print_best_fit_results(){
 		fprintf(fout, "#s0 = %lf\n", SubHaloZ.s0);
 		fprintf(fout, "\n");
 
-
-*/
-=======
-	int i=0, count=1, nBins=HaloZ.n_bins;
-	char* out_url=merge_strings(Urls_internal.output_prefix,"all_halo_best_fit_distributions.dat");
-	FILE* out=fopen(out_url,"w");
-	
-			fprintf(out, "#Concentration distribution best fit values, c_0=%lf, c_sig  :%lf \n", 
-				HaloZ.c_0,HaloZ.c_sig );
-			fprintf(out, "#Lambda parameter distribution best fit values, l_0  :%lf, l_sig  :%lf \n", 
-				HaloZ.l_0,HaloZ.l_sig );
-			fprintf(out, "#Average shape parameter s_0  :%lf, average triaxiality t_0    :%lf \n", 
-				HaloZ.s0,HaloZ.t0);
-
 #ifdef GAS
-			fprintf(out, "#Mass-Tx relation best fit values, ln_M0: %lf, alpha :%lf  \n", 
+			fprintf(fout, "#Mass-Tx relation best fit values, ln_M0: %lf, alpha :%lf  \n", 
 				HaloZ.ln_M0, HaloZ.T_alpha);
 #endif
-
-
-
->>>>>>> debda4f552a3a42475da31cd89cf66a7c2ee615e
-
 }
