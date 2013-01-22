@@ -45,13 +45,11 @@ void read_redshift_file()
 
 			size = get_lines(redshifts_file, Urls.a_outputs);
 
-			Settings.n_pk_files = size;
+			Urls.nPkFiles = size;
 			GrowthFac.npts = size;
 			GrowthFac.z = (double *) calloc(size, sizeof(double));
 			GrowthFac.a = (double *) calloc(size, sizeof(double));
-			GrowthFac.gf_z = (double *) calloc(size, sizeof(double));
-			GrowthFac.gf_over_a_z = (double *) calloc(size, sizeof(double));
-
+			GrowthFac.gf = (double *) calloc(size, sizeof(double));
 
 				for(i=0; i<size; i++) 
 				{
@@ -137,12 +135,12 @@ void read_numerical_mass_function(char *URL)
 		dim = get_lines(nmf, URL);
 		MassFunc.bins  =  dim;
 		MassFunc.n = (double*) calloc(dim, sizeof(double));
-		MassFunc.num_masses  = (double*) calloc(dim, sizeof(double));
+		MassFunc.mass  = (double*) calloc(dim, sizeof(double));
 
 			for(k=0; k<dim; k++)
 			{
 				fgets(lines, 512, nmf);
-				sscanf(lines, "%lf %lf", &MassFunc.num_masses[k], 
+				sscanf(lines, "%lf %lf", &MassFunc.mass[k], 
 					&MassFunc.n[k]);
 			}
 	fclose(nmf);

@@ -31,7 +31,7 @@ double tinker(double M, void *p)
 	c = T_mf.c;
 
 		norm = mf_normalization(M);
-		sig = sigma_M(M);
+		sig = sigmaM(M);
 
 	return norm*A*(pow(sig/b,-a) + 1)*exp(-c/(sig*sig));
 }
@@ -59,7 +59,7 @@ double mf_tinker(double M, double A, double a, double b, double c)
 	double norm, sig;
 
 	norm = mf_normalization(M);
-	sig = sigma_M(M);
+	sig = sigmaM(M);
 
 	return norm*A*(pow(sig/b,-a) + 1)*exp(-c/(sig*sig));
 }
@@ -71,7 +71,7 @@ double dA_mf_tinker(double M, double A, double a, double b, double c)
 	double norm, sig;
 
 	norm = mf_normalization(M);
-	sig = sigma_M(M);
+	sig = sigmaM(M);
 
 	return norm*(pow(sig/b,-a) + 1)*exp(-c/(sig*sig));
 }
@@ -83,7 +83,7 @@ double da_mf_tinker(double M, double A, double a, double b, double c)
 	double norm, sig;
 
 	norm = mf_normalization(M);
-	sig = sigma_M(M);
+	sig = sigmaM(M);
 
 	return norm*A*( pow(b/sig,a)*log(b/sig)*ln_10)*exp(-c/(sig*sig));
 }
@@ -94,7 +94,7 @@ double db_mf_tinker(double M, double A, double a, double b, double c)
 	double norm, sig;
 	
 	norm = mf_normalization(M);
-	sig = sigma_M(M);
+	sig = sigmaM(M);
 	
 	return norm*A*(a*pow(sig,-a)*pow(b,a-1))*exp(-c/(sig*sig));
 }
@@ -106,7 +106,7 @@ double dc_mf_tinker(double M, double A, double a, double b, double c)
 	double norm, sig;
 
 	norm = mf_normalization(M);
-	sig = sigma_M(M);
+	sig = sigmaM(M);
 	
 	return -norm*A*pow(sig,-2)*(pow(b/sig,a) + 1)*exp(-c/(sig*sig));
 }

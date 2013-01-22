@@ -49,23 +49,24 @@ double W_r(double k, double R)
 
 
 
-double sigma_M(double m)
+double sigmaM(double m)
 {
-	return get_interpolated_value(ThMassFunc.th_masses, ThMassFunc.sigmas, ThMassFunc.bins, m);
+	return get_interpolated_value(ThMassFunc.mass, ThMassFunc.sigma, ThMassFunc.bins, m);
 }
 
 
 
-double ln_sigma_M(double log_M, void *p)
+double ln_sigma(double log_M, void *p)
 {
-	return get_interpolated_value(ThMassFunc.ln_masses, ThMassFunc.ln_sigmas, ThMassFunc.bins, log_M);
+	return get_interpolated_value(ThMassFunc.ln_mass, ThMassFunc.ln_sigma, ThMassFunc.bins, log_M);
 }
 
 
 
-double d_ln_sigma_d_ln_M(double M)
+double dln_sigma_dln_mass(double M)
 {
-	return get_interpolated_value(ThMassFunc.ln_masses, ThMassFunc.dlnSdlnM, ThMassFunc.bins, inv_ln_10*log(M));
+	return get_interpolated_value(ThMassFunc.ln_mass, ThMassFunc.dln_sigma_dln_mass, 
+		ThMassFunc.bins, inv_ln_10*log(M));
 }
 
 
@@ -90,7 +91,7 @@ double integrate_sigma2(double M)
 	par[0] = R_m(M);
 
 	k_min = Pks[PK_INDEX].k[0];
-	k_max = Pks[PK_INDEX].k[Pks[0].n_pk_entries-1];
+	k_max = Pks[PK_INDEX].k[Pks[0].npts-1];
 
 		gsl_function F;
 		F.function = &sigma_integ;
@@ -113,12 +114,12 @@ void normalize_sigma8()
 	double s8, k_min, k_max, result, error, par[2]; 
 	gsl_integration_workspace *w = gsl_integration_workspace_alloc(WORKSP);
 
-	s8 = Cosmo.s8;
+	s8 = Cosmo.sigma8;
 	par[0]=8.; 
 	PK_INDEX=0;
 
 	k_min = Pks[0].k[0]; 
-	k_max = Pks[0].k[Pks[0].n_pk_entries-1];
+	k_max = Pks[0].k[Pks[0].npts-1];
 
 		gsl_function F;
 		F.function = &sigma_integ;
@@ -127,10 +128,10 @@ void normalize_sigma8()
 		gsl_integration_qags(&F, k_min, k_max, 0, 1e-6, WORKSP, w, &result, &error);
 		result*=(1./(2*PI*PI));
 
-		Cosmo.n_s8 = s8*s8/result;
+		Cosmo.norm_sigma8 = s8*s8/result;
 
 			fprintf(stdout, "Original sigma8:%lf, required sigma8: %lf, normalization factor:%lf\n", 
-				sqrt(result), s8, Cosmo.n_s8);
+				sqrt(result), s8, Cosmo.norm_sigma8);
 
 		gsl_integration_workspace_free (w);
 
@@ -146,8 +147,8 @@ void init_MassFunc()
 	int nBins = Settings.n_bins;
 	// We need N-1 points, since the value saved is the one at half length of every bin
 	MassFunc.bins = nBins-1;
-	MassFunc.num_masses = (double*) calloc(nBins-1, sizeof(double));
-	MassFunc.dn_num_masses = (double*) calloc(nBins-1, sizeof(double));
+	MassFunc.mass = (double*) calloc(nBins-1, sizeof(double));
+	MassFunc.mass_halfstep = (double*) calloc(nBins-1, sizeof(double));
 	MassFunc.n = (double*) calloc(nBins-1, sizeof(double));
 	MassFunc.n_tot = (int*) calloc(nBins-1, sizeof(int));
 	MassFunc.n_bin = (int*) calloc(nBins-1, sizeof(int));
@@ -160,45 +161,47 @@ void init_MassFunc()
 
 void init_ThMassFunc()
 {
+	int nTot=ThMassFunc.bins;
+
 	fprintf(stdout, "\nAllocating memory for theoretical mass function structures...\n");
 
-	int pts=ThMassFunc.bins;
-
-	ThMassFunc.th_masses = (double *) calloc(pts, sizeof(double)); 
-	ThMassFunc.sigmas = (double *) calloc(pts, sizeof(double)); 
-	ThMassFunc.ln_masses = (double *) calloc(pts, sizeof(double)); 
-	ThMassFunc.ln_sigmas = (double *) calloc(pts, sizeof(double)); 
-	ThMassFunc.dlnSdlnM = (double *) calloc(pts, sizeof(double)); 
-	ThMassFunc.tin = (double*) calloc(pts, sizeof(double));
-	ThMassFunc.diff_tin = (double*) calloc(pts, sizeof(double));
+	ThMassFunc.mass = (double *) calloc(nTot, sizeof(double)); 
+	ThMassFunc.sigma = (double *) calloc(nTot, sizeof(double)); 
+	ThMassFunc.ln_mass = (double *) calloc(nTot, sizeof(double)); 
+	ThMassFunc.ln_sigma = (double *) calloc(nTot, sizeof(double)); 
+	ThMassFunc.dln_sigma_dln_mass = (double *) calloc(nTot, sizeof(double)); 
+	ThMassFunc.n = (double*) calloc(nTot, sizeof(double));
+	ThMassFunc.dn = (double*) calloc(nTot, sizeof(double));
 }
 
 
 
 void init_sigmas()
 {
-	int k=0, pts=ThMassFunc.bins;
-	double M, Mmax, Mmin, sig, *m_steps; 
+	int k=0, nTot=0; 
+	double M=0, Mmax=0, Mmin=0, sig=0; 
+	double *m_steps=NULL; 
 
-	m_steps = (double*) calloc(pts, sizeof(double));
+	nTot=ThMassFunc.bins;
+	m_steps = (double*) calloc(nTot, sizeof(double));
 
 	fprintf(stdout, "\nInitializing sigmas to calculate the theoretical Tinker mass function...");
 	// ThMassFunc Min and Max are initialized when the program starts in the values read in the exec.sh script
 	Mmin=ThMassFunc.Mmin;
 	Mmax=ThMassFunc.Mmax;
 
-	m_steps = log_stepper(Mmin, Mmax, pts); 
+	m_steps = log_stepper(Mmin, Mmax, nTot); 
 
 #ifdef _OPENMP
 #endif
-		for(k=0; k<ThMassFunc.bins; k++)
+		for(k=0; k<nTot; k++)
 		{
 			M=m_steps[k];
 			sig = sqrt(integrate_sigma2(M));
-			ThMassFunc.th_masses[k]=M;
-			ThMassFunc.ln_masses[k]=inv_ln_10*log(M);
-			ThMassFunc.sigmas[k]=sig;
-			ThMassFunc.ln_sigmas[k]=inv_ln_10*log(sig);
+			ThMassFunc.mass[k]=M;
+			ThMassFunc.sigma[k]=sig;
+			ThMassFunc.ln_mass[k]=inv_ln_10*log(M);
+			ThMassFunc.ln_sigma[k]=inv_ln_10*log(sig);
 		}
 
 	fprintf(stdout, "done.\n");
@@ -207,20 +210,22 @@ void init_sigmas()
 
 
 
-void init_dlnsdlnm()
+void init_dln_sigma_dln_mass()
 {
-	int k=0;
-	double result, abserr, mm;
+	int k=0, nTot=0;
+	double result=0, abserr=0, mm=0;
+
+	nTot = ThMassFunc.bins;
 
 		gsl_function F;
-		F.function = &ln_sigma_M;
+		F.function = &ln_sigma;
 		F.params = 0;
 
-		for(k=0; k<ThMassFunc.bins; k++)
+		for(k=0; k<nTot; k++)
 		{
-			mm=ThMassFunc.ln_masses[k];
+			mm=ThMassFunc.ln_mass[k];
 			gsl_deriv_central(&F, mm, 1e-4, &result, &abserr);
-			ThMassFunc.dlnSdlnM[k]=result;
+			ThMassFunc.dln_sigma_dln_mass[k]=result;
 		}
 }
 
@@ -229,12 +234,7 @@ void init_dlnsdlnm()
 
 double mf_normalization(double M)
 {
-	double lnslnm, norm;
-
-		lnslnm = sqrt(pow(d_ln_sigma_d_ln_M(M),2)); 
-		norm = Settings.rho_0/(M*M);
-
-	return norm*lnslnm*sqrt(2./PI);
+	return sqrt(2./PI) * Settings.rho_0/(M*M) * sqrt(pow(dln_sigma_dln_mass(M),2));
 }
 
 
@@ -275,8 +275,8 @@ void compute_numerical_mass_function(void)
 			halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
 			dn_norm = 2*halfstep/nHaloes;
 			dM = mass_bin[i+1]-mass_bin[i];
-			MassFunc.num_masses[i]=mass_bin[i];
-			MassFunc.dn_num_masses[i]=mass_bin[i]+halfstep;
+			MassFunc.mass[i]=mass_bin[i];
+			MassFunc.mass_halfstep[i]=mass_bin[i]+halfstep;
 			MassFunc.dn[i]=n_mass[i]/(volume*dM);
 			MassFunc.n[i]=cum_n_mass[i]/volume;
 			MassFunc.err_dn[i]=sqrt(n_mass[i])/(volume*dM);
@@ -310,19 +310,19 @@ void compute_theoretical_mass_function(int index)
 
 		init_sigmas();
 
-		init_dlnsdlnm();
+		init_dln_sigma_dln_mass();
 
 		if(Settings.fit==1) 
-			best_fit_mf_tinker(MassFunc.num_masses, MassFunc.dn, MassFunc.err_dn, MassFunc.bins);
+			best_fit_mf_tinker(MassFunc.mass, MassFunc.dn, MassFunc.err_dn, MassFunc.bins);
 
-		Mmin = ThMassFunc.th_masses[0];
-		Mmax = ThMassFunc.th_masses[ThMassFunc.bins-1];
+		Mmin = ThMassFunc.mass[0];
+		Mmax = ThMassFunc.mass[ThMassFunc.bins-1];
 
 		for(k=0; k<ThMassFunc.bins-1; k++)
 		{
-			Mmin=ThMassFunc.th_masses[k];
-			ThMassFunc.diff_tin[k]=tinker(Mmin, p);
-			ThMassFunc.tin[k]=integral_tinker(Mmin, Mmax);
+			Mmin=ThMassFunc.mass[k];
+			ThMassFunc.dn[k]=tinker(Mmin, p);
+			ThMassFunc.n[k]=integral_tinker(Mmin, Mmax);
 		}
 }
 
@@ -330,21 +330,23 @@ void compute_theoretical_mass_function(int index)
 
 void initialize_mass_function_datastore()
 {
-	int numPkFiles=Settings.n_pk_files-1, k=0, dim = MassFunc.bins;
-
+	int numPkFiles=0, k=0, nTot=0; 
+	
+	nTot = MassFunc.bins;
+	numPkFiles = Urls.nPkFiles;
 	MassFuncZ = 
 		(struct mass_function*) calloc(numPkFiles, sizeof(struct mass_function));
 
 		for(k=0; k<numPkFiles; k++)
 		{
-			MassFuncZ[k].bins = dim;
-			MassFuncZ[k].th_masses  = (double*) calloc(dim, sizeof(double));
-			MassFuncZ[k].tin = (double*) calloc(dim, sizeof(double));
-			MassFuncZ[k].diff_tin = (double*) calloc(dim, sizeof(double));
+			MassFuncZ[k].bins = nTot;
+			MassFuncZ[k].mass = (double*) calloc(nTot, sizeof(double));
+			MassFuncZ[k].n = (double*) calloc(nTot, sizeof(double));
+			MassFuncZ[k].dn = (double*) calloc(nTot, sizeof(double));
 #ifndef TH_ONLY
-			MassFuncZ[k].num_masses  = (double*) calloc(dim, sizeof(double));
-			MassFuncZ[k].n = (double*) calloc(dim, sizeof(double));
-			MassFuncZ[k].dn = (double*) calloc(dim, sizeof(double));
+			MassFuncZ[k].mass = (double*) calloc(nTot, sizeof(double));
+			MassFuncZ[k].n = (double*) calloc(nTot, sizeof(double));
+			MassFuncZ[k].dn = (double*) calloc(nTot, sizeof(double));
 #endif
 		}
 }
@@ -353,19 +355,21 @@ void initialize_mass_function_datastore()
 
 void store_mf(int m)
 {
-	int k=0;
+	int k=0, nTot=0;
 
 	fprintf(stdout, "\nstore_mf(%d). Saving the (cumulative) mass functions into mf structure.\n",m);
 
-	MassFuncZ[m].bins = ThMassFunc.bins;
+	nTot = ThMassFunc.bins;
 
-	for(k=0; k<ThMassFunc.bins; k++)
+	MassFuncZ[m].bins = nTot;
+
+	for(k=0; k<nTot; k++)
 	{
-		MassFuncZ[m].th_masses[k] = ThMassFunc.th_masses[k];
-		MassFuncZ[m].tin[k] = ThMassFunc.tin[k];
-		MassFuncZ[m].diff_tin[k] = ThMassFunc.diff_tin[k];
+		MassFuncZ[m].mass[k] = ThMassFunc.mass[k];
+		MassFuncZ[m].n[k] = ThMassFunc.n[k];
+		MassFuncZ[m].dn[k] = ThMassFunc.dn[k];
 #ifndef TH_ONLY
-		MassFuncZ[m].num_masses[k] = MassFunc.num_masses[k];
+		MassFuncZ[m].mass[k] = MassFunc.mass[k];
 		MassFuncZ[m].n[k] = MassFunc.n[k];
 		MassFuncZ[m].dn[k] = MassFunc.dn[k];
 #endif

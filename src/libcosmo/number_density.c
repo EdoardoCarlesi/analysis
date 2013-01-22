@@ -19,22 +19,26 @@
 
 void get_n_M_z(double M)
 {
-	int k=0;
+	int k=0, nTot=0, nPks=0;
+	
 	NumDen.npts = snaps_within_z_range();
-	NumDen.z = (double*) calloc(NumDen.npts, sizeof(double));
-	NumDen.n_tin = (double*) calloc(NumDen.npts, sizeof(double));
-	NumDen.n_num = (double*) calloc(NumDen.npts, sizeof(double));
+	nTot = NumDen.npts;
+	nPks = Urls.nPkFiles;	
+
+	NumDen.z = (double*) calloc(nTot, sizeof(double));
+	NumDen.n_th = (double*) calloc(nTot, sizeof(double));
+	NumDen.n_num = (double*) calloc(nTot, sizeof(double));
 
 	for(k=0; k<NumDen.npts; k++)
 	{
-		NumDen.z[k] = Pks[Settings.n_pk_files-k-1].z;
+		NumDen.z[k] = Pks[nPks-k-1].z;
 
-		NumDen.n_tin[k] = 
-			get_interpolated_value(MassFuncZ[k].th_masses, 
-				MassFuncZ[k].tin, MassFuncZ[k].bins, M);
+		NumDen.n_th[k] = 
+			get_interpolated_value(MassFuncZ[k].mass, 
+				MassFuncZ[k].n, MassFuncZ[k].bins, M);
 
 		NumDen.n_num[k] = 
-			get_interpolated_value(MassFuncZ[k].num_masses, 
+			get_interpolated_value(MassFuncZ[k].mass, 
 				MassFuncZ[k].n, MassFuncZ[k].bins, M);
 	}
 }
@@ -59,7 +63,7 @@ int snaps_within_z_range()
 double integrand_tin_n_M_z(double z, void *p)
 {
 	return comoving_vol(z,p)*get_interpolated_value(NumDen.z, 
-		NumDen.n_tin, NumDen.npts, z);;
+		NumDen.n_th, NumDen.npts, z);;
 }
 
 
@@ -101,15 +105,17 @@ double* integrate_number_density(double z0, double z1)
 }
 
 
+
 void compute_number_density()
 {
-	int index=0, m=0, nPk=0, nBin=0, nFc=0; double zz;
+	int index=0, m=0, nPk=0, nBin=0, nFc=0; 
+	double zz=0;
 
 	fprintf(stderr, "\ncompute_number_density().\n");
 
-	nPk = Pks[0].n_pk_entries;
-	nFc = Urls.numFiles;
-	nBin= MassFunc.bins;
+	nPk = Urls.nPkFiles;
+	nFc = Urls.nCatalogueFiles;
+	nBin = MassFunc.bins;
 	
 	init_pks();
 	
@@ -131,8 +137,8 @@ void compute_number_density()
 #endif
 			compute_theoretical_mass_function(index);
 
-			ThMassFunc.Mmin=0.1*MassFunc.num_masses[0];
-			ThMassFunc.Mmax=10*MassFunc.num_masses[nBin-1];
+			ThMassFunc.Mmin=0.1*MassFunc.mass[0];
+			ThMassFunc.Mmax=10*MassFunc.mass[nBin-1];
 			store_mf(m);
 
 			fprintf(stderr, "Done z: %lf. zMax: %lf \n", zz, NumDen.zMax);

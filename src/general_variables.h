@@ -1,22 +1,24 @@
 extern struct power_spectrum 
 {
-	int n_pk_entries;
+	int npts;
+
 	double z;
 	double a;
-	double lna;
-	double *sigma;
+
 	double *k; 
 	double *pk;
-	char *url;
+	double *sigma;
 
 } *Pks;
 
 
 extern struct correlation_function
 {
-	int n_xi_entries;
+	int npts;
+
 	double z;
 	double a;
+
 	double *r;
 	double *xi_r;
 	double *xi_fit;
@@ -28,12 +30,11 @@ extern struct growth_factor
 {
 	int npts;
 	double scale_k;
+
 	double *a;
 	double *z;
-	double *gf_z;
-	double *gf_over_a_z;
-	//double *ln_gf_a;
-	//double *ln_gf_z;
+	double *gf;
+
 } GrowthFac;
 
 
@@ -42,11 +43,11 @@ extern struct general_settings
 	int fit;	
 	int tick;
 	int inverse_read;
-	int nP_1D;
+	int n_part_1D;
 	int halo_skip;
 	int pk_skip;
 	int use_one_pk;
-	int n_pk_files;
+
 	double box_size;
 	double zStart;
 	
@@ -93,30 +94,32 @@ extern struct general_settings
 
 extern struct cosmology
 {
-	int npts;
+	double OmegaM;
+	double OmegaL;
+	double OmegaDE;
 #ifdef GAS
 	double OmegaB;
 	double OmegaDM;
 #endif
-	double OmegaM;
-	double OmegaL;
-	double OmegaVDE;
+
+	double G; 
 	double H_0;
 	double h;
 	double delta_c;
-	double s8;
-	double n_s8;
-	double Gn; 
+	double sigma8;
+	double norm_sigma8;
 
 	double err;
 	double virial;
 	double spin;
 
-	double *a_hub;
+	// When loading cosmology parameter from file, store them here
+	int npts;
 	double *z_hub;
-	double *Hubble;
+	double *a_hub;
 	double *w;
-
+	double *Hubble;
+	
 } Cosmo;
 
 
@@ -129,20 +132,19 @@ extern struct mass_function
 	double Mmin;
 	double Mmax;
 
-	double *err;
-	double *err_dn;
-	double *ln_masses;
-	double *sigmas;
-	double *ln_sigmas;
-	double *dlnSdlnM;
-	double *num_masses;
-	double *dn_num_masses; // The derivative is taken in the middle of the mass bin
+	double *mass;
+	double *mass_halfstep;
+	double *sigma;
+
+	double *ln_mass;
+	double *ln_sigma;
+	double *dln_sigma_dln_mass;
 
 	double *dn;
 	double *n;
-	double *th_masses;
-	double *diff_tin;
-	double *tin;
+
+	double *err;
+	double *err_dn;
 
 } MassFunc, ThMassFunc, *MassFuncZ;
 
@@ -150,10 +152,11 @@ extern struct mass_function
 extern struct num_density
 {
 	int npts;
-	double *z;
 	double zMax;
 	double zMin;
-	double *n_tin;
+
+	double *z;
+	double *n_th;
 	double *n_num;
 
 } NumDen; 
@@ -289,22 +292,27 @@ extern struct halo
 
 extern struct internal_urls
 {
-	int numFiles;
-	int *numHaloes;
-	double *z;
+	int nCatalogueFiles;
+	int nPkFiles;
 
-	char *halo_file;
-	char *profiles_file;
-	char *pk_file;
 	char *a_outputs;
 	char *output_prefix;
 	char *hubble_file;
+	
+	// Using a single halo/profile/P(k) file for the analysis
+	char *halo_file;
+	char *profiles_file;
+	char *pk_file;
+
+	// Files that store a list of URLS to the actual files
 	char *pk_list;
 	char *halo_list;
 	char *profile_list;
 	char *subhalo_list;
-
+	
+	// Arrays containing all the available urls for the analysis
 	char **urls;
+	char **urls_pks;
 	char **urls_profiles;
 	char **urls_satellites;
 	char **urls_particles;
@@ -314,7 +322,6 @@ extern struct internal_urls
 
 extern struct halo_properties
 {
-	int ID;
 	int z_bins;
 	int r_bins;
 	int n_bins;
@@ -325,15 +332,12 @@ extern struct halo_properties
 	double c_02;
 	double c_sig;
 	double c_sig2;
+
 	double *c;
 	double *c_c0;
-	double *c_avg_mass;
+	double *c_avg;
 	double *p_c;
 	double *err_p_c;
-
-	double *costh;
-	double *costh_count;
-	double costh0;
 
 	double l_0;
 	double l_sig;
@@ -368,28 +372,35 @@ extern struct halo_properties
 	int *cum_n_r_sub_subset;
 	double *r_sub_subset;
 
+	double costh0;
+	double *costh;
+	double *costh_count;
+
+	double cosphi0;
 	double *cosphi;
 	double *cosphi_count;
 	double *cum_cosphi;
-	double cosphi0;
 
 	int *n_vel_sub;
 	double *vel_sub;
 	double *p_vel_sub;
 	double vel_0;
 
-	double *mass_sub;
 	double avgMass;
+	double *mass_sub;
+	
 	double *ecc;
+
 	int *n_sub;
 	int *cum_n_sub;
 	int *n_ecc;
 
 #ifdef GAS
+	double ln_M0;
+	double T_alpha;
+
 	double *gas_T;
 	double *gas_u;
 	double *gas_fraction;
-	double ln_M0;
-	double T_alpha;
 #endif
 } SubHaloZ, HaloZ, *HaloProperties, *SubHaloProperties;

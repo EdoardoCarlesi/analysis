@@ -28,7 +28,7 @@ void initialize_internal_variables(char **argv){
 		int URLS=4;
 
 	Settings.box_size = atof(argv[URLS+1]); 
-	Settings.nP_1D = atoi(argv[URLS+2]); 
+	Settings.n_part_1D = atoi(argv[URLS+2]); 
 	Settings.n_bins=atoi(argv[URLS+3]);
 	Settings.pk_skip=atoi(argv[URLS+4]);
 	Settings.halo_skip=atoi(argv[URLS+5]);
@@ -47,7 +47,7 @@ void initialize_internal_variables(char **argv){
 		int SET=16;
 
 	Cosmo.h=atof(argv[SET+URLS+1]);
-	Cosmo.s8=atof(argv[SET+URLS+2]);
+	Cosmo.sigma8=atof(argv[SET+URLS+2]);
 	Cosmo.OmegaM=atof(argv[SET+URLS+3]);
 	Cosmo.OmegaL=atof(argv[SET+URLS+4]);
 	Cosmo.delta_c=atof(argv[SET+URLS+5]);
@@ -64,7 +64,7 @@ void initialize_internal_variables(char **argv){
 	Urls.profile_list = argv[SET+COSMO+URLS+3];
 	Urls.subhalo_list = argv[SET+COSMO+URLS+4];
 	Urls.pk_list = argv[SET+COSMO+URLS+5];
-	Urls.numFiles = atoi(argv[SET+COSMO+URLS+6]);
+	Urls.nCatalogueFiles = atoi(argv[SET+COSMO+URLS+6]);
 
 #ifdef PRINT_INFO
 	int kk=0; 
@@ -74,7 +74,7 @@ void initialize_internal_variables(char **argv){
 
 	// Setting extra useful variables
 	Cosmo.H_0=Cosmo.h*100;
-	Cosmo.Gn=6.672e-8;
+	Cosmo.G=6.672e-8;
 	ThMassFunc.Mmin=Settings.Mmin;
 	ThMassFunc.Mmax=Settings.Mmax;
 

@@ -34,7 +34,7 @@ void determine_simulation_settings()
 	{
 #ifndef GAS
 	Settings.pMass = HALO[0].Mvir/HALO[0].n_part;
-	Settings.rho_0 = Settings.pMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
+	Settings.rho_0 = Settings.pMass*pow(Settings.n_part_1D,3)*pow(Settings.box_size, -3);
 	fprintf(stderr, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
 #else
 	Settings.dmMass  = HALO[0].M_dm/HALO[0].N_dm;
@@ -148,7 +148,7 @@ void get_halo_files_urls()
 
 	struct internal_urls *URLS;
 
-	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", Urls.numFiles);
+	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", Urls.nCatalogueFiles);
 
 #ifdef WITH_MPI
 	URLS = &pUrls[ThisTask];
@@ -177,18 +177,18 @@ void get_halo_files_urls()
 		lin_pro = get_lines(fc_pro, url_fc_pro);
 		lin_sub = get_lines(fc_sub, url_fc_sub);
 
-		URLS->numFiles = lin;
+		URLS->nCatalogueFiles = lin;
 
 		URLS->urls = 
-			(char **) calloc(URLS->numFiles, sizeof(char *));
+			(char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
 		URLS->urls_profiles = 
-			(char **) calloc(URLS->numFiles, sizeof(char *));
+			(char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
 		URLS->urls_satellites = 
-			(char **) calloc(URLS->numFiles, sizeof(char *));
+			(char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
 
 	if(lin > 0)
 	{
-		for(n=0; n<URLS->numFiles; n++)
+		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc);
 			URLS->urls[n] = 
@@ -205,7 +205,7 @@ void get_halo_files_urls()
 
 	if(lin_sub > 0)
 	{
-		for(n=0; n<URLS->numFiles; n++)
+		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_sub);
 			URLS->urls_satellites[n] = 
@@ -222,7 +222,7 @@ void get_halo_files_urls()
 
 	if(lin_pro > 0)
 	{
-		for(n=0; n<URLS->numFiles; n++)
+		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_pro);
 			URLS->urls_profiles[n] = 

@@ -14,11 +14,11 @@ double mf_normalization(double);
 void init_MassFunc(void);
 void init_ThMassFunc(void);
 void init_sigmas(void);
-void init_dlnsdlnm(void);
+void init_dln_sigma_dln_mass(void);
 
-double sigma_M(double);
-double ln_sigma_M(double, void*);
-double d_ln_sigma_d_ln_M(double);
+double sigmaM(double);
+double ln_sigma(double, void*);
+double dln_sigma_dln_mass(double);
 
 void compute_numerical_mass_function(void);
 void compute_theoretical_mass_function(int);

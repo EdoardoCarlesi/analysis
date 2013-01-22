@@ -18,7 +18,7 @@
 double power_k(double k, int index)
 {
 	return get_interpolated_value(Pks[index].k, Pks[index].pk, 
-		Pks[index].n_pk_entries, k);
+		Pks[index].npts, k);
 }
 
 
@@ -26,13 +26,14 @@ double power_k(double k, int index)
 void normalize_all_power_spectra_to_sigma8()
 {
 	int i=0, j=0, Npk=0, Nentr=0;
-	Npk = Settings.n_pk_files;
+	Npk = Urls.nPkFiles;
 	
 		for(i=0; i<Npk; i++)
 		{	
-			Nentr = Pks[i].n_pk_entries;
+			Nentr = Pks[i].npts;
+
 			for(j=0; j<Nentr; j++)
-				Pks[i].pk[j] *= Cosmo.n_s8;
+				Pks[i].pk[j] *= Cosmo.norm_sigma8;
 		}
 
 }
@@ -44,11 +45,12 @@ void compute_growth_factor()
 		fprintf(stderr,"compute_growth_factor().\n");
 
 		int i=0, pk0=0, pkNorm=0, dim_eff=0; 
-		double norm=1., pk_norm=1., delta=1., delta_a, a, z, pk, K, kk; 
+		double norm=1., pk_norm=1., delta=1.;
+		double a=0, z=0, pk=0, K=0, kk=0; 
 
 			kk = Pks[0].k[0];
 			K = GrowthFac.scale_k, 
-			dim_eff = Settings.n_pk_files;
+			dim_eff = Urls.nPkFiles;
 			pkNorm  = dim_eff - 1;
 
 				if(K < kk) 
@@ -72,14 +74,12 @@ void compute_growth_factor()
 			delta *= sqrt(pk_norm/norm);
 			a = Pks[i].a;
 			z = 1./a - 1;
-			delta_a = delta/a;
 
 #ifdef PRINT_INFO
-		fprintf(stderr, "GrowthFac.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta_a);
+		fprintf(stderr, "GrowthFac.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta/a);
 #endif
 
-			GrowthFac.gf_z[i] = delta;
-			GrowthFac.gf_over_a_z[i] = delta_a;
+			GrowthFac.gf[i] = delta;
 		}
 }
 
@@ -101,15 +101,16 @@ void calculate_power_k_from_xi()
 
 void compute_correlation_function(int index)
 {
-	double r_min = 0.1, r_max = 100;
+	int i=0, N_r=0;
+	double r_min=0.1, r_max=100;
+	double r=0, vol=0, fit=0, r_0=13.; 
+	double *R=NULL;
 
 	fprintf(stderr, "Computing Xi(r) between r_min:%lf and r_max:%lf\n", r_min, r_max);
 
-	double r=0, vol=0, fit=0, r_0=13., *R;
-	int i, N_r;
+	Xi.npts = Settings.n_bins;
+	N_r = Xi.npts;
 
-	Xi.n_xi_entries = Settings.n_bins;
-	N_r = Xi.n_xi_entries;
 	Xi.r = (double *) calloc(N_r, sizeof(double));
 	Xi.xi_r = (double *) calloc(N_r, sizeof(double));
 	Xi.xi_fit = (double *) calloc(N_r, sizeof(double));
@@ -135,13 +136,17 @@ void compute_correlation_function(int index)
 
 double correlation_r(double r, int index)
 {
-	int WORKSP = 5000; 
-	double result, error, k_min, k_max, par[2]; 
+	int WORKSP = 5000, nPkFiles=0; 
+	double result=0., error=0., k_min=0., k_max=0.; 
+	double par[2]; 
+	
+	nPkFiles = Urls.nPkFiles;
 
 	par[0] = r; 
 	par[1] = (double) index;
+
 	k_min = Pks[index].k[0];
-	k_max = Pks[index].k[Pks[index].n_pk_entries-1];
+	k_max = Pks[index].k[nPkFiles-1];
 
 #ifdef PRINT_INFO
 	fprintf(stderr, "correlation_r(), r:%lf\n", r);

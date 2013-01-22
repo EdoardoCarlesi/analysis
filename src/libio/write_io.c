@@ -29,7 +29,7 @@ void print_number_densities()
 			for(k=0; k<N; k++) 
 			{
 			fprintf(fout,"%lf", NumDen.z[k]);
-			fprintf(fout,"\t%e", NumDen.n_tin[k]);
+			fprintf(fout,"\t%e", NumDen.n_th[k]);
 			fprintf(fout,"\t%e", NumDen.n_num[k]);
 			fprintf(fout, "\n");
 			}
@@ -145,9 +145,9 @@ void print_theoretical_mass_function(float z)
 
 			for(k=0; k<nTot; k++)
 			{
-				th_mass=ThMassFunc.th_masses[k];
-				tin=ThMassFunc.tin[k];
-				diff_tin=ThMassFunc.diff_tin[k];	
+				th_mass=ThMassFunc.mass[k];
+				tin=ThMassFunc.n[k];
+				diff_tin=ThMassFunc.dn[k];	
 				fprintf(fout,"%e", th_mass);
 				fprintf(fout,"\t%e", diff_tin);
 				fprintf(fout,"\t%e", tin);
@@ -174,7 +174,7 @@ void print_correlation_function()
 		FILE_HEADER(fout, "Xi fit", count);
 		fprintf(fout, "\n");
 	
-		for(i=0; i<Xi.n_xi_entries; i++) 
+		for(i=0; i<Xi.npts; i++) 
 		{
 			fprintf(fout, "%lf\n", Xi.r[i]); 
 			fprintf(fout, "\t%lf\n", Xi.xi_r[i]);
@@ -242,8 +242,8 @@ void print_growth_factor()
 		for (k=0; k<dim_eff; k++) 
 		{
 			fprintf(output,"%lf", GrowthFac.z[k]);
-			fprintf(output,"\t%lf", GrowthFac.gf_z[k]);
-			fprintf(output,"\t%lf", GrowthFac.gf_over_a_z[k]);
+			fprintf(output,"\t%lf", GrowthFac.gf[k]);
+			fprintf(output,"\t%lf", GrowthFac.gf[k]/GrowthFac.a[k]);
 			fprintf(output,"\n");
 		}
 
@@ -259,7 +259,7 @@ void print_evolution_to_file()
 	char *out = merge_strings(Urls.output_prefix, "halo_subhalo_evolution.dat");
 	FILE *f_out = fopen(out, "w");
 
-	nTot = Urls.numFiles-1;
+	nTot = Urls.nCatalogueFiles-1;
 	
 	fprintf(f_out,"#");
 	FILE_HEADER(f_out, "z           ", count);
@@ -328,9 +328,9 @@ void print_all_halo_properties_to_one_file()
 
 			for(i=0; i<nBins; i++)	
 			{
-				fprintf(out, "%e", MassFunc.num_masses[i]);
+				fprintf(out, "%e", MassFunc.mass[i]);
 				fprintf(out, "\t%e", MassFunc.n[i]);
-				fprintf(out, "\t%lf", HaloZ.c_avg_mass[i]);
+				fprintf(out, "\t%lf", HaloZ.c_avg[i]);
 				fprintf(out, "\t%lf", HaloZ.c[i]);
 				fprintf(out, "\t%lf", HaloZ.p_c[i]);
 				fprintf(out, "\t%lf", HaloZ.l[i]);
@@ -386,23 +386,21 @@ void print_numerical_mass_function()
 	FILE *output = fopen(file_out, "w");
 
 		fprintf(output,"#");
-		FILE_HEADER(output, "M", count);
-		FILE_HEADER(output, "n", count);
-		FILE_HEADER(output, "n_tot", count);
-		FILE_HEADER(output, "n_err", count);
-		FILE_HEADER(output, "M_dM", count);
-		FILE_HEADER(output, "dn", count);
-		FILE_HEADER(output, "n_bin", count);
+		FILE_HEADER(output, "M     ", count);
+		FILE_HEADER(output, "n     ", count);
+		FILE_HEADER(output, "n_tot ", count);
+		FILE_HEADER(output, "n_err ", count);
+		FILE_HEADER(output, "dn    ", count);
+		FILE_HEADER(output, "n_bin ", count);
 		FILE_HEADER(output, "dn_err", count);
 		fprintf(output,"\n");
 
 			for(i=0; i<nBins; i++) 
 			{
-				fprintf(output, "%e", MassFunc.num_masses[i]);
+				fprintf(output, "%e", MassFunc.mass[i]);
 				fprintf(output, "\t%e", MassFunc.n[i]);
 				fprintf(output, "\t%d", MassFunc.n_tot[i]);
 				fprintf(output, "\t%e", MassFunc.err[i]);
-				fprintf(output, "\t%e", MassFunc.dn_num_masses[i]);
 				fprintf(output, "\t%e", MassFunc.dn[i]);
 				fprintf(output, "\t%d", MassFunc.n_bin[i]);
 				fprintf(output, "\t%e", MassFunc.err_dn[i]);

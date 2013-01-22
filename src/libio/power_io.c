@@ -11,12 +11,12 @@
 
 void fill_pk_file(int num)
 {
-	FILE *f = fopen(Pks[num].url, "r");
+	FILE *f = fopen(Urls.urls_pks[num], "r");
 	double kk=0, ppkk=0;
 	char dummyline[200];
 	int i=0, skip=Settings.pk_skip;
 
-		for(i=0; i< Pks[num].n_pk_entries + skip; i++) 
+		for(i=0; i< Pks[num].npts + skip; i++) 
 			{
 				fgets(dummyline, 200, f);
 			if(i>=skip)
@@ -43,7 +43,7 @@ void read_pk_snapshots()
 		if(Settings.use_one_pk == 1)
 		{
 			fprintf(stderr, "\nReading one P(k) from: %s\n", Urls.pk_file);
-				Pks[0].url = Urls.pk_file;
+			strcpy(Urls.urls_pks[0],Urls.pk_file);
 			
 		} else {
 
@@ -56,18 +56,18 @@ void read_pk_snapshots()
 	nPkSnaps = get_lines(pk, Urls.pk_list);
 	rewind(pk);
 
-	if(nPkSnaps != Settings.n_pk_files) 
+	if(nPkSnaps != Urls.nPkFiles) 
 	{
-		fprintf(stderr, "\nNumber of redshifts (%d) and number of snapshots (%d) does not match!\n", 
-		Settings.n_pk_files, nPkSnaps);
+		fprintf(stderr, "\nWarning. Number of redshifts (%d) and number of snapshots (%d) does not match!\n", 
+			Urls.nPkFiles, nPkSnaps);
 	}
 
 			for(n=0; n<nPkSnaps; n++)	
 			{
 				fgets(dummyline,120,pk);
-				dummyline[strlen(dummyline)-1]='\0';
-				Pks[n].url = (char *) calloc(strlen(dummyline)+1, sizeof(char));	
-				strcpy(Pks[n].url,dummyline);
+				Urls.urls_pks[n] = (char *) calloc(strlen(dummyline)+1, sizeof(char));	
+				strcpy(Urls.urls_pks[n],dummyline);
+				Urls.urls_pks[n][strlen(dummyline)-1]='\0';
 #ifdef PRINT_INFO
 	fprintf(stdout, "%s\n", dummyline);
 #endif
@@ -80,32 +80,33 @@ void read_pk_snapshots()
 void init_pks()
 {
 	int m=0, numPkFiles=0, dimPkFile=0;  
-	FILE *f;  
+	FILE *f=NULL;  
  
 		if(Settings.use_one_pk == 1) 
-			{
-				numPkFiles = 1;
+		{
+			numPkFiles = 1;
 
-				} else {
-					numPkFiles = Settings.n_pk_files;
-				}
+			} else {
+				numPkFiles = Urls.nPkFiles;
+			}
 
 			Pks = (struct power_spectrum *) calloc(numPkFiles, sizeof(struct power_spectrum));
-
+			Urls.urls_pks = (char **) calloc(numPkFiles, sizeof(char *));
+			
 			read_pk_snapshots();
 
 			for(m=0; m<numPkFiles; m++)
 			{
-				f = fopen(Pks[m].url, "r");
-				dimPkFile = get_lines(f, Pks[m].url) - Settings.pk_skip;
-				Pks[m].n_pk_entries = dimPkFile;
+				f = fopen(Urls.urls_pks[m], "r");
+				dimPkFile = get_lines(f, Urls.urls_pks[m]) - Settings.pk_skip;
+				Pks[m].npts = dimPkFile;
 
 #ifdef PRINT_INFO
 		fprintf(stderr, "Number of P(k) files:%d, dimension of file[%d]:%d \n", numPkFiles, m+1, dimPkFile);
 #endif
 
-			Pks[m].k    = (double *) calloc(dimPkFile, sizeof(double));
-			Pks[m].pk   = (double *) calloc(dimPkFile, sizeof(double));
+				Pks[m].k    = (double *) calloc(dimPkFile, sizeof(double));
+				Pks[m].pk   = (double *) calloc(dimPkFile, sizeof(double));
 
 				if(Settings.use_one_pk > 1)
 				{

@@ -30,7 +30,7 @@ void initialize_halo_properties_structure()
 			// Other halo properties
 		HaloZ.n_bins=nBins-1; nBins--;
 		HaloZ.c = (double*) calloc(nBins, sizeof(double));
-		HaloZ.c_avg_mass = (double*) calloc(nBins, sizeof(double));
+		HaloZ.c_avg = (double*) calloc(nBins, sizeof(double));
 		HaloZ.p_c = (double*) calloc(nBins, sizeof(double));
 		HaloZ.l = (double*) calloc(nBins, sizeof(double));
 		HaloZ.p_l = (double*) calloc(nBins, sizeof(double));
@@ -457,7 +457,7 @@ void sort_concentration()
 
 			for(i=0; i<nBins-1; i++)
 			{
-				HaloZ.c_avg_mass[i]=c_avg_mass[i];
+				HaloZ.c_avg[i]=c_avg_mass[i];
 			}
 	
 /*	

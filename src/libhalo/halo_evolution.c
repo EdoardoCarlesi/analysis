@@ -55,12 +55,13 @@ void stdout_halo_status(int j)
 void initialize_halo_storage()
 {
 	int k=0, j=0, nTot=0;
-	nTot = Urls.numFiles;
+
+	nTot = Urls.nCatalogueFiles;
 
 	HaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
 	SubHaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
 
-		for(j=0; j< nTot; j++)
+		for(j=0; j<nTot; j++)
 		{
 			k = GrowthFac.npts - j - 1;
 			HaloProperties[j].z = GrowthFac.z[k];
