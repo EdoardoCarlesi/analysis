@@ -20,7 +20,7 @@ model1='lcdm'
 model2='ude'
 box_size=75
 particle_number=256
-tot_snaps=29
+tot_snaps=28
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
@@ -76,7 +76,7 @@ zMax=3
 fit=0
 
 # Base directories
-base_ahf=${HOME}/ahf-v1.0/
+base_ahf=${HOME}/AHF/latest_ahf/
 base_data=${HOME}/data/dedm/
 base_analysis=${HOME}/Analysis/
 base_out=$base_analysis/output/

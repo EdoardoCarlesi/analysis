@@ -12,10 +12,10 @@ list_file=$7
 
 
 if [ $swap -eq 1 ] ; then
-amigaPk=$amigadir'/bin/amigaPk-swap'
+amigaPk=$amigadir'/bin/simuPk-swap'
 else 
-#amigaPk=$amigadir'/bin/amigaPk'
 amigaPk=$amigadir'/bin/simuPk'
+echo amigaPk=$amigadir'/bin/simuPk'
 fi
 
 cd $filesdir

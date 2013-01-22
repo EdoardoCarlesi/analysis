@@ -13,8 +13,7 @@ fprintf(stdout, "\nComputing the Chi^2 distribution of NFW profiles fits for the
 
 	initialize_internal_variables(argv);
 
-	Cosmo.err=0.3;
-	Cosmo.OmegaM=1.;
+	Cosmo.err=0.3;  Cosmo.OmegaM=1.;
 
 	read_halo_file();
 

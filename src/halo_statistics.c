@@ -4,7 +4,6 @@
 #include "libio/write_io.h"
 #include "libio/halo_io.h"
 #include "libhalo/halo_properties.h"
-
 #include "general_functions.h"
 #include "general_variables.h"
 
