@@ -63,6 +63,7 @@ extern struct general_settings
 	int n_subhaloes;
 	int n_subhaloes_nmin;
 	int n_bins;
+	int n_bins_th;
 	int r_bins;
 
 	int use_n_min; // If =1 using n_min, otherwise using mass_min
@@ -137,6 +138,7 @@ extern struct mass_function
 	double *sigma;
 
 	double *ln_mass;
+	double *ln_mass_halfstep;
 	double *ln_sigma;
 	double *dln_sigma_dln_mass;
 

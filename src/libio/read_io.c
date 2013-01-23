@@ -58,9 +58,9 @@ void read_redshift_file()
 					GrowthFac.a[i] = aa;
 					GrowthFac.z[i] = 1./aa - 1.;
 #ifdef PRINT_INFO
-			fprintf(stderr, "%d) a:%lf z:%lf\n", i, aa, GrowthFac.z[i]);
+					fprintf(stderr, "%d) a:%lf z:%lf\n", i, aa, GrowthFac.z[i]);
 #endif
-		}
+				}
 }		
 
 

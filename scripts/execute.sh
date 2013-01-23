@@ -27,7 +27,8 @@ catalogue_z=0
 catalogue_number=028
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=10
+n_bins=25
+n_bins_th=100
 r_bins=7
 
 # Scale of P(k) for growth factor calculation
@@ -38,12 +39,12 @@ pk_skip=11
 mf_skip=1
 
 #Minimum and maximum mass for the mass function computation
-m_min=1.e+11
+m_min=1.e+10
 m_max=1.e+15
-m_th=1.e+10
 
-#Minimum particles per halo
+#Minimum particles per halo or minimum mass per halo
 n_min=200
+m_th=1.e+10
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
 use_n_min=1
@@ -87,16 +88,8 @@ dir_snaps=snaps
 dir_halo=catalogues01
 
 # General file prefixes 
-prefix1=$base_out$model1'-'$box_size'-'$particle_number'-'
-prefix2='k_'$k'-'
-prefix3='z_'$catalogue_z'-'
-prefix4='M_'$m_min'-'
-prefix5='N_'$n_min'_'
-prefix6='snaps_'$tot_snaps
+prefix=$base_out$model1'-'$box_size'-'$particle_number'-'
 
-if [ $fit -eq 1 ] ; then 
-prefix1=$prefix1'fit-'
-fi
 
 # Where the output redshift file for the snapshot is
 if [ $particle_number -eq 32 ] ; then
@@ -171,15 +164,15 @@ ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
 cd $base_analysis/src/
 make clean
 
-#url_variables=$base_analysis' '$outputs' '$pk_file1' '$halo_file1' '$profile_file1' '$pk_file_base1' '$snaps_dir1' '$halo_dir1
-url_variables=$outputs' '$halo_file1' '$profile_file1' '$pk_file1
-set_variables=$box_size' '$particle_number' '$n_bins' '$pk_skip' '$mf_skip' '$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$r_bins' '$n_min' '$use_n_min' '$use_n_haloes
-cosmo_variables=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
-extra_variables=$k' '$zMax
-evolution_variables=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
-halo2_variables=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
+url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1
+set_var1=$box_size' '$particle_number' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip
+set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$n_min' '$use_n_min' '$use_n_haloes
+cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
+extra_var=$k' '$zMax
+evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
+halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
 
-all_variables=$url_variables' '$set_variables' '$cosmo_variables' '$extra_variables' '
+all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$extra_var' '$prefix' '$evolution_var' '
 
 execute=$base_analysis
 
@@ -196,7 +189,7 @@ fi
 
 if [ $1 -eq 1 ] ; then
 make fit_nfw
-$execute/bin/fit_nfw $all_variables$prefix1$prefix3$prefix4
+$execute/bin/fit_nfw $all_variables
 fi
 
 if [ $1 -eq 2 ] ; then
@@ -207,45 +200,45 @@ fi
 if [ $1 -eq 3 ] ; then
 find $snaps_dir1'/Pk-'$particle_number* -print > $list_file
 make growth_factor
-$execute/bin/growth_factor $all_variables$prefix1$prefix2 $evolution_variables
+$execute/bin/growth_factor $all_variables
 fi
 
 if [ $1 -eq 4 ] ; then
 make mass_function
-$execute/bin/mass_function $all_variables$prefix1$prefix3
+$execute/bin/mass_function $all_variables
 fi
 
 if [ $1 -eq 5 ] ; then
 make halo_statistics
-$execute/bin/halo_statistics $all_variables$prefix1$prefix3$prefix4 $evolution_variables
+$execute/bin/halo_statistics $all_variables
 fi
 
 if [ $1 -eq 6 ] ; then
 make number_density
-$execute/bin/number_density $all_variables$prefix1$prefix4
+$execute/bin/number_density $all_variables
 fi
 
 if [ $1 -eq 7 ] ; then
 make halo_evolution
-$execute/bin/halo_evolution $all_variables$prefix1$prefix6 $pk_list_file $halo_evolution
+$execute/bin/halo_evolution $all_variables
 fi
 
 if [ $1 -eq 8 ] ; then
 make halo_comparison
-$execute/bin/halo_comparison $all_variables$prefix1$prefix3$prefix4' '$halo2_variables
+$execute/bin/halo_comparison $all_variables
 fi
 
 if [ $1 -eq 9 ] ; then
 make subhalo_statistics 
-$execute/bin/subhalo_statistics $all_variables$prefix1$prefix3$prefix5
+$execute/bin/subhalo_statistics $all_variables
 fi
 
 if [ $1 -eq 10 ] ; then
 make theoretical_mass_function
-$execute/bin/theoretical_mass_function  $all_variables$prefix1
+$execute/bin/theoretical_mass_function  $all_variables
 fi
 
 if [ $1 -eq 11 ] ; then
 make test
-$execute/bin/test  $all_variables$prefix1$prefix4
+$execute/bin/test  $all_variables
 fi

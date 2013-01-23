@@ -17,6 +17,7 @@
 #include "../libmath/statistics.h"
 #include "../libmath/mathtools.h"
 
+
 struct tinker_mf T_mf;
 
 
@@ -166,17 +167,17 @@ int d_mf_tinker_f(const gsl_vector *x, void *data, gsl_matrix *J)
 	c = gsl_vector_get(x,3);
 
 	for(i = 1; i < n; i++)
-		{
-			s = err[i];
+	{
+		s = err[i];
 
-			if(s==0) s = err[i-1];
+		if(s==0) s = err[i-1];
 
-			t = vx[i]; 
+		t = vx[i]; 
 
-			e1 = dA_mf_tinker(t,A,a,b,c);
-			e2 = da_mf_tinker(t,A,a,b,c);
-			e3 = db_mf_tinker(t,A,a,b,c); 
-			e4 = dc_mf_tinker(t,A,a,b,c); 
+		e1 = dA_mf_tinker(t,A,a,b,c);
+		e2 = da_mf_tinker(t,A,a,b,c);
+		e3 = db_mf_tinker(t,A,a,b,c); 
+		e4 = dc_mf_tinker(t,A,a,b,c); 
 
 	gsl_matrix_set(J,i,0,e1/s);
 	gsl_matrix_set(J,i,1,e2/s);

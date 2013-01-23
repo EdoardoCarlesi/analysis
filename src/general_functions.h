@@ -6,4 +6,6 @@ void normalize_to_one(char*, char*);
 
 void print_counter(int);
 
+void default_init(void);
+
 char* merge_strings(char*,char*);

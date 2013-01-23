@@ -47,6 +47,7 @@ void read_pk_snapshots()
 		if(Settings.use_one_pk == 1)
 		{
 			fprintf(stderr, "\nReading one P(k) from: %s\n", Urls.pk_file);
+			Urls.urls_pks[0] = (char *) calloc(strlen(Urls.pk_file), sizeof(char));
 			strcpy(Urls.urls_pks[0],Urls.pk_file);
 			
 		} else {
@@ -88,22 +89,22 @@ void init_pks()
  
 		if(Settings.use_one_pk == 1) 
 		{
-			numPkFiles = 1;
+			numPkFiles = 1;	
+		} else {
 
-			} else {
-				numPkFiles = Urls.nPkFiles;
-			}
+			numPkFiles = Urls.nPkFiles;
+		}
 
-			Pks = (struct power_spectrum *) calloc(numPkFiles, sizeof(struct power_spectrum));
-			Urls.urls_pks = (char **) calloc(numPkFiles, sizeof(char *));
+		Pks = (struct power_spectrum *) calloc(numPkFiles, sizeof(struct power_spectrum));
+		Urls.urls_pks = (char **) calloc(numPkFiles, sizeof(char *));
 			
-			read_pk_snapshots();
+		read_pk_snapshots();
 
-			for(m=0; m<numPkFiles; m++)
-			{
-				f = fopen(Urls.urls_pks[m], "r");
-				dimPkFile = get_lines(f, Urls.urls_pks[m]) - Settings.pk_skip;
-				Pks[m].npts = dimPkFile;
+		for(m=0; m<numPkFiles; m++)
+		{
+			f = fopen(Urls.urls_pks[m], "r");
+			dimPkFile = get_lines(f, Urls.urls_pks[m]) - Settings.pk_skip;
+			Pks[m].npts = dimPkFile;
 
 #ifdef PRINT_INFO
 		fprintf(stderr, "Number of P(k) files:%d, dimension of file[%d]:%d \n", numPkFiles, m+1, dimPkFile);
