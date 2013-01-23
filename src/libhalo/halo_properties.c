@@ -389,18 +389,19 @@ void sort_concentration()
 						conc[m] = Haloes[i].c;
 
 				mass[m] = Haloes[i].Mvir;
-				fprintf(stdout, "mass: %e, conc: %f\n", mass[m], conc[m]);
+			//	fprintf(stdout, "mass: %e, conc: %f\n", mass[m], conc[m]);
 				m++;
 			}
 		}
 		
 					cMax = 1.01*maximum(conc, nHaloes_conc); 
 					mMin = minimum(mass, nHaloes_conc);
+					mMax = 1.01*maximum(mass, nHaloes_conc); 
 					cMax = maximum(conc, nHaloes_conc); 
-					mMax = maximum(mass, nHaloes_conc); 
  		
 					bin_x=lin_stepper(cMin,cMax,nBins);
 					lin_bin(conc,bin_x,nBins,nHaloes_conc,int_c_bin_y);	
+
 				norm=(nBins)/((cMax-cMin)*nHaloes_conc);
 				halfstep=0.5*(bin_x[1]-bin_x[0]);
 
@@ -412,10 +413,10 @@ void sort_concentration()
 				c_err_y[i] = sqrt(norm*value);
 			}	
 
+			/*
 			//c_0 = average(conc, nHaloes_conc);
 			c_0 = maximum(c_bin_y, nBins-1);
 
-			/*
 				params = best_fit_lognorm(conc, nHaloes_conc, nBins-1, 
 					c_bin_x, c_bin_y, c_err_y);
 
@@ -584,9 +585,8 @@ void compute_halo_properties()
 
 		compute_numerical_mass_function();
 
-			//sort_axis_alignement();
+			sort_axis_alignement();
 			sort_shape_and_triaxiality();
-			//sort_radial_velocity();
 			sort_lambda();
 			sort_concentration();
 

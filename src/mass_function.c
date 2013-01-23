@@ -18,9 +18,6 @@ int main(int arg, char **argv)
 
 	initialize_internal_variables(argv);
 
-	MassFunc.bins  = Settings.n_bins; 
-	ThMassFunc.bins = Settings.n_bins_th;
-
 #ifdef WITH_MPI
 	MPI_Init(&arg, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
@@ -46,7 +43,9 @@ int main(int arg, char **argv)
 		init_pks();
 
 		get_halo_files_urls();
-		use_halo_url(0);
+
+		set_halo_url();
+
 		read_halo_file();
 
 #ifdef WITH_MPI

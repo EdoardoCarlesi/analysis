@@ -44,7 +44,7 @@ void compute_growth_factor()
 {
 	fprintf(stderr,"compute_growth_factor().\n");
 
-	int i=0, pk0=0, pkNorm=0, dim_eff=0; 
+	int i=0, j=0, pk0=0, pkNorm=0, dim_eff=0; 
 	double norm=1., pk_norm=1., delta=1.;
 	double a=0, z=0, pk=0, K=0, kk=0; 
 
@@ -52,7 +52,7 @@ void compute_growth_factor()
 		K = GrowthFac.scale_k, 
 
 		dim_eff = Urls.nPkFiles;
-		pkNorm  = dim_eff - 1;
+		pkNorm  = 0; // This way we normalize GrowthFactor(z=0) = 1
 
 			if(K < kk) 
 			{
@@ -60,15 +60,16 @@ void compute_growth_factor()
 				"\n**Chosen k (%lf) is smaller than the numerical range. Setting k=%lf.\n", K, kk);
 				K = kk; 
 			}
-					// pk0 is the highest redshift power spectrum
-					// pkNorm is the z at which we want the GrowthFac to be exactly one
+				// pk0 is the highest redshift power spectrum
+				// pkNorm is the z at which we want the GrowthFac to be exactly one
 				pk_norm = power_k(K, pk0);
 				norm = power_k(K, pkNorm);
 
 		fprintf(stderr, "Normalizing to Pk[%d]=%lf at scale k:%lf\n", pk0, pk_norm, K);
 
-		for (i=0; i<dim_eff; i++)
+		for (j=0; j<dim_eff; j++)
 		{
+			i = dim_eff-j-1;
 			pk = power_k(K, i);
 			delta = sqrt(pk/pk_norm);
 			delta *= sqrt(pk_norm/norm);

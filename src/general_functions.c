@@ -36,6 +36,7 @@ void initialize_internal_variables(char **argv){
 	Settings.r_bins = atoi(argv[count++]);
 	Settings.pk_skip = atoi(argv[count++]);
 	Settings.halo_skip = atoi(argv[count++]);
+	Settings.cat_number = atoi(argv[count++]);
 	Settings.fit = atoi(argv[count++]);
 	Settings.zStart = atof(argv[count++]);
 	Settings.mass_min = atof(argv[count++]);
@@ -66,17 +67,14 @@ void initialize_internal_variables(char **argv){
 	Urls.pk_list = argv[count++];
 	Urls.nCatalogueFiles = atoi(argv[count++]);
 
+//	fprintf(stdout, "Prefix=%s\n", Urls.output_prefix);
+
 #ifdef PRINT_INFO
 	int kk=0;
  
 	for(kk=1; kk<count; kk++) 
 		fprintf(stderr, "argv[%d]: %s \n", kk, argv[kk]);
 #endif
-	// Setting extra useful variables
-	Cosmo.H_0=Cosmo.h*100;
-	Cosmo.G=6.672e-8;
-	ThMassFunc.Mmin=Settings.Mmin;
-	ThMassFunc.Mmax=Settings.Mmax;
 
 	default_init();
 }
@@ -85,6 +83,16 @@ void initialize_internal_variables(char **argv){
 
 void default_init()
 {
+	// Setting extra useful variables
+	Cosmo.H_0=Cosmo.h*100;
+	Cosmo.G=6.672e-8;
+	ThMassFunc.Mmin=Settings.Mmin;
+	ThMassFunc.Mmax=Settings.Mmax;
+	MassFunc.bins  = Settings.n_bins; 
+	ThMassFunc.bins = Settings.n_bins_th;
+	Settings.use_cat=Urls.nCatalogueFiles-Settings.cat_number;
+	
+	// Init some commonly used structures to default values
 	GrowthFac.z = (double *) calloc(1, sizeof(double));
 	GrowthFac.a = (double *) calloc(1, sizeof(double));
 	GrowthFac.gf= (double *) calloc(1, sizeof(double));

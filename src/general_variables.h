@@ -47,6 +47,8 @@ extern struct general_settings
 	int halo_skip;
 	int pk_skip;
 	int use_one_pk;
+	int cat_number;
+	int use_cat;
 
 	double box_size;
 	double zStart;
@@ -335,6 +337,8 @@ extern struct halo_properties
 	double c_sig;
 	double c_sig2;
 
+	double *mass; // The masses stored here are in different in principle, since include the mass/npart threshold
+
 	double *c;
 	double *c_c0;
 	double *c_avg;
@@ -357,7 +361,6 @@ extern struct halo_properties
 	double *shape;
 	double *p_shape;
 	
-	double *mass;
 	double *radVel;
 	double *err_radVel;
 

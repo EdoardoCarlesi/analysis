@@ -32,7 +32,7 @@ int main(int argc, char **argv)
 
 			get_halo_files_urls();
 			
-			use_halo_url(0);
+			set_halo_url();
 
 			read_halo_file();
 
@@ -51,7 +51,10 @@ int main(int argc, char **argv)
 
 		compute_halo_properties();
 
-		print_all_halo_properties_to_one_file();
+		print_axis_alignment(0);
+
+		print_all_halo_properties_to_one_file(0);
+		
 	
 #ifdef WITH_MPI
 	}
