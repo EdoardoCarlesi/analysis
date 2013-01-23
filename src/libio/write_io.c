@@ -20,13 +20,7 @@ void print_number_densities()
 
 	nTot = NumDen.npts; 
 	M = Settings.mass_min;
-	N = Settings.n_min;
-
-	if(Settings.use_n_min == 1)
-		sprintf(out, "%sN_%d%s", Urls.output_prefix, N, "_number_density.dat");
-	else
-		sprintf(out, "%sM_%.2e%s", Urls.output_prefix, M, "_number_density.dat");
-		
+	sprintf(out, "%sM_%.2e%s", Urls.output_prefix, M, "_number_density.dat");
 	fopen(out, "w");
 
 	fprintf(stdout, "\nWriting number_density() output to: %s \n", out);
@@ -52,13 +46,14 @@ void print_number_densities()
 
 void print_all_subhalo_properties_to_one_file()
 {
-	int i=0, count=1, nBins=0;
+	int i=0, j=0, count=1, nTot=0;
 	double z=0;
 	char out[200]; 
 	FILE* fout=NULL;
 
-	nBins = SubHaloZ.n_bins;
-	z = GrowthFac.z[GrowthFac.npts-i-1];
+	nTot = SubHaloZ.n_bins;
+	j = Settings.use_cat;
+	z = GrowthFac.z[j];
  	sprintf(out, "%sz%.2f%s", Urls.output_prefix, z, "_all_sub_statistics.dat");
 	fout = fopen(out,"w");
 

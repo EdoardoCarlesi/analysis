@@ -65,6 +65,12 @@ void determine_simulation_settings()
 		SETTINGS->n_all
 		);		
 
+#ifndef GAS
+		// Now set the mass_min to the value determined by the n_part
+		if(Settings.use_n_min == 1)
+			Settings.mass_min = Settings.n_min * Settings.pMass; 
+#endif
+	
 	} else {
 		fprintf(stderr, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
 		- %d virialized\n\
@@ -482,6 +488,7 @@ void read_halo_file()
 	
 	determine_simulation_settings();	
 
+		
 	fclose(h_file);
 }
 
