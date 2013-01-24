@@ -298,9 +298,9 @@ void store_mf(int m)
 
 
 
-void compute_theoretical_mass_function(int index)
+void compute_theoretical_mass_function()
 {
-	int k=0, nTot;
+	int k=0, nTot=0;
 	void *p=0; 
 	double Mmin, Mmax;
 		
@@ -308,7 +308,7 @@ void compute_theoretical_mass_function(int index)
 
 	fprintf(stdout, "\ncompute_theoretical_mass_function()\n");
 	
-		PK_INDEX = index;
+		PK_INDEX = Settings.use_cat;
 	
 		init_ThMassFunc();
 		init_sigmas();
