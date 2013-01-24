@@ -55,10 +55,10 @@ void read_redshift_file()
 				{
 					fgets(dummyline, 50, redshifts_file);
 					sscanf(dummyline, "%lf", &aa);
-					GrowthFac.a[i] = aa;
-					GrowthFac.z[i] = 1./aa - 1.;
+					GrowthFac.a[size-i-1] = aa;
+					GrowthFac.z[size-i-1] = 1./aa - 1.;
 #ifdef PRINT_INFO
-					fprintf(stderr, "%d) a:%lf z:%lf\n", i, aa, GrowthFac.z[i]);
+					fprintf(stderr, "%d) a:%lf z:%lf\n", size-i-1, aa, GrowthFac.z[size-i-1]);
 #endif
 				}
 }		

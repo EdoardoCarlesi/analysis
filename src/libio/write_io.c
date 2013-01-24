@@ -10,397 +10,369 @@
 
 #define FILE_HEADER(fout, info, count) fprintf(fout, info "(%i)\t",count++)
 
+#define DUMP_MSG(name, url) fprintf(stdout, "Printing %s to file: %s\n", name, url)
+
+static int i;
+static int count;
+static int nTot;
+static double z;
+static double M;
+static char out_url[200];
+static FILE *out_file;
+
 
 void print_number_densities()
 {
-	int k=0, count=1, nTot=0, N=0;
-	double M=0;
-	char out[200]; 
-	FILE *fout=NULL;
-
+	count = 1;
 	nTot = NumDen.npts; 
 	M = Settings.mass_min;
-	sprintf(out, "%sM_%.2e%s", Urls.output_prefix, M, "_number_density.dat");
-	fopen(out, "w");
+	sprintf(out_url, "%sM_%.2e%s", Urls.output_prefix, M, "_number_density.dat");
+	out_file = fopen(out_url, "w");
 
-	fprintf(stdout, "\nWriting number_density() output to: %s \n", out);
-	
-		fprintf(fout,"#");
-		FILE_HEADER(fout, "z", count);
-		FILE_HEADER(fout, "Tinker n", count);
-		FILE_HEADER(fout, "numerical n", count);
-		fprintf(fout, "\n");
+	DUMP_MSG("number density", out_url);
 
-		for(k=0; k<nTot; k++) 
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "z          ", count);
+		FILE_HEADER(out_file, "Tinker n   ", count);
+		FILE_HEADER(out_file, "numerical n", count);
+		fprintf(out_file, "\n");
+
+		for(i=0; i<nTot; i++) 
 		{
-			fprintf(fout,"%.4lf", NumDen.z[k]);
-			fprintf(fout,"\t%.3e", NumDen.n_th[k]);
-			fprintf(fout,"\t%.3e", NumDen.n_num[k]);
-			fprintf(fout, "\n");
+			fprintf(out_file,"%.4lf", NumDen.z[i]);
+			fprintf(out_file,"\t%.3e", NumDen.n_th[i]);
+			fprintf(out_file,"\t%.3e", NumDen.n_num[i]);
+			fprintf(out_file, "\n");
 		}
 
-	fclose(fout);
+	fclose(out_file);
 }
 
 
 
 void print_all_subhalo_properties_to_one_file()
 {
-	int i=0, j=0, count=1, nTot=0;
-	double z=0;
-	char out[200]; 
-	FILE* fout=NULL;
-
+	count = 1;
 	nTot = SubHaloZ.n_bins;
-	j = Settings.use_cat;
-	z = GrowthFac.z[j];
- 	sprintf(out, "%sz%.2f%s", Urls.output_prefix, z, "_all_sub_statistics.dat");
-	fout = fopen(out,"w");
+	z = GrowthFac.z[Settings.use_cat];
+ 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_all_sub_statistics.dat");
+	out_file = fopen(out_url,"w");
 
-	fprintf(stdout, "\nWriting subhalo_properties() output to:%s\n", out);
+	DUMP_MSG("subhalo properties", out_url);
 
-		fprintf(fout,"#");
-		FILE_HEADER(fout, "lambda ", count);
-		FILE_HEADER(fout, "P(l)", count);
-		FILE_HEADER(fout, "shape", count);
-		FILE_HEADER(fout, "P(s)", count);
-		FILE_HEADER(fout, "triax", count);
-		FILE_HEADER(fout, "P(t)", count);
-		FILE_HEADER(fout, "Cos(th)", count);
-		FILE_HEADER(fout, "P(c(th))", count);
-		FILE_HEADER(fout, "Cos(phi)", count);
-		FILE_HEADER(fout, "P(c(phi))", count);
-		FILE_HEADER(fout, "sub(r)/Rv", count);
-		FILE_HEADER(fout, "n(r)", count);
-		FILE_HEADER(fout, "n(>r)", count);
-		FILE_HEADER(fout, "V_sub", count);
-		FILE_HEADER(fout, "P(V_sub)", count);
-		FILE_HEADER(fout, "mass", count);
-		FILE_HEADER(fout, "n(>M)", count);
-		FILE_HEADER(fout, "subset(r)", count);
-		FILE_HEADER(fout, "subset(n(>r))", count);
-		fprintf(fout, "\n");
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "lambda ", count);
+		FILE_HEADER(out_file, "P(l)", count);
+		FILE_HEADER(out_file, "shape", count);
+		FILE_HEADER(out_file, "P(s)", count);
+		FILE_HEADER(out_file, "triax", count);
+		FILE_HEADER(out_file, "P(t)", count);
+		FILE_HEADER(out_file, "Cos(th)", count);
+		FILE_HEADER(out_file, "P(c(th))", count);
+		FILE_HEADER(out_file, "Cos(phi)", count);
+		FILE_HEADER(out_file, "P(c(phi))", count);
+		FILE_HEADER(out_file, "sub(r)/Rv", count);
+		FILE_HEADER(out_file, "n(r)", count);
+		FILE_HEADER(out_file, "n(>r)", count);
+		FILE_HEADER(out_file, "V_sub", count);
+		FILE_HEADER(out_file, "P(V_sub)", count);
+		FILE_HEADER(out_file, "mass", count);
+		FILE_HEADER(out_file, "n(>M)", count);
+		FILE_HEADER(out_file, "subset(r)", count);
+		FILE_HEADER(out_file, "subset(n(>r))", count);
+		fprintf(out_file, "\n");
 
-		for(i=0; i<nBins; i++)	
+		for(i=0; i<nTot; i++)	
 		{
-			fprintf(fout, "%lf"  , SubHaloZ.l[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.p_l[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.shape[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.triax[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.costh[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.costh_count[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.cosphi[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.cosphi_count[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.r_sub[i]);
-			fprintf(fout, "\t%d" , SubHaloZ.n_r_sub[i]);
-			fprintf(fout, "\t%d" , SubHaloZ.cum_n_r_sub[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.vel_sub[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.p_vel_sub[i]);
-			fprintf(fout, "\t%e" , SubHaloZ.mass_sub[i]);
-			fprintf(fout, "\t%d" , SubHaloZ.cum_n_sub[i]);
-			fprintf(fout, "\t%lf", SubHaloZ.r_sub_subset[i]);
-			fprintf(fout, "\t%d" , SubHaloZ.cum_n_r_sub_subset[i]);
-			fprintf(fout, "\n");
+			fprintf(out_file, "%lf"  , SubHaloZ.l[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.p_l[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.shape[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.triax[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.costh[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.costh_count[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.cosphi[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.cosphi_count[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.r_sub[i]);
+			fprintf(out_file, "\t%d" , SubHaloZ.n_r_sub[i]);
+			fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.vel_sub[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.p_vel_sub[i]);
+			fprintf(out_file, "\t%e" , SubHaloZ.mass_sub[i]);
+			fprintf(out_file, "\t%d" , SubHaloZ.cum_n_sub[i]);
+			fprintf(out_file, "\t%lf", SubHaloZ.r_sub_subset[i]);
+			fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub_subset[i]);
+			fprintf(out_file, "\n");
 		}
 
-	fclose(fout);	
+	fclose(out_file);	
 }
 
 
 
-void print_theoretical_mass_function(int i)
+void print_theoretical_mass_function()
 {
-	double z=0; 
-	int k=0, count=1, nTot=0; 
-	char out_file[200];
-	FILE *fout=NULL;
-
+	count = 1;
 	nTot = ThMassFunc.bins-1;
-	z = GrowthFac.z[GrowthFac.npts-i-1];
-	sprintf(out_file, "%sz%.2f%s", Urls.output_prefix, z, "_theoretical_mass_function.dat");
-	fout=fopen(out_file, "w");
+	z = GrowthFac.z[Settings.use_cat];
+	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_theoretical_mass_function.dat");
+	out_file = fopen(out_url, "w");
 
-	fprintf(stdout, "Theoretical mass function output file:%s \n", out_file);
+	DUMP_MSG("theoretical mass function", out_url);
 
-		fprintf(fout,"#");
-		FILE_HEADER(fout, "Mass", count);
-		FILE_HEADER(fout, "n(>M) Tinker", count);
-		FILE_HEADER(fout, "dn Tinker", count);
-		fprintf(fout, "\n");
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "Mass", count);
+		FILE_HEADER(out_file, "n(>M) Tinker", count);
+		FILE_HEADER(out_file, "dn Tinker", count);
+		fprintf(out_file, "\n");
 
-			for(k=0; k<nTot; k++)
+			for(i=0; i<nTot; i++)
 			{
-				fprintf(fout,"%e", ThMassFunc.mass_halfstep[k]);
-				fprintf(fout,"\t%e", ThMassFunc.n[k]);
-				fprintf(fout,"\t%e", ThMassFunc.dn[k]);
-				fprintf(fout,"\n");
+				fprintf(out_file,"%e", ThMassFunc.mass_halfstep[i]);
+				fprintf(out_file,"\t%e", ThMassFunc.n[i]);
+				fprintf(out_file,"\t%e", ThMassFunc.dn[i]);
+				fprintf(out_file,"\n");
 			}
 
-	fclose(fout);
+	fclose(out_file);
 }
 
 
 
 void print_correlation_function(int j)
 {
-	int i=0, count=1, nTot=0; 
-	double z=0;
-	char fileName[200];
-	FILE *fout=NULL;
-	
+	count = 1;
 	nTot = Xi.npts;
-	z = GrowthFac.z[GrowthFac.npts-i-1];
-	sprintf(fileName, "%sz%.2f%s", Urls.output_prefix, z, "_correlation_function.dat");
-	fopen(fileName,"w");
+	z = GrowthFac.z[Settings.use_cat];
+	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_correlation_function.dat");
+	out_file = fopen(out_url,"w");
 
-	fprintf(stdout, "\nWriting correlation_function() output to: %s\n", fileName);
+	DUMP_MSG("correlation function", out_url);
 
-		fprintf(fout,"#");
-		FILE_HEADER(fout, "R", count);
-		FILE_HEADER(fout, "Xi", count);
-		FILE_HEADER(fout, "Xi fit", count);
-		fprintf(fout, "\n");
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "R", count);
+		FILE_HEADER(out_file, "Xi", count);
+		FILE_HEADER(out_file, "Xi fit", count);
+		fprintf(out_file, "\n");
 	
 		for(i=0; i<nTot; i++) 
 		{
-			fprintf(fout, "%lf\n", Xi.r[i]); 
-			fprintf(fout, "\t%lf\n", Xi.xi_r[i]);
-			fprintf(fout, "\t%lf\n", Xi.xi_fit[i]);
-			fprintf(fout, "\n");
+			fprintf(out_file, "%lf\n", Xi.r[i]); 
+			fprintf(out_file, "\t%lf\n", Xi.xi_r[i]);
+			fprintf(out_file, "\t%lf\n", Xi.xi_fit[i]);
+			fprintf(out_file, "\n");
 		}
-	fclose(fout);
+	fclose(out_file);
 }
 
 
 
 void print_growth_factor()
 {
-	int count=1, k=0, nTot=0; 
-	double scale=0;
-	char fileName[200];
-	FILE *output=NULL; 
-
+	count = 1;
 	nTot = GrowthFac.npts;
-	scale = GrowthFac.scale_k;
-	sprintf(fileName, "%sk%.3f%s", Urls.output_prefix, scale, "_growth_factor.dat");	
-	output = fopen(fileName,"w");
+	sprintf(out_url, "%sk%.3f%s", Urls.output_prefix, GrowthFac.scale_k, "_growth_factor.dat");	
+	out_file = fopen(out_url,"w");
 
-	fprintf(stdout,"Printing growth_factors() to:%s.\n", fileName);
+	DUMP_MSG("growth factor", out_url);
 	
-		fprintf(output, "#");
-		FILE_HEADER(output, "z", count);
-		FILE_HEADER(output, "gf", count);
-		FILE_HEADER(output, "gf/a", count);
-		fprintf(output, "\n");
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "z   ", count);
+		FILE_HEADER(out_file, "gf  ", count);
+		FILE_HEADER(out_file, "gf/a", count);
+		fprintf(out_file, "\n");
 	
-		for (k=0; k<nTot; k++) 
+		for (i=0; i<nTot; i++) 
 		{
-			fprintf(output,"%lf", GrowthFac.z[k]);
-			fprintf(output,"\t%lf", GrowthFac.gf[k]);
-			fprintf(output,"\t%lf", GrowthFac.gf[k]/GrowthFac.a[k]);
-			fprintf(output,"\n");
+			fprintf(out_file,"%lf", GrowthFac.z[i]);
+			fprintf(out_file,"\t%lf", GrowthFac.gf[i]);
+			fprintf(out_file,"\t%lf", GrowthFac.gf[i]/GrowthFac.a[i]);
+			fprintf(out_file,"\n");
 		}
 
-	fclose(output);
-	fprintf(stdout, "Written growth factor file to %s.\n", fileName);
+	fclose(out_file);
 }
 
 
 
 void print_evolution_to_file()
 {
-	int j=0, count=1, nTot=0; 
-	char out[200]; 
-	FILE *f_out=NULL;
-
+	count = 1;
 	nTot = Urls.nCatalogueFiles-1;
-	sprintf(out, "%s%s", Urls.output_prefix, "halo_subhalo_evolution.dat");
-	fopen(out, "w");
-	fprintf(stdout,"Printing evolution() to:%s.\n", out);
-	
-		fprintf(f_out,"#");
-		FILE_HEADER(f_out, "z", count);
-		FILE_HEADER(f_out, "conc", count);
-		FILE_HEADER(f_out, "lambda", count);
-		FILE_HEADER(f_out, "shape", count);
-		FILE_HEADER(f_out, "triax", count);
-		FILE_HEADER(f_out, "avg_sub", count);
-		FILE_HEADER(f_out, "sub_conc", count);
-		FILE_HEADER(f_out, "sub_lambda", count);
-		FILE_HEADER(f_out, "sub_shape", count);
-		FILE_HEADER(f_out, "sub_triax", count);
-		FILE_HEADER(f_out, "sub_costh", count);
-		FILE_HEADER(f_out, "sub_cosphi", count);
-		FILE_HEADER(f_out, "sub_avg_vel", count);
-		FILE_HEADER(f_out, "sub_avg_mass", count);
-		fprintf(f_out,"\n");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "halo_subhalo_evolution.dat");
+	out_file = fopen(out_url, "w");
 
-		for(j=0; j<nTot; j++)
+	DUMP_MSG("evolution", out_url);
+	
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "z         ", count);
+		FILE_HEADER(out_file, "conc      ", count);
+		FILE_HEADER(out_file, "lambda    ", count);
+		FILE_HEADER(out_file, "shape     ", count);
+		FILE_HEADER(out_file, "triax     ", count);
+		FILE_HEADER(out_file, "avg_sub   ", count);
+		FILE_HEADER(out_file, "sub_conc  ", count);
+		FILE_HEADER(out_file, "sub_lambda", count);
+		FILE_HEADER(out_file, "sub_shape ", count);
+		FILE_HEADER(out_file, "sub_triax ", count);
+		FILE_HEADER(out_file, "sub_costh ", count);
+		FILE_HEADER(out_file, "sub_cosph ", count);
+		FILE_HEADER(out_file, "sub_avg_v ", count);
+		FILE_HEADER(out_file, "sub_avg_m ", count);
+		fprintf(out_file,"\n");
+
+		for(i=0; i<nTot; i++)
 		{ 
-			fprintf(f_out, "%lf", HaloProperties[j].z);   
-			fprintf(f_out, "\t%lf", HaloProperties[j].c_0);   
-			fprintf(f_out, "\t%lf", HaloProperties[j].l_0);   
-			fprintf(f_out, "\t%lf", HaloProperties[j].s0);   
-			fprintf(f_out, "\t%lf", HaloProperties[j].t0);   
-			fprintf(f_out, "\t%lf", HaloProperties[j].avgSub);   
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].c_0);   	
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].l_0);   	
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].s0);   	
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].t0);   	
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].costh0);   	
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].cosphi0);   	
-			fprintf(f_out, "\t%lf", SubHaloProperties[j].vel_0);   	
-			fprintf(f_out, "\t%e", SubHaloProperties[j].avgMass);   	
-			fprintf(f_out,"\n");
+			fprintf(out_file, "%lf", HaloProperties[i].z);   
+			fprintf(out_file, "\t%lf", HaloProperties[i].c_0);   
+			fprintf(out_file, "\t%lf", HaloProperties[i].l_0);   
+			fprintf(out_file, "\t%lf", HaloProperties[i].s0);   
+			fprintf(out_file, "\t%lf", HaloProperties[i].t0);   
+			fprintf(out_file, "\t%lf", HaloProperties[i].avgSub);   
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].c_0);   	
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].l_0);   	
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].s0);   	
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].t0);   	
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].costh0);   	
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].cosphi0);   	
+			fprintf(out_file, "\t%lf", SubHaloProperties[i].vel_0);   	
+			fprintf(out_file, "\t%e", SubHaloProperties[i].avgMass);   	
+			fprintf(out_file,"\n");
 		}
 
-	fclose(f_out);
+	fclose(out_file);
 }
 
 
 
 void print_all_halo_properties_to_one_file()
 {
-	int i=0, count=1, nBins=0;
-	double z=0;
-	char out_url[200];
-	FILE* out=NULL;
-	
-	nBins=HaloZ.n_bins;
-	z = GrowthFac.z[GrowthFac.npts-i-1];
+	count = 1;
+	nTot = HaloZ.n_bins-1;
+	z = GrowthFac.z[Settings.use_cat];
 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_all_halo_statistical_properties.dat");
-	fopen(out_url,"w");
+	out_file = fopen(out_url,"w");
 
-	fprintf(stdout,"Printing halo_properties() to:%s.\n", out_url);
+	DUMP_MSG("halo properties", out_url);
 
-		fprintf(out, "#");
-		FILE_HEADER(out, "Mass", count);
-		FILE_HEADER(out, "n(>M)", count);
-		FILE_HEADER(out, "avg_c", count);
-		FILE_HEADER(out, "conc", count);
-		FILE_HEADER(out, "P(c)", count);
-		FILE_HEADER(out, "lambda", count);
-		FILE_HEADER(out, "P(l)", count);
-		FILE_HEADER(out, "triax", count);
-		FILE_HEADER(out, "P(t)", count);
-		FILE_HEADER(out, "shape", count);
-		FILE_HEADER(out, "P(s)", count);
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "Mass  ", count);
+		FILE_HEADER(out_file, "avg_c ", count);
+		FILE_HEADER(out_file, "conc  ", count);
+		FILE_HEADER(out_file, "P(c)  ", count);
+		FILE_HEADER(out_file, "lambda", count);
+		FILE_HEADER(out_file, "P(l)  ", count);
+		FILE_HEADER(out_file, "triax ", count);
+		FILE_HEADER(out_file, "P(t)  ", count);
+		FILE_HEADER(out_file, "shape ", count);
+		FILE_HEADER(out_file, "P(s)  ", count);
 #ifdef GAS
-		FILE_HEADER(out, "gas_temp", count);
-		FILE_HEADER(out, "gas_frac", count);
+		FILE_HEADER(out_file, "gas_temp", count);
+		FILE_HEADER(out_file, "gas_frac", count);
 #endif
-		fprintf(out, "\n");
+		fprintf(out_file, "\n");
 
-			for(i=0; i<nBins; i++)	
+			for(i=0; i<nTot; i++)	
 			{
-				fprintf(out, "%e", MassFunc.mass[i]);
-				fprintf(out, "\t%e", MassFunc.n[i]);
-				fprintf(out, "\t%lf", HaloZ.c_avg[i]);
-				fprintf(out, "\t%lf", HaloZ.c[i]);
-				fprintf(out, "\t%lf", HaloZ.p_c[i]);
-				fprintf(out, "\t%lf", HaloZ.l[i]);
-				fprintf(out, "\t%lf", HaloZ.p_l[i]);
-				fprintf(out, "\t%lf", HaloZ.triax[i]);
-				fprintf(out, "\t%lf", HaloZ.p_triax[i]);
-				fprintf(out, "\t%lf", HaloZ.shape[i]);
-				fprintf(out, "\t%lf", HaloZ.p_shape[i]);
+
+				fprintf(out_file, "%e", MassFunc.mass[i]);
+				fprintf(out_file, "\t%lf", HaloZ.c_avg[i]);
+				fprintf(out_file, "\t%lf", HaloZ.c[i]);
+				fprintf(out_file, "\t%lf", HaloZ.p_c[i]);
+				fprintf(out_file, "\t%lf", HaloZ.l[i]);
+				fprintf(out_file, "\t%lf", HaloZ.p_l[i]);
+				fprintf(out_file, "\t%lf", HaloZ.triax[i]);
+				fprintf(out_file, "\t%lf", HaloZ.p_triax[i]);
+				fprintf(out_file, "\t%lf", HaloZ.shape[i]);
+				fprintf(out_file, "\t%lf", HaloZ.p_shape[i]);
 #ifdef GAS
-				fprintf(out, "\t%lf", HaloZ.gas_T[i]);
-				fprintf(out, "\t%lf", HaloZ.gas_fraction[i]);
+				fprintf(out_file, "\t%lf", HaloZ.gas_T[i]);
+				fprintf(out_file, "\t%lf", HaloZ.gas_fraction[i]);
 
 #endif
-				fprintf(out, "\n");
-		}
+				fprintf(out_file, "\n");
+			}
 
-	fclose(out);
+	fclose(out_file);
 }
 
 
 
 void print_axis_alignment(int j)
 {
-	int i=0, count=1, nBins=0;
-	double z=0;
-	char file_out[200]; 
-	FILE *output=NULL;
+	count = 1;
+	nTot = HaloZ.r_bins-1;
+	z = GrowthFac.z[Settings.use_cat];
+	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_axis_alignement.dat");
+	out_file = fopen(out_url, "w");
 
-	nBins = HaloZ.r_bins;
-	z = GrowthFac.z[GrowthFac.npts-j-1];
-	sprintf(file_out, "%sz%.2f%s", Urls.output_prefix, z, "_axis_alignement.dat");
-	fopen(file_out, "w");
+	DUMP_MSG("axis alignment", out_url);
 
-	fprintf(stdout,"Printing axis_alignment() to:%s.\n", file_out);
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "r      ", count);
+		FILE_HEADER(out_file, "c(Tc)^2", count);
+		FILE_HEADER(out_file, "c(Tp)^2", count);
+		FILE_HEADER(out_file, "N      ", count);
+		fprintf(out_file, "\n");
 
-		fprintf(output, "#");
-		FILE_HEADER(output, "r", count);
-		FILE_HEADER(output, "cos(Th_c)^2", count);
-		FILE_HEADER(output, "cos(Th_p)^2", count);
-		FILE_HEADER(output, "N", count);
-		fprintf(output, "\n");
-
-			for(i=0; i<nBins; i++) 
+			for(i=0; i<nTot; i++) 
 			{
-				fprintf(output, "%lf", HaloZ.R[i]);
-				fprintf(output, "\t%lf", HaloZ.Th_c[i]/HaloZ.N_pairs[i]);
-				fprintf(output, "\t%lf", HaloZ.Th_p[i]/HaloZ.N_pairs[i]);
-				fprintf(output, "\t%d", HaloZ.N_pairs[i]);
-				fprintf(output, "\n"); 
+				fprintf(out_file, "%lf", HaloZ.R[i]);
+				fprintf(out_file, "\t%lf", HaloZ.Th_c[i]/HaloZ.N_pairs[i]);
+				fprintf(out_file, "\t%lf", HaloZ.Th_p[i]/HaloZ.N_pairs[i]);
+				fprintf(out_file, "\t%d", HaloZ.N_pairs[i]);
+				fprintf(out_file, "\n"); 
 			}
 
-	fclose(output);
+	fclose(out_file);
 }
 
 
 
 void print_numerical_mass_function(int j)
 {
-	int i=0, count=1, nBins=0;
-	double z=0;
-	char file_out[200]; 
-	FILE *output=NULL;
+	count = 1;
+	nTot = MassFunc.bins;
+	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
+	out_file = fopen(out_url, "w");
 
-	nBins = MassFunc.bins;
-	z = GrowthFac.z[GrowthFac.npts-j-1];
-	sprintf(file_out, "%sz%.2f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
-	output = fopen(file_out, "w");
+	DUMP_MSG("numerical mass function", out_url);
 
-	fprintf(stdout,"Printing numerical_mass_function() to:%s.\n", file_out);
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "M    ", count);
+		FILE_HEADER(out_file, "n    ", count);
+		FILE_HEADER(out_file, "n_tot", count);
+		FILE_HEADER(out_file, "n_err", count);
+		FILE_HEADER(out_file, "dn   ", count);
+		FILE_HEADER(out_file, "n_bin", count);
+		FILE_HEADER(out_file, "dn_err", count);
+		fprintf(out_file,"\n");
 
-		fprintf(output,"#");
-		FILE_HEADER(output, "M", count);
-		FILE_HEADER(output, "n", count);
-		FILE_HEADER(output, "n_tot", count);
-		FILE_HEADER(output, "n_err", count);
-		FILE_HEADER(output, "dn", count);
-		FILE_HEADER(output, "n_bin", count);
-		FILE_HEADER(output, "dn_err", count);
-		fprintf(output,"\n");
-
-			for(i=0; i<nBins; i++) 
+			for(i=0; i<nTot; i++) 
 			{
-				fprintf(output, "%e", MassFunc.mass[i]);
-				fprintf(output, "\t%e", MassFunc.n[i]);
-				fprintf(output, "\t%d", MassFunc.n_tot[i]);
-				fprintf(output, "\t%e", MassFunc.err[i]);
-				fprintf(output, "\t%e", MassFunc.dn[i]);
-				fprintf(output, "\t%d", MassFunc.n_bin[i]);
-				fprintf(output, "\t%e", MassFunc.err_dn[i]);
-				fprintf(output,"\n");
+				fprintf(out_file, "%e", MassFunc.mass[i]);
+				fprintf(out_file, "\t%e", MassFunc.n[i]);
+				fprintf(out_file, "\t%d\t", MassFunc.n_tot[i]);
+				fprintf(out_file, "\t%e", MassFunc.err[i]);
+				fprintf(out_file, "\t%e", MassFunc.dn[i]);
+				fprintf(out_file, "\t%d\t", MassFunc.n_bin[i]);
+				fprintf(out_file, "\t%e", MassFunc.err_dn[i]);
+				fprintf(out_file,"\n");
 			}
-	fclose(output);
+	fclose(out_file);
 }
 
 
 
 void print_nfw()
 {
+// TODO //FIXME
 	int k=0, count=1, nTot=0;
 	char *out = merge_strings(Urls.output_prefix, "nfw_test.dat");
 	FILE *out_nfw = fopen(out, "w");
 
 	nTot = NFW.bins;		
 
-	fprintf(stdout, "\nWriting nfw() output to: %s\n", out);
+	DUMP_MSG("Navarro Frenk White profile", out);
 
 	fprintf(out_nfw, "#");
 	FILE_HEADER(out_nfw, "r", count);
@@ -427,24 +399,25 @@ void print_best_fit_results(){
 // TODO //FIXME
 	int i=0, count=1, nBins=HaloZ.n_bins;
 	char* out_url=merge_strings(Urls.output_prefix,"all_halo_best_fit_distributions.dat");
-	FILE* fout=fopen(out_url,"w");
+	FILE* out_file=fopen(out_url,"w");
+	DUMP_MSG("best fit", out_url);
 	
-		fprintf(fout, "#Concentration distribution best fit values, c_0=%lf, c_sig  :%lf \n", 
+		fprintf(out_file, "#Concentration distribution best fit values, c_0=%lf, c_sig  :%lf \n", 
 			HaloZ.c_0,HaloZ.c_sig );
-		fprintf(fout, "#Lambda parameter distribution best fit values, l_0  :%lf, l_sig  :%lf \n", 
+		fprintf(out_file, "#Lambda parameter distribution best fit values, l_0  :%lf, l_sig  :%lf \n", 
 			HaloZ.l_0,HaloZ.l_sig );
-		fprintf(fout, "#Average shape parameter s_0  :%lf, average triaxiality t_0    :%lf \n", 
+		fprintf(out_file, "#Average shape parameter s_0  :%lf, average triaxiality t_0    :%lf \n", 
 			HaloZ.s0,HaloZ.t0);
 
-		fprintf(fout, "#lambda_0  = %lf\n", SubHaloZ.l_0);
-		fprintf(fout, "#cos(th_0) = %lf\n", SubHaloZ.costh0);
-		fprintf(fout, "#cos(phi_0)= %lf\n", SubHaloZ.cosphi0);
-		fprintf(fout, "#t0 = %lf\n", SubHaloZ.t0);
-		fprintf(fout, "#s0 = %lf\n", SubHaloZ.s0);
-		fprintf(fout, "\n");
+		fprintf(out_file, "#lambda_0  = %lf\n", SubHaloZ.l_0);
+		fprintf(out_file, "#cos(th_0) = %lf\n", SubHaloZ.costh0);
+		fprintf(out_file, "#cos(phi_0)= %lf\n", SubHaloZ.cosphi0);
+		fprintf(out_file, "#t0 = %lf\n", SubHaloZ.t0);
+		fprintf(out_file, "#s0 = %lf\n", SubHaloZ.s0);
+		fprintf(out_file, "\n");
 
 #ifdef GAS
-			fprintf(fout, "#Mass-Tx relation best fit values, ln_M0: %lf, alpha :%lf  \n", 
+			fprintf(out_file, "#Mass-Tx relation best fit values, ln_M0: %lf, alpha :%lf  \n", 
 				HaloZ.ln_M0, HaloZ.T_alpha);
 #endif
 }

@@ -24,10 +24,10 @@ tot_snaps=28
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=028
+catalogue_number=28
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=25
+n_bins=20
 n_bins_th=100
 r_bins=7
 
@@ -39,7 +39,7 @@ pk_skip=11
 mf_skip=1
 
 #Minimum and maximum mass for the mass function computation
-m_min=1.e+10
+m_min=1.e+11
 m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo
@@ -132,13 +132,19 @@ if [ $use_mpi -eq 1 ] ; then
 zzzz='0000.z'
 fi
 
-cd $halo_dir1
-halo_name1=`ls *$catalogue_number*$zzzz*_halos`
-halo_name2=`ls *$catalogue_number*$zzzz*_halos`
+cat_zero='00'
+
+if [ $catalogue_number > 9 ] ; then
+cat_zero='0'
+fi
 
 cd $halo_dir1
-profile_name1=`ls *$catalogue_number*$zzzz*_profiles`
-profile_name2=`ls *$catalogue_number*$zzzz*_profiles`
+halo_name1=`ls *$cat_zero$catalogue_number*$zzzz*_halos`
+halo_name2=`ls *$cat_zero$catalogue_number*$zzzz*_halos`
+
+cd $halo_dir1
+profile_name1=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
+profile_name2=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
 
 pk_file_base1=$snaps_dir1/Pk*$particle_number
 pk_file_base2=$snaps_dir2/Pk*$particle_number
@@ -156,7 +162,7 @@ halo_list=$base_temp/halo.list
 profile_list=$base_temp/profile.list
 subhalo_list=$base_temp/subhalo.list
 
-ls $pk_file_base1* > $pk_list 
+ls -r $pk_file_base1* > $pk_list 
 ls -r $halo_dir1/*$zzzz*halos > $halo_list 
 ls -r $halo_dir1/*$zzzz*profiles > $profile_list
 ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
@@ -165,14 +171,13 @@ cd $base_analysis/src/
 make clean
 
 url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1
-set_var1=$box_size' '$particle_number' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip
+set_var1=$box_size' '$particle_number' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
 set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$n_min' '$use_n_min' '$use_n_haloes
-cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial
-extra_var=$k' '$zMax
+cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
 evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
 halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
 
-all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$extra_var' '$prefix' '$evolution_var' '
+all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$prefix' '$evolution_var' '
 
 execute=$base_analysis
 
