@@ -51,10 +51,9 @@ int main(int argc, char **argv)
 
 		compute_halo_properties();
 
-		print_axis_alignment(0);
+		print_axis_alignment();
 
-		print_all_halo_properties_to_one_file(0);
-		
+		print_all_halo_properties_to_one_file();
 	
 #ifdef WITH_MPI
 	}

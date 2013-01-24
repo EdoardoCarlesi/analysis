@@ -135,7 +135,7 @@ void compute_number_density()
 #ifndef TH_ONLY
 			compute_numerical_mass_function();
 #endif
-			compute_theoretical_mass_function(index);
+			compute_theoretical_mass_function();
 
 			ThMassFunc.Mmin=0.1*MassFunc.mass[0];
 			ThMassFunc.Mmax=10*MassFunc.mass[nBin-1];
