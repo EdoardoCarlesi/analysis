@@ -13,6 +13,10 @@
 #include "../libcosmo/cosmological_relations.h"
 #include "../libcosmo/mass_function.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
 
 void initialize_halo_properties_structure()
 {
@@ -79,7 +83,7 @@ void free_halo_properties()
 }
 
 
-
+	// TODO: add mass cut
 void sort_axis_alignement()
 {
 	int *Nbins, j=0, k=0, i=0, max_haloes, nBins, skip;
@@ -141,10 +145,10 @@ void sort_axis_alignement()
 				HaloZ.Th_p[i]=Bbins[i]; 
 				HaloZ.N_pairs[i]=Nbins[i];
 
-					}
 				}
 			}
 		}
+	}
 
 	free(radius);
 	free(Abins);
@@ -159,16 +163,26 @@ void sort_axis_alignement()
 
 void sort_shape_and_triaxiality()
 {
-	int i=0, m=0, nBins=Settings.n_bins,  nHaloes=Settings.n_threshold;
+	int i=0, m=0, nBins, nHaloesCut, nHaloes;
 	int *array_shape_bin_y, *array_triax_bin_y;
 	double *array_shape, *array_triax, *array_shape_bin, *array_triax_bin; 
 	double half_t, half_s, sMax, sMin, tMax, tMin, p_s, p_t;
 
 	fprintf(stdout, "\nSorting shape and triaxiality."); 
 
+	nBins=Settings.n_bins;
+	nHaloesCut=n_haloes_per_criterion();
+
+#ifdef WITH_MPI
+// The loop has to be done using ALL the haloes, since they are not ordered
+		nHaloes=Settings.n_haloes; 
+#else
+		nHaloes=Settings.n_threshold; 
+#endif
+
 	Settings.tick=0;
-	array_shape = (double*) calloc(nHaloes, sizeof(double));	
-	array_triax = (double*) calloc(nHaloes, sizeof(double));	
+	array_shape = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_triax = (double*) calloc(nHaloesCut, sizeof(double));	
 	array_shape_bin = (double*) calloc(nBins, sizeof(double));	
 	array_triax_bin = (double*) calloc(nBins, sizeof(double));	
 	array_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
@@ -176,32 +190,37 @@ void sort_shape_and_triaxiality()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			array_shape[i] = Haloes[i].shape;
-			array_triax[i] = Haloes[i].triax;
-			m++;
+			if(halo_condition(i) == 1)
+			{
+				array_shape[m] = Haloes[i].shape;
+				array_triax[m] = Haloes[i].triax;
+				m++;
+			}
 		}
 
-			HaloZ.s0 = average(array_shape, nHaloes);
-			HaloZ.t0 = average(array_triax, nHaloes);
+			HaloZ.s0 = average(array_shape, nHaloesCut);
+			HaloZ.t0 = average(array_triax, nHaloesCut);
 
-				sMax = maximum(array_shape, nHaloes); 
-				sMin = minimum(array_shape, nHaloes);
-				tMax = maximum(array_triax, nHaloes); 
-				tMin = minimum(array_triax, nHaloes);
+				sMax = maximum(array_shape, nHaloesCut); 
+				sMin = minimum(array_shape, nHaloesCut);
+				tMax = maximum(array_triax, nHaloesCut); 
+				tMin = minimum(array_triax, nHaloesCut);
 
 			array_shape_bin = lin_stepper(sMin, sMax, nBins);
-			lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
+			lin_bin(array_shape, array_shape_bin, nBins, 
+				nHaloesCut, array_shape_bin_y);	
 
 			array_triax_bin = lin_stepper(tMin, tMax, nBins);
-			lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
+			lin_bin(array_triax, array_triax_bin, nBins, 
+				nHaloesCut, array_triax_bin_y);	
 
 			half_s = 0.5*(array_shape_bin[1]-array_shape_bin[0]);
 			half_t = 0.5*(array_triax_bin[1]-array_triax_bin[0]);
 
 			for(i=0; i<nBins-1; i++)	
 			{
-				p_s = (double) array_shape_bin_y[i]/nHaloes;
-				p_t = (double) array_triax_bin_y[i]/nHaloes;
+				p_s = (double) array_shape_bin_y[i]/nHaloesCut;
+				p_t = (double) array_triax_bin_y[i]/nHaloesCut;
 				HaloZ.shape[i]=array_shape_bin[i]+half_s;
 				HaloZ.triax[i]=array_triax_bin[i]+half_t;
 				HaloZ.p_shape[i]=p_s;
@@ -216,39 +235,51 @@ void sort_shape_and_triaxiality()
 	free(array_triax_bin);
 	free(array_shape_bin_y); 
 	free(array_triax_bin_y);
-	fprintf(stderr, "\n");
+	fprintf(stdout, "\n");
 }
 
 
 
 void sort_radial_velocity()
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0; 
+	int i=0, m=0, nBins, nHaloesCut, nHaloes; 
 	double mMax, mMin;
 	double *radial_velocity_bin, *radial_velocity_error, *mass, *radial_velocity, *mass_bin; 
 
 	fprintf(stdout, "\nSorting halo radial velocities.\n");
-	
-	Settings.tick=0;
-	mass = (double*) calloc(nHaloes, sizeof(double));	
-	radial_velocity = (double*) calloc(nHaloes, sizeof(double));	
 
-	mass_bin = (double*) calloc(nBins, sizeof(double));	
-	radial_velocity_bin = (double*) calloc(nBins-1, sizeof(double));	
-	radial_velocity_error = (double*) calloc(nBins-1, sizeof(double));	// TODO error estimation
+	nBins=Settings.n_bins;
+	nHaloesCut=n_haloes_per_criterion();
+	
+#ifdef WITH_MPI
+		nHaloes=Settings.n_haloes; 
+#else
+		nHaloes=Settings.n_threshold; 
+#endif
+
+		mass = (double*) calloc(nHaloesCut, sizeof(double));	
+		radial_velocity = (double*) calloc(nHaloesCut, sizeof(double));	
+
+		mass_bin = (double*) calloc(nBins, sizeof(double));	
+		radial_velocity_bin = (double*) calloc(nBins-1, sizeof(double));	
+		radial_velocity_error = (double*) calloc(nBins-1, sizeof(double));	// TODO error estimation
 
 		for(i=0; i<nHaloes; i++)
 		{
-			radial_velocity[i] = Haloes[i].Vmax;
-			mass[i] = Haloes[i].Mvir; 	
+			if(halo_condition(i) == 1)
+			{
+				radial_velocity[m] = Haloes[i].Vmax;
+				mass[m] = Haloes[i].Mvir; 
+				m++;
+			}
 		}
 
-			mMax = maximum(mass, nHaloes);
-			mMin = minimum(mass, nHaloes);
+			mMax = maximum(mass, nHaloesCut);
+			mMin = minimum(mass, nHaloesCut);
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 			average_bin(mass, radial_velocity, mass_bin, radial_velocity_bin, 
-				radial_velocity_error, nBins, nHaloes);
+				radial_velocity_error, nBins, nHaloesCut);
 
 			for(i=0; i<nBins; i++)	
 			{
@@ -268,14 +299,15 @@ void sort_radial_velocity()
 
 void sort_lambda()
 {
-	int nBins=Settings.n_bins, nHaloes_spin, nHaloes, i=0, m=0, *lambda_int_y; 
+	int nBins, nHaloesCut, nHaloes, i=0, m=0; 
+	int *lambda_int_y; 
 	double *bin_x, *params, *lambda, *lambda_bin_x, *lambda_err_y, *lambda_double_y;
 	double l_0, sig, halfstep, lMax, lMin, delta_l, norm, value;
 
 	fprintf(stdout, "\nSorting spin parameter.\n"); 
 
-	Settings.tick=0;
-	nHaloes_spin=Settings.n_spin;
+	nBins = Settings.n_bins;
+	nHaloesCut = n_haloes_per_criterion();
 
 #ifdef WITH_MPI
 // The loop has to be done using ALL the haloes, since they are not ordered
@@ -285,29 +317,31 @@ void sort_lambda()
 #endif
 
 	bin_x = (double*) calloc(nBins, sizeof(double));	
-	lambda = (double*) calloc(nHaloes_spin, sizeof(double));	
-	params = (double*) calloc(2, sizeof(double));
+	lambda = (double*) calloc(nHaloesCut, sizeof(double));	
+
 	lambda_int_y = (int*) calloc(nBins-1, sizeof(int));	
 	lambda_bin_x = (double*) calloc(nBins-1, sizeof(double));	
 	lambda_double_y = (double*) calloc(nBins-1, sizeof(double));	
 	lambda_err_y = (double*) calloc(nBins-1, sizeof(double));	
 
+	params = (double*) calloc(2, sizeof(double));
+
 		for(i=0; i<nHaloes; i++)
 		{
-			if(Haloes[i].spin==1) 
+			if(halo_condition(i) == 1)
 			{
 				lambda[m] = Haloes[i].lambda;
 				m++;
 			}
 		}
 	
-				lMax = 1.01*maximum(lambda, nHaloes_spin);  
-				lMin = minimum(lambda, nHaloes_spin);
+				lMax = 1.01*maximum(lambda, nHaloesCut);  
+				lMin = minimum(lambda, nHaloesCut);
 				delta_l = (lMax-lMin)/nBins; 
-				norm = 1./(delta_l*nHaloes_spin);
+				norm = 1./(delta_l*nHaloesCut);
 	
 				bin_x = lin_stepper(lMin, lMax, nBins);
-				lin_bin(lambda, bin_x, nBins, nHaloes_spin, lambda_int_y);	
+				lin_bin(lambda, bin_x, nBins, nHaloesCut, lambda_int_y);	
 
 			halfstep=(bin_x[1]-bin_x[0])*0.5;
 
@@ -319,7 +353,7 @@ void sort_lambda()
 				lambda_double_y[i]=norm*value; 
 			}
 
-			params = best_fit_lognorm(lambda, nHaloes_spin, nBins-1, 
+			params = best_fit_lognorm(lambda, nHaloesCut, nBins-1, 
 					lambda_bin_x, lambda_double_y, lambda_err_y);
 
 			l_0 = params[0]; 
@@ -348,15 +382,15 @@ void sort_lambda()
 
 void sort_concentration()
 {
-	int nBins=Settings.n_bins, nHaloes, nHaloes_conc, i=0, m=0, *int_c_bin_y;
+	int nBins, nHaloes, nHaloesCut, i=0, m=0, *int_c_bin_y;
 	double mMax, mMin, M_0, *c_err_mass, *params, *params2, *params3;
 	double *conc, *mass, *c_avg_mass, *mass_bin, *bin_x, *c_bin_x, *c_bin_y, *c_err_y;
 	double value, c_0, sig, max, halfstep, c_02, sig2, cMax, cMin, norm;
 
 	fprintf(stdout, "\nSorting concentrations.\n");
 
-	Settings.tick=0;
-	nHaloes_conc=Settings.n_concentration;
+	nBins = Settings.n_bins;
+	nHaloesCut = n_haloes_per_criterion();
 
 #ifdef WITH_MPI
 // The loop has to be done using ALL the Haloes, since they are not ordered
@@ -365,8 +399,9 @@ void sort_concentration()
 		nHaloes=Settings.n_threshold; 
 #endif
 
-	conc = (double*) calloc(nHaloes_conc, sizeof(double));	
-	mass = (double*) calloc(nHaloes_conc, sizeof(double));	
+	conc = (double*) calloc(nHaloesCut, sizeof(double));	
+	mass = (double*) calloc(nHaloesCut, sizeof(double));	
+
 	bin_x = (double*) calloc(nBins, sizeof(double));	
 	c_bin_x = (double*) calloc(nBins-1, sizeof(double));	
 	c_bin_y = (double*) calloc(nBins-1, sizeof(double));	
@@ -375,13 +410,14 @@ void sort_concentration()
 	mass_bin = (double*) calloc(nBins, sizeof(double));	
 	c_avg_mass = (double*) calloc(nBins-1, sizeof(double));	
 	c_err_mass = (double*) calloc(nBins-1, sizeof(double));	
+
 	params = (double*) calloc(2, sizeof(double));
 	params2 = (double*) calloc(2, sizeof(double));
 	params3 = (double*) calloc(2, sizeof(double));
 
 		for(i=0; i<nHaloes; i++) 
 		{
-			if(Haloes[i].virial==1 && Haloes[i].conc==1)
+			if(halo_condition(i) == 1)
 			{ 
 				conc[m] = Haloes[i].c_nfw;
 	
@@ -394,15 +430,15 @@ void sort_concentration()
 			}
 		}
 		
-					cMax = 1.01*maximum(conc, nHaloes_conc); 
-					mMin = minimum(mass, nHaloes_conc);
-					mMax = 1.01*maximum(mass, nHaloes_conc); 
-					cMax = maximum(conc, nHaloes_conc); 
+					cMax = 1.01*maximum(conc, nHaloesCut); 
+					mMin = minimum(mass, nHaloesCut);
+					mMax = 1.01*maximum(mass, nHaloesCut); 
+					cMax = maximum(conc, nHaloesCut); 
  		
 					bin_x=lin_stepper(cMin,cMax,nBins);
-					lin_bin(conc,bin_x,nBins,nHaloes_conc,int_c_bin_y);	
+					lin_bin(conc,bin_x,nBins,nHaloesCut,int_c_bin_y);	
 
-				norm=(nBins)/((cMax-cMin)*nHaloes_conc);
+				norm=(nBins)/((cMax-cMin)*nHaloesCut);
 				halfstep=0.5*(bin_x[1]-bin_x[0]);
 
 			for(i=0; i<nBins-1; i++) 
@@ -434,7 +470,7 @@ void sort_concentration()
 				HaloZ.p_c[i]=c_bin_y[i];
 			}
 
-			for(i=0; i<nHaloes_conc; i++) 
+			for(i=0; i<nHaloesCut; i++) 
 				conc[i]/=c_0;
 
 		for(i=0; i<nBins-1; i++)
@@ -443,18 +479,18 @@ void sort_concentration()
 			c_bin_y[i]/=c_0;
 		}
 
-		params2 = best_fit_lognorm(conc, nHaloes_conc, nBins-1, 
+		params2 = best_fit_lognorm(conc, nHaloesCut, nBins-1, 
 			c_bin_x, c_bin_y, c_err_y);
 
 		c_02 = params2[0]; 
 		sig2 = params2[1];
 
-			for(i=0; i<nHaloes_conc; i++) 
+			for(i=0; i<nHaloesCut; i++) 
 				conc[i]*=c_0;
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 			average_bin(mass, conc, mass_bin, c_avg_mass,
-				c_err_mass, nBins, nHaloes_conc);
+				c_err_mass, nBins, nHaloesCut);
 
 			for(i=0; i<nBins-1; i++)
 			{
@@ -488,7 +524,7 @@ void sort_concentration()
 #ifdef GAS
 void sort_gas_fraction()
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.n_threshold, i=0, m=0;
+	int nBins, nHaloes, nHaloesCut, i=0, m=0;
 	double *gas_fraction, *gas_fraction_bin, *gas_fraction_error, *mass_bin, *mass;
 	double mMax, mMin;
 	
@@ -597,3 +633,77 @@ void compute_halo_properties()
 }
 
 
+
+int halo_condition(int i)
+{
+	int condition=0;
+
+	if(Settings.use_spin == 1)
+	{
+		if(Haloes[i].spin == 1)
+			condition = 1;
+		else 
+			condition = 0;
+	}
+		
+	else if(Settings.use_conc == 1)
+	{
+		if(Haloes[i].conc == 1)
+			condition = 1;
+		else 
+			condition = 0;
+	}
+
+	else if(Settings.use_mass == 1)
+	{
+		if(Haloes[i].mass == 1)
+			condition = 1;
+		else 
+			condition = 0;
+	}
+
+	else if(Settings.use_vir == 1)
+	{
+		if(Haloes[i].vir == 1)
+			condition = 1;
+		else 
+			condition = 0;
+	}
+
+	else if(Settings.use_all == 1)
+	{
+		if(Haloes[i].all == 1)
+			condition = 1;
+		else 
+			condition = 0;
+	}
+	
+	else 
+		condition = 0;
+	
+	return condition;
+}
+
+
+
+int n_haloes_per_criterion()
+{
+	int nTot=0;
+
+	if(Settings.use_spin == 1)
+		nTot = Settings.n_spin;
+
+	else if(Settings.use_all == 1)
+		nTot = Settings.n_all;
+
+	else if(Settings.use_vir == 1)
+		nTot = Settings.n_virialized;
+
+	else if(Settings.use_conc == 1)
+		nTot = Settings.n_concentration;
+
+	else if(Settings.use_mass == 1)
+		nTot = Settings.n_threshold;
+
+	return nTot;
+}

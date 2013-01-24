@@ -73,6 +73,7 @@ extern struct general_settings
 	double mass_min;
 	int n_haloes_to_use; // Use the first N haloes
 
+	int use_mass;
 	int use_spin;
 	int use_vir;
 	int use_conc;
@@ -150,7 +151,7 @@ extern struct mass_function
 	double *err;
 	double *err_dn;
 
-} MassFunc, ThMassFunc, *MassFuncZ;
+} MassFunc, ThMassFunc, *MassFuncZ, *ThMassFuncZ;
 
 
 extern struct num_density
@@ -173,6 +174,7 @@ extern struct nfw
 	double rho0;
 	double *radius;
 	double *overd;
+	double *profile;
 	double *err;
 	double *chi2r;
 
@@ -199,9 +201,12 @@ extern struct halo
         int n_bins;
 	int neg_r_bins;
 	int host;
-	int virial;
+
+	// These variables are set to 1 if the halo satisfies the condition
+	int vir;
 	int spin;
 	int conc;
+	int mass; 
 	int all;
 
 	double Xc;

@@ -212,7 +212,7 @@ double* best_fit_mf_tinker(double *x_array, double* y_array, double* y_err, int 
 	b = T_mf.b;
 	c = T_mf.c;
 
-	fprintf(stderr, "Finding best fit values for the Tinker mass function using a non linear least square fit.\n");
+	fprintf(stdout, "Finding best fit values for the Tinker mass function using a non linear least square fit.\n");
 
 		dat.n = (size_t) nBins;
 		dat.x = x_array;
@@ -246,8 +246,8 @@ double* best_fit_mf_tinker(double *x_array, double* y_array, double* y_err, int 
 		b = gsl_vector_get(par.fitted_p,2);
 		c = gsl_vector_get(par.fitted_p,3);
 
-		fprintf(stderr, "The best fit parameters for this distribution are: \n");
-		fprintf(stderr, "A: %e a: %lf b: %lf c: %lf \n", A, a, b, c);
+		fprintf(stdout, "The best fit parameters for this distribution are: \n");
+		fprintf(stdout, "A: %e a: %lf b: %lf c: %lf \n", A, a, b, c);
 
 		/* Return the best fit parameters*/
 		params = (double*) calloc(4, sizeof(double));

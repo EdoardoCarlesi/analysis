@@ -8,7 +8,7 @@
 
 int main(int argc, char **argv)
 {
-	fprintf(stderr, "\nmain(). Computing subhalo statistical properties.\n");
+	fprintf(stdout, "\nmain(). Computing subhalo statistical properties.\n");
 
 		initialize_internal_variables(argv);
 
@@ -20,7 +20,7 @@ int main(int argc, char **argv)
 
 		print_all_subhalo_properties_to_one_file();
 
-	fprintf(stderr, "\nmain(). Subhalo statistical properties computed.\n");
+	fprintf(stdout, "\nmain(). Subhalo statistical properties computed.\n");
 
 	return 0;
 }

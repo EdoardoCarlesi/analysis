@@ -15,7 +15,7 @@
 
 int main(int argc, char **argv)
 {
-	fprintf(stderr, "\nComputing halo statistical properties.\n");
+	fprintf(stdout, "\nComputing halo statistical properties.\n");
 
 	initialize_internal_variables(argv);
 
@@ -62,7 +62,7 @@ int main(int argc, char **argv)
 
 		if(ThisTask == 0)
 #endif
-			fprintf(stderr, "\nHalo statistical properties computed.\n");
+			fprintf(stdout, "\nHalo statistical properties computed.\n");
 
 #ifdef WITH_MPI
 	MPI_Finalize();

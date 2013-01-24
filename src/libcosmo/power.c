@@ -42,7 +42,7 @@ void normalize_all_power_spectra_to_sigma8()
 
 void compute_growth_factor()
 {
-	fprintf(stderr,"compute_growth_factor().\n");
+	fprintf(stdout,"compute_growth_factor().\n");
 
 	int i=0, j=0, pk0=0, pkNorm=0, dim_eff=0; 
 	double norm=1., pk_norm=1., delta=1.;
@@ -65,7 +65,7 @@ void compute_growth_factor()
 				pk_norm = power_k(K, pk0);
 				norm = power_k(K, pkNorm);
 
-		fprintf(stderr, "Normalizing to Pk[%d]=%lf at scale k:%lf\n", pk0, pk_norm, K);
+		fprintf(stdout, "Normalizing to Pk[%d]=%lf at scale k:%lf\n", pk0, pk_norm, K);
 
 		for (j=0; j<dim_eff; j++)
 		{
@@ -77,7 +77,7 @@ void compute_growth_factor()
 			z = 1./a - 1;
 
 #ifdef PRINT_INFO
-		fprintf(stderr, "GrowthFac.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta/a);
+		fprintf(stdout, "GrowthFac.z[%d]=%lf, delta:%lf, delta_a:%lf\n", i, z, delta, delta/a);
 #endif
 
 			GrowthFac.gf[i] = delta;
@@ -107,7 +107,7 @@ void compute_correlation_function(int index)
 	double r=0, vol=0, fit=0, r_0=13.; 
 	double *R=NULL;
 
-	fprintf(stderr, "Computing Xi(r) between r_min:%lf and r_max:%lf\n", r_min, r_max);
+	fprintf(stdout, "Computing Xi(r) between r_min:%lf and r_max:%lf\n", r_min, r_max);
 
 	Xi.npts = Settings.n_bins;
 	N_r = Xi.npts;
@@ -128,7 +128,7 @@ void compute_correlation_function(int index)
 			Xi.xi_r[i] = correlation_r(r,index)/vol;
 			Xi.xi_fit[i] = fit;
 #ifdef PRINT_INFO
-	fprintf(stderr, "At r:%lf, Xi(r):%lf; fitted value:%lf \n", Xi.r[i], Xi.xi_r[i], fit);
+	fprintf(stdout, "At r:%lf, Xi(r):%lf; fitted value:%lf \n", Xi.r[i], Xi.xi_r[i], fit);
 #endif
 		}
 }
@@ -150,7 +150,7 @@ double correlation_r(double r, int index)
 	k_max = Pks[index].k[nPkFiles-1];
 
 #ifdef PRINT_INFO
-	fprintf(stderr, "correlation_r(), r:%lf\n", r);
+	fprintf(stdout, "correlation_r(), r:%lf\n", r);
 #endif
 
 		gsl_integration_workspace *w = gsl_integration_workspace_alloc(WORKSP);

@@ -11,7 +11,7 @@
 
 int main(int arg, char **argv)
 {
-	fprintf(stderr, "\nComputing the analytical mass function for a given P(k).\n");
+	fprintf(stdout, "\nComputing the analytical mass function for a given P(k).\n");
 
 	initialize_internal_variables(argv);
 
@@ -28,9 +28,9 @@ int main(int arg, char **argv)
 			//compute_correlation_function(0.);
 			//print_correlation_function();
 
-		compute_theoretical_mass_function(0);
+		compute_theoretical_mass_function();
 
-		print_theoretical_mass_function(0.0);
+		print_theoretical_mass_function();
 
 	return 0;
 }

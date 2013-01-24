@@ -18,7 +18,7 @@
 
 
 void initialize_internal_variables(char **argv){
-	fprintf(stderr, "Initializing internal variables...\n");
+	fprintf(stdout, "Initializing internal variables...\n");
 		
 	int count=1;
 
@@ -73,10 +73,14 @@ void initialize_internal_variables(char **argv){
 	int kk=0;
  
 	for(kk=1; kk<count; kk++) 
-		fprintf(stderr, "argv[%d]: %s \n", kk, argv[kk]);
+		fprintf(stdout, "argv[%d]: %s \n", kk, argv[kk]);
 #endif
 
 	default_init();
+
+#ifdef _OPENMP
+	omp_set_num_threads(4);
+#endif
 }
 
 
@@ -105,7 +109,7 @@ void print_counter(int freq){
 
 	if(Settings.tick==freq) 
 	{
-		fprintf(stderr,"."); 
+		fprintf(stdout,"."); 
 		Settings.tick=0;
 	} else {
 		Settings.tick++;
@@ -138,10 +142,10 @@ void normalize_to_one(char * url_in, char * url_out)
 		if (inv==1) 
 		{
 			norm = y[size-1];
-			fprintf(stderr, "norm: %lf \n", y[size-1]);
+			fprintf(stdout, "norm: %lf \n", y[size-1]);
 		} else {
 			norm = y[0];
-			fprintf(stderr, "norm: %lf \n", y[0]);
+			fprintf(stdout, "norm: %lf \n", y[0]);
 		}
 
 		for(k=0; k<size; k++)

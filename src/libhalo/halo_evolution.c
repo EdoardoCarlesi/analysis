@@ -14,7 +14,8 @@ void compute_halo_and_subhalo_statistics(int j)
 {
 	fprintf(stdout, "Reading halo url[%d]: %s\n", j, Urls.urls[j]);
 
-	use_halo_url(j);
+	Settings.use_cat = j;
+	set_halo_url();
 
 		read_halo_file();
 

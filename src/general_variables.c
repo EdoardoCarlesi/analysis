@@ -11,7 +11,7 @@ struct halo_properties SubHaloZ, HaloZ, *HaloProperties, *SubHaloProperties;
 
 struct merger_tree *MergerTree;
 
-struct mass_function MassFunc, ThMassFunc, *MassFuncZ;
+struct mass_function MassFunc, ThMassFunc, *MassFuncZ, *ThMassFuncZ;
 struct num_density NumDen;
 
 struct correlation_function Xi, *Xis;

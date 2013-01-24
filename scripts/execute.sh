@@ -15,6 +15,16 @@
 use_mpi=$2
 n_procs=$3
 
+use_multiple_cat=$4
+
+cp Makefile.config_nompi Makefile.config
+
+if [ $use_mpi -eq 1 ] ; then 
+use_multiple_cat=1
+cp Makefile.config_mpi Makefile.config
+fi
+
+
 # Model and simulation ettings
 model1='lcdm'
 model2='ude'
@@ -28,7 +38,7 @@ catalogue_number=28
 
 # Number of bins for general distributions and for the radial alignment
 n_bins=20
-n_bins_th=100
+n_bins_th=1000
 r_bins=7
 
 # Scale of P(k) for growth factor calculation
@@ -39,8 +49,8 @@ pk_skip=11
 mf_skip=1
 
 #Minimum and maximum mass for the mass function computation
-m_min=1.e+11
-m_max=1.e+15
+m_min=1.e+10
+m_max=0.8e+15
 
 #Minimum particles per halo or minimum mass per halo
 n_min=200
@@ -128,13 +138,13 @@ halo_dir_ahf2=$DATA2$dir_ahf/
 
 zzzz='.z'
 
-if [ $use_mpi -eq 1 ] ; then
+if [ $use_multiple_cat -eq 1 ] ; then
 zzzz='0000.z'
 fi
 
 cat_zero='00'
 
-if [ $catalogue_number > 9 ] ; then
+if [ $catalogue_number -gt 9 ] ; then
 cat_zero='0'
 fi
 

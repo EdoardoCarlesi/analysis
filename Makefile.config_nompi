@@ -17,7 +17,6 @@ OPT    += -DUSE_UNIT_MPC
 #OPT	+= -DTH_ONLY
 
 # Enable MPI version
-WITH_MPI="on"
 WITH_OMP="on"
 
 NUM_OMP_THREADS=4

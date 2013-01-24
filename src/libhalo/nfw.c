@@ -180,11 +180,11 @@ void fit_and_store_nfw_parameters()
 	HALO = pHaloes[ThisTask];
 	nHaloes = pSettings[ThisTask].n_threshold;
 #else 
-	HALO = haloes;
+	HALO = Haloes;
 	nHaloes = Settings.n_threshold;
 #endif
 
-	fprintf(stderr, "fit_and_store_nfw_parameters() is using %d haloes.\n", 
+	fprintf(stdout, "fit_and_store_nfw_parameters() is using %d haloes.\n", 
 			nHaloes);
 
 		for(k=0; k<nHaloes; k++)
@@ -195,7 +195,7 @@ void fit_and_store_nfw_parameters()
 
 void fit_and_store_nfw_parameters_from_list(int *list, int max)
 {
-	fprintf(stderr, "fit_and_store_nfw_parameters_from_list().\n");
+	fprintf(stdout, "fit_and_store_nfw_parameters_from_list().\n");
 
 	int k=0, j=0;
 	int nHaloes;
@@ -206,7 +206,7 @@ void fit_and_store_nfw_parameters_from_list(int *list, int max)
 	HALO = pHaloes[ThisTask];
 	nHaloes = pSettings[ThisTask].n_threshold;
 #else 
-	HALO = haloes;
+	HALO = Haloes;
 	nHaloes = Settings.n_threshold;
 #endif
 	

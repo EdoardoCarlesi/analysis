@@ -13,7 +13,7 @@
 
 int main(int argc, char **argv)
 {
-	fprintf(stderr, "\nmain(). Calculating number density.\n");
+	fprintf(stdout, "\nmain(). Calculating number density.\n");
 	
 	initialize_internal_variables(argv);
 	
@@ -25,7 +25,7 @@ int main(int argc, char **argv)
 
 		//integrate_over_z_range();
 
-	fprintf(stderr, "\nmain(). Number density calculated.\n");
+	fprintf(stdout, "\nmain(). Number density calculated.\n");
 
 	return 0;
 }

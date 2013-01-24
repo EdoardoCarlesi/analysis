@@ -25,25 +25,26 @@ void determine_simulation_settings()
 	HALO = pHaloes[ThisTask];
 	SETTINGS = &pSettings[ThisTask];
 #else
-	int ThisTask = 0;
 	HALO = Haloes;
 	SETTINGS = &Settings;
 #endif
 
+#ifdef WITH_MPI
 	if(ThisTask==0)
+#endif
 	{
 #ifndef GAS
 	Settings.pMass = HALO[0].Mvir/HALO[0].n_part;
 	Settings.rho_0 = Settings.pMass*pow(Settings.n_part_1D,3)*pow(Settings.box_size, -3);
-	fprintf(stderr, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
+	fprintf(stdout, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
 #else
 	Settings.dmMass  = HALO[0].M_dm/HALO[0].N_dm;
 	Settings.gasMass = HALO[0].M_gas/HALO[0].N_gas; 
 	Settings.rho_dm = Settings.dmMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
 	Settings.rho_b = Settings.gasMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
 	Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
-	fprintf(stderr, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
-	fprintf(stderr, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
+	fprintf(stdout, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
+	fprintf(stdout, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
 #endif
 
 		Settings.rho_c = (3*HALO[0].Mvir) /
@@ -52,12 +53,20 @@ void determine_simulation_settings()
 
 	if(Settings.use_n_min == 1)
 	{
-		fprintf(stderr, "\nTask=%d has %d haloes over the %d particles threshold of which:\n\
+#ifdef WITH_MPI
+		fprintf(stdout, "\nTask=%d has %d haloes over the %d particles threshold of which:\n\
 		- %d virialized\n\
 		- %d with the right concentration\n\
 		- %d satisfying the spin criterion\n\
 		and %d haloes complying with all criteria.\n", 
 		ThisTask, 
+#else
+		fprintf(stdout, "\nThere are %d haloes over the %d particles threshold of which:\n\
+		- %d virialized\n\
+		- %d with the right concentration\n\
+		- %d satisfying the spin criterion\n\
+		and %d haloes complying with all criteria.\n", 
+#endif
 		SETTINGS->n_threshold, Settings.n_min,
 		SETTINGS->n_virialized,
 		SETTINGS->n_concentration, 
@@ -67,17 +76,26 @@ void determine_simulation_settings()
 
 #ifndef GAS
 		// Now set the mass_min to the value determined by the n_part
+		// Check how to do this with DM and GAS particles
 		if(Settings.use_n_min == 1)
 			Settings.mass_min = Settings.n_min * Settings.pMass; 
 #endif
 	
 	} else {
-		fprintf(stderr, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
+#ifdef WITH_MPI
+		fprintf(stdout, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
 		- %d virialized\n\
 		- %d with the right concentration\n\
 		- %d satisfying the spin criterion\n\
 		and %d haloes complying with all criteria.\n", 
 		ThisTask, 
+#else
+		fprintf(stdout, "\nThere are %d haloes over the %e mass threshold of which:\n\
+		- %d virialized\n\
+		- %d with the right concentration\n\
+		- %d satisfying the spin criterion\n\
+		and %d haloes complying with all criteria.\n", 
+#endif
 		SETTINGS->n_threshold, Settings.mass_min,
 		SETTINGS->n_virialized,
 		SETTINGS->n_concentration, 
@@ -205,7 +223,9 @@ void get_halo_files_urls()
 	fclose(fc);
 
 		} else {
+#ifdef WITH_MPI
 			if(ThisTask==0)
+#endif
 				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc);
 		}
 
@@ -222,7 +242,9 @@ void get_halo_files_urls()
 	fclose(fc_sub);
 
 		} else {
+#ifdef WITH_MPI
 			if(ThisTask==0)
+#endif
 				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc_sub);
 		}
 
@@ -239,7 +261,9 @@ void get_halo_files_urls()
 	fclose(fc_pro);
 
 		} else {
+#ifdef WITH_MPI
 			if(ThisTask==0)
+#endif
 				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc_pro);
 		}
 
@@ -247,9 +271,12 @@ void get_halo_files_urls()
 
 
 
-void use_halo_url(int n)
+void set_halo_url()
 {
+	int n=0;
 	struct internal_urls *URLS;
+	
+	n = Settings.use_cat;
 
 #ifdef WITH_MPI
 	URLS = &pUrls[ThisTask];
@@ -266,7 +293,7 @@ void use_halo_url(int n)
 void read_halo_file()
 {
 	int b=0, n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
-	double a=0; // Dummy variable to read columns
+	double a=0; // Dummy variable to read useless columns
 	char dummyline[LINE_SIZE]; 
 	FILE *h_file;
 
@@ -285,7 +312,6 @@ void read_halo_file()
 	URLS = &pUrls[ThisTask];
 	SETTINGS = &pSettings[ThisTask];
 #else
-	int ThisTask = 0;
 	skip = 1;
 	URLS = &Urls;
 	SETTINGS = &Settings;
@@ -305,17 +331,29 @@ void read_halo_file()
 
 	if(h_file==NULL) 
 	{
+#ifdef WITH_MPI
 		fprintf(stderr, "Task=%d, halo file not found:%s\n", 
 			ThisTask, URLS->halo_file);
-
+#else
+		fprintf(stdout, "Halo file not found:%s\n", URLS->halo_file);
+#endif
 		} else {
-			fprintf(stderr, "Task=%d is reading from halo file:%s\n", 
+
+#ifdef WITH_MPI
+			fprintf(stdout, "Task=%d is reading from halo file:%s\n", 
 				ThisTask, URLS->halo_file);
+#else
+			fprintf(stdout, "Reading from halo file:%s\n", URLS->halo_file);
+#endif
 		}
 
 
+#ifdef WITH_MPI
 	fprintf(stdout, "\nTask=%d is allocating memory for %d haloes...\n",
 			ThisTask, SETTINGS->n_haloes);
+#else
+	fprintf(stdout, "\nAllocating memory for %d haloes...\n", SETTINGS->n_haloes);
+#endif
 
 	while(!feof(h_file) && n < SETTINGS->n_haloes)
 	{
@@ -436,6 +474,7 @@ void read_halo_file()
 
 	if(condition==1)
 	{
+		HALO[n].mass=1;
 		thr++;
 
 		if(HALO[n].abs_th_vir < Cosmo.virial) 
@@ -457,13 +496,13 @@ void read_halo_file()
 			}
 
 			vir++;
-		HALO[n].virial=1;
+		HALO[n].vir=1;
 		} else {
 			HALO[n].conc=0;
-			HALO[n].virial=0;
+			HALO[n].vir=0;
 	 	}
 			if(	HALO[n].conc==1 &&
-				HALO[n].virial==1 &&
+				HALO[n].vir==1 &&
 				HALO[n].spin==1 ) 
 	
 				{		
@@ -476,6 +515,8 @@ void read_halo_file()
 			n++;
 			j++;
 		} else { // Skip this line
+
+		HALO[n].mass = 0;
 		j++;
 	}
 } // Finished counting haloes over threshold conditions
@@ -522,7 +563,7 @@ void read_profiles_file()
 			fprintf(stderr, "Profiles file not found:%s\n", 
 				URLS->profiles_file);
 		else
-			fprintf(stderr, "Found profiles file:%s\n", 
+			fprintf(stdout, "Found profiles file:%s\n", 
 				URLS->profiles_file);
 
 #ifdef WITH_MPI
@@ -624,7 +665,7 @@ int* read_cross_correlated_haloes(char* halo_cc_list, int n_halos_comp, int* cc_
 	char dummyline[128]; 
 	FILE *cc_list = fopen(halo_cc_list, "r");
 	
-	fprintf(stderr, "Reading cross correlation file:%s\n", halo_cc_list);
+	fprintf(stdout, "Reading cross correlation file:%s\n", halo_cc_list);
 
 	do {
 		fgets(dummyline, 128, cc_list);

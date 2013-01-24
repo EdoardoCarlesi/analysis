@@ -3,16 +3,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../libcosmo/nfw.h"
-#include "../libmath/log_norm.h"
 #include "../general_variables.h"
 #include "../general_functions.h"
 
+// Define some useful macros
 #define FILE_HEADER(fout, info, count) fprintf(fout, info "(%i)\t",count++)
 
 #define DUMP_MSG(name, url) fprintf(stdout, "Printing %s to file: %s\n", name, url)
 
 
+// These variables are used throughout all functions
 static int i;
 static int count;
 static int nTot;
@@ -38,13 +38,13 @@ void print_number_densities()
 		FILE_HEADER(out_file, "numerical n", count);
 		fprintf(out_file, "\n");
 
-		for(i=0; i<nTot; i++) 
-		{
-			fprintf(out_file,"%.4lf", NumDen.z[i]);
-			fprintf(out_file,"\t%.3e", NumDen.n_th[i]);
-			fprintf(out_file,"\t%.3e", NumDen.n_num[i]);
-			fprintf(out_file, "\n");
-		}
+			for(i=0; i<nTot; i++) 
+			{
+				fprintf(out_file,"%.4lf", NumDen.z[i]);
+				fprintf(out_file,"\t%.3e", NumDen.n_th[i]);
+				fprintf(out_file,"\t%.3e", NumDen.n_num[i]);
+				fprintf(out_file, "\n");
+			}
 
 	fclose(out_file);
 }
@@ -63,47 +63,47 @@ void print_all_subhalo_properties_to_one_file()
 
 		fprintf(out_file,"#");
 		FILE_HEADER(out_file, "lambda ", count);
-		FILE_HEADER(out_file, "P(l)", count);
-		FILE_HEADER(out_file, "shape", count);
-		FILE_HEADER(out_file, "P(s)", count);
-		FILE_HEADER(out_file, "triax", count);
-		FILE_HEADER(out_file, "P(t)", count);
+		FILE_HEADER(out_file, "P(l)   ", count);
+		FILE_HEADER(out_file, "shape  ", count);
+		FILE_HEADER(out_file, "P(s)   ", count);
+		FILE_HEADER(out_file, "triax  ", count);
+		FILE_HEADER(out_file, "P(t)   ", count);
 		FILE_HEADER(out_file, "Cos(th)", count);
 		FILE_HEADER(out_file, "P(c(th))", count);
-		FILE_HEADER(out_file, "Cos(phi)", count);
-		FILE_HEADER(out_file, "P(c(phi))", count);
+		FILE_HEADER(out_file, "Cos(ph) ", count);
+		FILE_HEADER(out_file, "P(c(ph))", count);
 		FILE_HEADER(out_file, "sub(r)/Rv", count);
-		FILE_HEADER(out_file, "n(r)", count);
-		FILE_HEADER(out_file, "n(>r)", count);
-		FILE_HEADER(out_file, "V_sub", count);
+		FILE_HEADER(out_file, "n(r)   ", count);
+		FILE_HEADER(out_file, "n(>r)  ", count);
+		FILE_HEADER(out_file, "V_sub  ", count);
 		FILE_HEADER(out_file, "P(V_sub)", count);
-		FILE_HEADER(out_file, "mass", count);
-		FILE_HEADER(out_file, "n(>M)", count);
+		FILE_HEADER(out_file, "mass   ", count);
+		FILE_HEADER(out_file, "n(>M)  ", count);
 		FILE_HEADER(out_file, "subset(r)", count);
 		FILE_HEADER(out_file, "subset(n(>r))", count);
 		fprintf(out_file, "\n");
 
-		for(i=0; i<nTot; i++)	
-		{
-			fprintf(out_file, "%lf"  , SubHaloZ.l[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.p_l[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.shape[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.triax[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.costh[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.costh_count[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.cosphi[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.cosphi_count[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.r_sub[i]);
-			fprintf(out_file, "\t%d" , SubHaloZ.n_r_sub[i]);
-			fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.vel_sub[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.p_vel_sub[i]);
-			fprintf(out_file, "\t%e" , SubHaloZ.mass_sub[i]);
-			fprintf(out_file, "\t%d" , SubHaloZ.cum_n_sub[i]);
-			fprintf(out_file, "\t%lf", SubHaloZ.r_sub_subset[i]);
-			fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub_subset[i]);
-			fprintf(out_file, "\n");
-		}
+			for(i=0; i<nTot; i++)	
+			{
+				fprintf(out_file, "%lf"  , SubHaloZ.l[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.p_l[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.shape[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.triax[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.costh[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.costh_count[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.cosphi[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.cosphi_count[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.r_sub[i]);
+				fprintf(out_file, "\t%d" , SubHaloZ.n_r_sub[i]);
+				fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.vel_sub[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.p_vel_sub[i]);
+				fprintf(out_file, "\t%e" , SubHaloZ.mass_sub[i]);
+				fprintf(out_file, "\t%d" , SubHaloZ.cum_n_sub[i]);
+				fprintf(out_file, "\t%lf", SubHaloZ.r_sub_subset[i]);
+				fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub_subset[i]);
+				fprintf(out_file, "\n");
+			}
 
 	fclose(out_file);	
 }
@@ -121,14 +121,14 @@ void print_theoretical_mass_function()
 	DUMP_MSG("theoretical mass function", out_url);
 
 		fprintf(out_file,"#");
-		FILE_HEADER(out_file, "Mass", count);
-		FILE_HEADER(out_file, "n(>M) Tinker", count);
-		FILE_HEADER(out_file, "dn Tinker", count);
+		FILE_HEADER(out_file, "Mass  ", count);
+		FILE_HEADER(out_file, "n(>M) ", count);
+		FILE_HEADER(out_file, "dn    ", count);
 		fprintf(out_file, "\n");
 
 			for(i=0; i<nTot; i++)
 			{
-				fprintf(out_file,"%e", ThMassFunc.mass_halfstep[i]);
+				fprintf(out_file,"%e", ThMassFunc.mass[i]);
 				fprintf(out_file,"\t%e", ThMassFunc.n[i]);
 				fprintf(out_file,"\t%e", ThMassFunc.dn[i]);
 				fprintf(out_file,"\n");
@@ -155,13 +155,14 @@ void print_correlation_function()
 		FILE_HEADER(out_file, "Xi fit", count);
 		fprintf(out_file, "\n");
 	
-		for(i=0; i<nTot; i++) 
-		{
-			fprintf(out_file, "%lf\n", Xi.r[i]); 
-			fprintf(out_file, "\t%lf\n", Xi.xi_r[i]);
-			fprintf(out_file, "\t%lf\n", Xi.xi_fit[i]);
-			fprintf(out_file, "\n");
-		}
+			for(i=0; i<nTot; i++) 
+			{
+				fprintf(out_file, "%lf\n", Xi.r[i]); 
+				fprintf(out_file, "\t%lf\n", Xi.xi_r[i]);
+				fprintf(out_file, "\t%lf\n", Xi.xi_fit[i]);
+				fprintf(out_file, "\n");
+			}
+
 	fclose(out_file);
 }
 
@@ -177,18 +178,18 @@ void print_growth_factor()
 	DUMP_MSG("growth factor", out_url);
 	
 		fprintf(out_file, "#");
-		FILE_HEADER(out_file, "z   ", count);
-		FILE_HEADER(out_file, "gf  ", count);
-		FILE_HEADER(out_file, "gf/a", count);
+		FILE_HEADER(out_file, "z     ", count);
+		FILE_HEADER(out_file, "gf    ", count);
+		FILE_HEADER(out_file, "gf/a  ", count);
 		fprintf(out_file, "\n");
 	
-		for (i=0; i<nTot; i++) 
-		{
-			fprintf(out_file,"%lf", GrowthFac.z[i]);
-			fprintf(out_file,"\t%lf", GrowthFac.gf[i]);
-			fprintf(out_file,"\t%lf", GrowthFac.gf[i]/GrowthFac.a[i]);
-			fprintf(out_file,"\n");
-		}
+			for (i=0; i<nTot; i++) 
+			{
+				fprintf(out_file,"%lf", GrowthFac.z[i]);
+				fprintf(out_file,"\t%lf", GrowthFac.gf[i]);
+				fprintf(out_file,"\t%lf", GrowthFac.gf[i]/GrowthFac.a[i]);
+				fprintf(out_file,"\n");
+			}
 
 	fclose(out_file);
 }
@@ -221,24 +222,24 @@ void print_evolution_to_file()
 		FILE_HEADER(out_file, "sub_avg_m ", count);
 		fprintf(out_file,"\n");
 
-		for(i=0; i<nTot; i++)
-		{ 
-			fprintf(out_file, "%lf", HaloProperties[i].z);   
-			fprintf(out_file, "\t%lf", HaloProperties[i].c_0);   
-			fprintf(out_file, "\t%lf", HaloProperties[i].l_0);   
-			fprintf(out_file, "\t%lf", HaloProperties[i].s0);   
-			fprintf(out_file, "\t%lf", HaloProperties[i].t0);   
-			fprintf(out_file, "\t%lf", HaloProperties[i].avgSub);   
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].c_0);   	
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].l_0);   	
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].s0);   	
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].t0);   	
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].costh0);   	
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].cosphi0);   	
-			fprintf(out_file, "\t%lf", SubHaloProperties[i].vel_0);   	
-			fprintf(out_file, "\t%e", SubHaloProperties[i].avgMass);   	
-			fprintf(out_file,"\n");
-		}
+			for(i=0; i<nTot; i++)
+			{ 
+				fprintf(out_file, "%lf", HaloProperties[i].z);   
+				fprintf(out_file, "\t%lf", HaloProperties[i].c_0);   
+				fprintf(out_file, "\t%lf", HaloProperties[i].l_0);   
+				fprintf(out_file, "\t%lf", HaloProperties[i].s0);   
+				fprintf(out_file, "\t%lf", HaloProperties[i].t0);   
+				fprintf(out_file, "\t%lf", HaloProperties[i].avgSub);   
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].c_0);   	
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].l_0);   	
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].s0);   	
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].t0);   	
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].costh0);   	
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].cosphi0);   	
+				fprintf(out_file, "\t%lf", SubHaloProperties[i].vel_0);   	
+				fprintf(out_file, "\t%e", SubHaloProperties[i].avgMass);   	
+				fprintf(out_file,"\n");
+			}
 
 	fclose(out_file);
 }
@@ -332,7 +333,7 @@ void print_axis_alignment()
 void print_numerical_mass_function()
 {
 	count = 1;
-	nTot = MassFunc.bins;
+	nTot = MassFunc.bins-1;
 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
 	out_file = fopen(out_url, "w");
 
@@ -343,6 +344,7 @@ void print_numerical_mass_function()
 		FILE_HEADER(out_file, "n    ", count);
 		FILE_HEADER(out_file, "n_tot", count);
 		FILE_HEADER(out_file, "n_err", count);
+		FILE_HEADER(out_file, "M_step", count);
 		FILE_HEADER(out_file, "dn   ", count);
 		FILE_HEADER(out_file, "n_bin", count);
 		FILE_HEADER(out_file, "dn_err", count);
@@ -354,11 +356,13 @@ void print_numerical_mass_function()
 				fprintf(out_file, "\t%e", MassFunc.n[i]);
 				fprintf(out_file, "\t%d\t", MassFunc.n_tot[i]);
 				fprintf(out_file, "\t%e", MassFunc.err[i]);
+				fprintf(out_file, "%e", MassFunc.mass_halfstep[i]);
 				fprintf(out_file, "\t%e", MassFunc.dn[i]);
 				fprintf(out_file, "\t%d\t", MassFunc.n_bin[i]);
 				fprintf(out_file, "\t%e", MassFunc.err_dn[i]);
 				fprintf(out_file,"\n");
 			}
+
 	fclose(out_file);
 }
 
@@ -375,21 +379,21 @@ void print_nfw()
 
 	DUMP_MSG("Navarro Frenk White profile", out);
 
-	fprintf(out_nfw, "#");
-	FILE_HEADER(out_nfw, "r", count);
-	FILE_HEADER(out_nfw, "rho_NFW", count);
-	FILE_HEADER(out_nfw, "overd", count);
-	FILE_HEADER(out_nfw, "err", count);
-	fprintf(out_nfw, "\n");
+		fprintf(out_nfw, "#");
+		FILE_HEADER(out_nfw, "r", count);
+		FILE_HEADER(out_nfw, "overd", count);
+		FILE_HEADER(out_nfw, "rho_NFW", count);
+		FILE_HEADER(out_nfw, "err", count);
+		fprintf(out_nfw, "\n");
 
-		for(k=0; k<nTot; k++)
-		{
-			fprintf(out_nfw, "%lf", NFW.radius[k]);
-			fprintf(out_nfw, "\t%lf", NFW.overd[k]);
-			fprintf(out_nfw, "\t%lf", nfw(NFW.radius[k], NFW.rs, NFW.rho0));
-			fprintf(out_nfw, "\t%lf", NFW.err[k]);
-			fprintf(out_nfw, "\n");
-		}
+			for(k=0; k<nTot; k++)
+			{
+				fprintf(out_nfw, "%lf", NFW.radius[k]);
+				fprintf(out_nfw, "\t%lf", NFW.overd[k]);
+				fprintf(out_nfw, "\t%lf", NFW.profile[k]);
+				fprintf(out_nfw, "\t%lf", NFW.err[k]);
+				fprintf(out_nfw, "\n");
+			}
 
 	fclose(out_nfw);
 }

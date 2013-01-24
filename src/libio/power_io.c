@@ -41,18 +41,18 @@ void read_pk_snapshots()
 	FILE *pk=NULL;
 
 #ifdef PRINT_INFO
-	fprintf(stderr, "\nget_pk_snapshot()\n");
+	fprintf(stdout, "\nget_pk_snapshot()\n");
 #endif
 
 		if(Settings.use_one_pk == 1)
 		{
-			fprintf(stderr, "\nReading one P(k) from: %s\n", Urls.pk_file);
+			fprintf(stdout, "\nReading one P(k) from: %s\n", Urls.pk_file);
 			Urls.urls_pks[0] = (char *) calloc(strlen(Urls.pk_file), sizeof(char));
 			strcpy(Urls.urls_pks[0],Urls.pk_file);
 			
 		} else {
 
-			fprintf(stderr, "\nReading pk file list from: %s\n", Urls.pk_list);
+			fprintf(stdout, "\nReading pk file list from: %s\n", Urls.pk_list);
 				pk = fopen(Urls.pk_list,"r");
 		if(pk==NULL) 
 				fprintf(stderr, "Could not find pk.list file: %s\n", Urls.pk_list);
@@ -107,7 +107,7 @@ void init_pks()
 			Pks[m].npts = dimPkFile;
 
 #ifdef PRINT_INFO
-		fprintf(stderr, "Number of P(k) files:%d, dimension of file[%d]:%d \n", numPkFiles, m+1, dimPkFile);
+		fprintf(stdout, "Number of P(k) files:%d, dimension of file[%d]:%d \n", numPkFiles, m+1, dimPkFile);
 #endif
 
 				Pks[m].k    = (double *) calloc(dimPkFile, sizeof(double));

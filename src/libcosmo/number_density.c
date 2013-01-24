@@ -17,6 +17,11 @@
 #include "../general_functions.h"
 #include "../general_variables.h"
 
+#ifdef _OPENMP
+#include <omp.h>
+#endif
+
+
 void get_n_M_z(double M)
 {
 	int k=0, nTot=0, nPks=0;
@@ -111,7 +116,7 @@ void compute_number_density()
 	int index=0, m=0, nPk=0, nBin=0, nFc=0; 
 	double zz=0;
 
-	fprintf(stderr, "\ncompute_number_density().\n");
+	fprintf(stdout, "\ncompute_number_density().\n");
 
 	nPk = Urls.nPkFiles;
 	nFc = Urls.nCatalogueFiles;
@@ -126,7 +131,7 @@ void compute_number_density()
 			zz=Pks[index].z;
 			Settings.zStart = zz;
 
-			fprintf(stderr,"\nstep %d, analyzing snapshot at redshift z: %lf\n", m, zz);
+			fprintf(stdout,"\nstep %d, analyzing snapshot at redshift z: %lf\n", m, zz);
 	
 			Urls.halo_file = (char *) calloc(strlen(Urls.urls[nFc-m-1]), sizeof(char));
  			strcpy(Urls.halo_file, Urls.urls[nFc-m-1]);
@@ -141,7 +146,7 @@ void compute_number_density()
 			ThMassFunc.Mmax=10*MassFunc.mass[nBin-1];
 			store_mf(m);
 
-			fprintf(stderr, "Done z: %lf. zMax: %lf \n", zz, NumDen.zMax);
+			fprintf(stdout, "Done z: %lf. zMax: %lf \n", zz, NumDen.zMax);
 			m++;
 
 		} while(zz<NumDen.zMax);

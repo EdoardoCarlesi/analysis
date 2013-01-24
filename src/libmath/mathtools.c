@@ -174,11 +174,9 @@ int int_maximum(int *array, int size)
 		/* Number the entries per bin in a given array */
 void lin_bin(double* array, double* bins, int bin_size, int array_size, int* binned_array)
 {
-	fprintf(stdout, "\nBinning into %d bins an array of size:%d...", bin_size, array_size);
-#ifdef PRINT_INFO
-	fprintf(stdout, "\n");
-#endif
 	int i=0, j=0;
+
+	fprintf(stdout, "\nBinning into %d bins an array of size:%d...", bin_size, array_size);
 
 	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);
 	gsl_histogram_set_ranges (h, bins, bin_size);
@@ -187,12 +185,7 @@ void lin_bin(double* array, double* bins, int bin_size, int array_size, int* bin
 			gsl_histogram_increment(h, array[i]);
 		
 		for(j=0; j<bin_size-1; j++)
-		{
 			binned_array[j] = (int) h->bin[j];
-#ifdef PRINT_INFO
-			fprintf(stdout, "bin[%d]=%lf\n", j, h->bin[j]);
-#endif
-		}
 
 	gsl_histogram_free(h);
 	fprintf(stdout, "done.\n");

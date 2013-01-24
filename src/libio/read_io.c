@@ -41,7 +41,7 @@ void read_redshift_file()
 		if(redshifts_file == NULL) 
 			fprintf(stderr, "\nError opening redshift file %s\n", Urls.a_outputs);
 		else 
-			fprintf(stderr, "Redshift file opened correctly:%s\n", Urls.a_outputs);
+			fprintf(stdout, "Redshift file opened correctly:%s\n", Urls.a_outputs);
 
 			size = get_lines(redshifts_file, Urls.a_outputs);
 
@@ -58,7 +58,7 @@ void read_redshift_file()
 					GrowthFac.a[size-i-1] = aa;
 					GrowthFac.z[size-i-1] = 1./aa - 1.;
 #ifdef PRINT_INFO
-					fprintf(stderr, "%d) a:%lf z:%lf\n", size-i-1, aa, GrowthFac.z[size-i-1]);
+					fprintf(stdout, "%d) a:%lf z:%lf\n", size-i-1, aa, GrowthFac.z[size-i-1]);
 #endif
 				}
 }		
@@ -71,7 +71,7 @@ void read_hubble()
 	char dummyline[512];
 	FILE *hub;
 
-	fprintf(stderr, "\nread_hubble(). Using file: %s \n", Urls.hubble_file);
+	fprintf(stdout, "\nread_hubble(). Using file: %s \n", Urls.hubble_file);
 	hub = fopen(Urls.hubble_file, "r");
 	n = get_lines(hub, Urls.hubble_file);
 
@@ -98,7 +98,7 @@ void read_cosmology(char *curl)
 	char line[512];
 	FILE *cfile = NULL;
 	
-	fprintf(stderr, "\nread_cosmology(). Initializing H(z) and w(z) from file:%s\n", curl);
+	fprintf(stdout, "\nread_cosmology(). Initializing H(z) and w(z) from file:%s\n", curl);
 
 	cfile=fopen(curl,"r");
 	if(cfile==NULL) 
@@ -130,7 +130,7 @@ void read_numerical_mass_function(char *URL)
 		char lines[50];
 		FILE* nmf = fopen(URL, "r");
 
-		fprintf(stderr, "\nread_numerical_mass_function() from file:%s\n", URL);
+		fprintf(stdout, "\nread_numerical_mass_function() from file:%s\n", URL);
 
 		dim = get_lines(nmf, URL);
 		MassFunc.bins  =  dim;
