@@ -59,9 +59,9 @@ int main(int arg, char **argv)
 	{
 #endif
 		compute_numerical_mass_function();
-		compute_theoretical_mass_function(0);
-		print_numerical_mass_function(0);	
-		print_theoretical_mass_function(0);	
+		compute_theoretical_mass_function();
+		print_numerical_mass_function();	
+		print_theoretical_mass_function();	
 	
 #ifdef WITH_MPI
 	}
