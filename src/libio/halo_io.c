@@ -247,14 +247,9 @@ void get_halo_files_urls()
 
 
 
-void set_halo_url()
+void use_halo_url(int n)
 {
-	int n=0;
 	struct internal_urls *URLS;
-
-	n = Settings.use_cat;
-
-	fprintf(stdout, "\nUsing halo url for catalogue %d.\n", n);	
 
 #ifdef WITH_MPI
 	URLS = &pUrls[ThisTask];

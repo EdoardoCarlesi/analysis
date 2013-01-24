@@ -12,6 +12,7 @@
 
 #define DUMP_MSG(name, url) fprintf(stdout, "Printing %s to file: %s\n", name, url)
 
+
 static int i;
 static int count;
 static int nTot;
@@ -138,7 +139,7 @@ void print_theoretical_mass_function()
 
 
 
-void print_correlation_function(int j)
+void print_correlation_function()
 {
 	count = 1;
 	nTot = Xi.npts;
@@ -297,7 +298,7 @@ void print_all_halo_properties_to_one_file()
 
 
 
-void print_axis_alignment(int j)
+void print_axis_alignment()
 {
 	count = 1;
 	nTot = HaloZ.r_bins-1;
@@ -328,7 +329,7 @@ void print_axis_alignment(int j)
 
 
 
-void print_numerical_mass_function(int j)
+void print_numerical_mass_function()
 {
 	count = 1;
 	nTot = MassFunc.bins;
