@@ -21,6 +21,6 @@ double ln_sigma(double, void*);
 double dln_sigma_dln_mass(double);
 
 void compute_numerical_mass_function(void);
-void compute_theoretical_mass_function(int);
+void compute_theoretical_mass_function(void);
 
 void initialize_mass_function_datastore(void);
