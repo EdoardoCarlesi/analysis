@@ -1,14 +1,6 @@
 #include <gsl/gsl_vector.h>
 #include <gsl/gsl_blas.h>
 
-#ifndef GENERAL_VARIABLES_H
-#define GENERAL_VARIABLES_H
-#endif
-
-#ifndef GENERAL_VARIABLES_H
-#include "../general_variables.h"
-#endif
-
 
 double nfw(double, double, double);
 double nfw_drs(double, double, double);

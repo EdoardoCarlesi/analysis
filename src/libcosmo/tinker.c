@@ -26,10 +26,10 @@ double tinker(double M, void *p)
 {
 	double A, a, b, c, norm, sig;
 
-	A = T_mf.A;
-	a = T_mf.a;
-	b = T_mf.b;
-	c = T_mf.c;
+		A = T_mf.A;
+		a = T_mf.a;
+		b = T_mf.b;
+		c = T_mf.c;
 
 		norm = mf_normalization(M);
 		sig = sigmaM(M);
@@ -59,8 +59,8 @@ double mf_tinker(double M, double A, double a, double b, double c)
 {
 	double norm, sig;
 
-	norm = mf_normalization(M);
-	sig = sigmaM(M);
+		norm = mf_normalization(M);
+		sig = sigmaM(M);
 
 	return norm*A*(pow(sig/b,-a) + 1)*exp(-c/(sig*sig));
 }
@@ -71,8 +71,8 @@ double dA_mf_tinker(double M, double A, double a, double b, double c)
 {
 	double norm, sig;
 
-	norm = mf_normalization(M);
-	sig = sigmaM(M);
+		norm = mf_normalization(M);
+		sig = sigmaM(M);
 
 	return norm*(pow(sig/b,-a) + 1)*exp(-c/(sig*sig));
 }
@@ -83,8 +83,8 @@ double da_mf_tinker(double M, double A, double a, double b, double c)
 {
 	double norm, sig;
 
-	norm = mf_normalization(M);
-	sig = sigmaM(M);
+		norm = mf_normalization(M);
+		sig = sigmaM(M);
 
 	return norm*A*( pow(b/sig,a)*log(b/sig)*ln_10)*exp(-c/(sig*sig));
 }
@@ -94,8 +94,8 @@ double db_mf_tinker(double M, double A, double a, double b, double c)
 {
 	double norm, sig;
 	
-	norm = mf_normalization(M);
-	sig = sigmaM(M);
+		norm = mf_normalization(M);
+		sig = sigmaM(M);
 	
 	return norm*A*(a*pow(sig,-a)*pow(b,a-1))*exp(-c/(sig*sig));
 }
@@ -106,8 +106,8 @@ double dc_mf_tinker(double M, double A, double a, double b, double c)
 {
 	double norm, sig;
 
-	norm = mf_normalization(M);
-	sig = sigmaM(M);
+		norm = mf_normalization(M);
+		sig = sigmaM(M);
 	
 	return -norm*A*pow(sig,-2)*(pow(b/sig,a) + 1)*exp(-c/(sig*sig));
 }
@@ -129,19 +129,21 @@ int mf_tinker_f(const gsl_vector *x, void *data, gsl_vector *f)
 		b = gsl_vector_get(x,2);
 		c = gsl_vector_get(x,3);
 
-	for(i=0; i<n; i++)
+		for(i=0; i<n; i++)
 		{
-		if(vy[i]!=0 && vx[i]!=0)
+			if(vy[i]!=0 && vx[i]!=0)
 			{
 				t = vx[i];
 				s = err[i];
 				
-				if(s==0) s = 2*err[i-1];
-				
+					if(s==0) 
+						s = 2*err[i-1];
+					
 				Yi = mf_tinker(t,A,a,b,c);
 				fset = (Yi - vy[i])/s;
 	
-			if(fset!=fset) fset=0;
+			if(fset!=fset)
+				fset=0;
 
 			gsl_vector_set(f, i, fset);
 			}
@@ -170,7 +172,8 @@ int d_mf_tinker_f(const gsl_vector *x, void *data, gsl_matrix *J)
 	{
 		s = err[i];
 
-		if(s==0) s = err[i-1];
+			if(s==0) 
+				s = err[i-1];
 
 		t = vx[i]; 
 
@@ -240,11 +243,11 @@ double* best_fit_mf_tinker(double *x_array, double* y_array, double* y_err, int 
 			/* Do the fit */
 			par.fitted_p = least_square_nl_fit(dat, par, f);
 
-		/* Set the correctly fitted parameters */
-		A = gsl_vector_get(par.fitted_p,0);
-		a = gsl_vector_get(par.fitted_p,1);
-		b = gsl_vector_get(par.fitted_p,2);
-		c = gsl_vector_get(par.fitted_p,3);
+			/* Set the correctly fitted parameters */
+			A = gsl_vector_get(par.fitted_p,0);
+			a = gsl_vector_get(par.fitted_p,1);
+			b = gsl_vector_get(par.fitted_p,2);
+			c = gsl_vector_get(par.fitted_p,3);
 
 		fprintf(stdout, "The best fit parameters for this distribution are: \n");
 		fprintf(stdout, "A: %e a: %lf b: %lf c: %lf \n", A, a, b, c);

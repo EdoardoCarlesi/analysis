@@ -9,7 +9,7 @@ then
 
 if grep '#WITH_MPI=' $mkfile
 then
-sed 's/#WITH_MPI/WITH_MPI/' <$mkfile >$tmp
+sed 's/#WITH_MPI=/WITH_MPI=/' <$mkfile >$tmp
 mv $tmp $mkfile
 fi 
 
@@ -17,7 +17,7 @@ else # Mpi option is not chosen
 
 if grep '^WITH_MPI=' $mkfile
 then
-sed 's/WITH_MPI/#WITH_MPI/' <$mkfile >$tmp
+sed 's/WITH_MPI=/#WITH_MPI=/' <$mkfile >$tmp
 mv $tmp $mkfile
 fi
 

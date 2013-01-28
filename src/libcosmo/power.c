@@ -101,7 +101,7 @@ void calculate_power_k_from_xi()
 
 
 void compute_correlation_function(int index)
-{
+{	// FIXME
 	int i=0, N_r=0;
 	double r_min=0.1, r_max=100;
 	double r=0, vol=0, fit=0, r_0=13.; 
