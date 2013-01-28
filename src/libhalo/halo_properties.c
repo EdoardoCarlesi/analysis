@@ -3,15 +3,16 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "halo_properties.h"
-#include "subhalo_general.h"
 #include "../general_variables.h"
 #include "../general_functions.h"
 #include "../libmath/mathtools.h"
 #include "../libmath/log_norm.h"
 #include "../libmath/power_law.h"
-#include "../libcosmo/cosmological_relations.h"
 #include "../libcosmo/mass_function.h"
+#include "../libcosmo/cosmological_relations.h"
+
+#include "halo_properties.h"
+#include "subhalo_general.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -92,9 +93,9 @@ void sort_axis_alignement()
 
 	fprintf(stdout,"Computing halo major axis alignement angles for %d bins.\n", HaloZ.r_bins);
 	
-		max_haloes = Settings.n_threshold;
-		skip = Settings.halo_skip; nBins = Settings.r_bins; 
-		Settings.tick=0;
+		max_haloes = Settings.n_haloes;
+		skip = Settings.halo_skip; 
+		nBins = Settings.r_bins; 
 
 		radius = (double *) calloc(nBins, sizeof(double));
 		Rbins = (double *) calloc(nBins-1, sizeof(double));
