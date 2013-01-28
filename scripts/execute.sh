@@ -17,13 +17,9 @@ n_procs=$3
 
 use_multiple_cat=$4
 
-cp Makefile.config_nompi Makefile.config
-
 if [ $use_mpi -eq 1 ] ; then 
 use_multiple_cat=1
-cp Makefile.config_mpi Makefile.config
 fi
-
 
 # Model and simulation ettings
 model1='lcdm'
@@ -190,6 +186,9 @@ halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir
 all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$prefix' '$evolution_var' '
 
 execute=$base_analysis
+
+# Check if the Makefile has implemented WITH_MPI or not
+./$base_analysis/scripts/mpi_check.sh $base_analysis $2
 
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
