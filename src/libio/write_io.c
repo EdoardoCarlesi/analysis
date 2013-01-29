@@ -371,10 +371,6 @@ void print_numerical_mass_function()
 void print_nfw()
 {
 // TODO //FIXME
-	int k=0, count=1, nTot=0;
-	char out_url[200];
-	FILE *out_file=NULL;
-
 	nTot = NFW.bins;		
 	sprintf(out_url, "%s%s", Urls.output_prefix, "nfw_test.dat");
 	out_file = fopen(out_url, "w");
@@ -388,12 +384,12 @@ void print_nfw()
 		FILE_HEADER(out_file, "err", count);
 		fprintf(out_file, "\n");
 
-			for(k=0; k<nTot; k++)
+			for(i=0; i<nTot; i++)
 			{
-				fprintf(out_file, "%lf", NFW.radius[k]);
-				fprintf(out_file, "\t%lf", NFW.overd[k]);
-				fprintf(out_file, "\t%lf", NFW.profile[k]);
-				fprintf(out_file, "\t%lf", NFW.err[k]);
+				fprintf(out_file, "%lf", NFW.radius[i]);
+				fprintf(out_file, "\t%lf", NFW.overd[i]);
+				fprintf(out_file, "\t%lf", NFW.profile[i]);
+				fprintf(out_file, "\t%lf", NFW.err[i]);
 				fprintf(out_file, "\n");
 			}
 
@@ -404,10 +400,6 @@ void print_nfw()
 
 void print_best_fit_results(){
 // TODO //FIXME
-	int i=0, count=1, nBins=HaloZ.n_bins;
-	char out_url[200];
-	FILE* out_file=NULL; 
-
 	out_file=fopen(out_url,"w");
 	sprintf(out_url, "%s%s", Urls.output_prefix,"all_halo_best_fit_distributions.dat");
 	DUMP_MSG("best fit", out_url);

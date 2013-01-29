@@ -1,5 +1,7 @@
 #/bin/bash
 
+echo 'MPI checking if settings are consistent'
+
 mkfile=$1/Makefile.config
 tmp=$1/Makefile.config.tmp
 

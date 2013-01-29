@@ -75,7 +75,7 @@ int lognorm_f(const gsl_vector *x, void *data, gsl_vector *f)
 int d_lognorm_f(const gsl_vector *x, void *data, gsl_matrix *J)
 {
 	size_t n=0, i=0;
-	double log_norm, e1, e2, arg, s, t, norm, l_0, sig, dl_log_norm, ds_log_norm;
+	double log_norm, e1, e2, s, t, l_0, sig, dl_log_norm, ds_log_norm;
 	double *vx, *err;
 
 	n = ((struct data*)data)->n;	

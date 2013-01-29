@@ -119,8 +119,6 @@ void sort_axis_alignement()
 						pow(Haloes[j].Yc - Haloes[k].Yc,2) +
 						pow(Haloes[j].Zc - Haloes[k].Zc,2) );
 
-					print_counter(500000);
-
 				if(R > Rmin && R < Rmax)
 				{
 					A = 
@@ -384,9 +382,11 @@ void sort_lambda()
 void sort_concentration()
 {
 	int nBins, nHaloes, nHaloesCut, i=0, m=0, *int_c_bin_y;
-	double mMax, mMin, M_0, *c_err_mass, *params, *params2, *params3;
+	double mMax, mMin, *c_err_mass, *params, *params2, *params3;
 	double *conc, *mass, *c_avg_mass, *mass_bin, *bin_x, *c_bin_x, *c_bin_y, *c_err_y;
-	double value, c_0, sig, max, halfstep, c_02, sig2, cMax, cMin, norm;
+	double value, c_0, halfstep, c_02, sig2, cMax, cMin, norm;
+	
+	//double max, sig, M_0;
 
 	fprintf(stdout, "\nSorting concentrations.\n");
 
@@ -431,10 +431,10 @@ void sort_concentration()
 			}
 		}
 		
-					cMax = 1.01*maximum(conc, nHaloesCut); 
-					mMin = minimum(mass, nHaloesCut);
 					mMax = 1.01*maximum(mass, nHaloesCut); 
-					cMax = maximum(conc, nHaloesCut); 
+					mMin = minimum(mass, nHaloesCut);
+					cMax = 1.01*maximum(conc, nHaloesCut); 
+					cMin = minimum(conc, nHaloesCut); 
  		
 					bin_x=lin_stepper(cMin,cMax,nBins);
 					lin_bin(conc,bin_x,nBins,nHaloesCut,int_c_bin_y);	
@@ -450,9 +450,9 @@ void sort_concentration()
 				c_err_y[i] = sqrt(norm*value);
 			}	
 
-			/*
 			//c_0 = average(conc, nHaloes_conc);
 			c_0 = maximum(c_bin_y, nBins-1);
+			/*
 
 				params = best_fit_lognorm(conc, nHaloes_conc, nBins-1, 
 					c_bin_x, c_bin_y, c_err_y);

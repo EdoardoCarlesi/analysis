@@ -8,7 +8,7 @@ AR?=ar
 
 .PHONY: all clean;
 
-OBJS = 
+OBJS = grid.o density.o
 
 all: 	libgrid.a
 

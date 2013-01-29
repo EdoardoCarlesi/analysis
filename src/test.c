@@ -9,6 +9,8 @@
 #include "libhalo/halo_properties.h"
 #include "general_variables.h"
 
+#include "libgrid/grid.h"
+
 #ifdef WITH_MPI
 #include <mpi.h>
 #include "libparallel/general.h"
@@ -26,10 +28,12 @@ int main(int argc, char **argv)
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
 
+	MPI_Status stat;
+
 	init_comm_structures();
 
 	init_cpu_struct();
-
+	
 	if(ThisTask == 0)
 	{	// Example settings
 		Settings.mass_min = 3.1e10;
@@ -59,9 +63,9 @@ int main(int argc, char **argv)
 
 	if(ThisTask==0)
 	{
-
 		// Do your (serial / OpenMP) operations	
-
+		init_grid(32);
+		fill_grid();
 	}
 
 	MPI_Finalize();

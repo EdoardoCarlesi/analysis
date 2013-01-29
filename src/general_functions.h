@@ -6,14 +6,10 @@
 
 void initialize_internal_variables(char **);
 
-void normalize_to_one(char*, char*);
-
-void print_counter(int);
-
 void default_init(void);
 
 void set_halo_selection_criterion(void);
+void check_condition_consistency(void);
 
 int n_haloes_per_criterion(void);
-
 int halo_condition(int);

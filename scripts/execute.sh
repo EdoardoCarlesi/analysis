@@ -136,12 +136,11 @@ halo_dir_ahf1=$DATA1$dir_ahf/
 halo_dir_ahf2=$DATA2$dir_ahf/
 
 zzzz='.z'
+cat_zero='00'
 
 if [ $use_multiple_cat -eq 1 ] ; then
 zzzz='0000.z'
 fi
-
-cat_zero='00'
 
 if [ $catalogue_number -gt 9 ] ; then
 cat_zero='0'
@@ -155,10 +154,13 @@ cd $halo_dir1
 profile_name1=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
 profile_name2=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
 
-pk_file_base1=$snaps_dir1/Pk*$particle_number
-pk_file_base2=$snaps_dir2/Pk*$particle_number
-pk_file1=`ls $pk_file_base1*snap*$catalogue_number`
-pk_file2=`ls $pk_file_base2*snap*$catalogue_number`
+pk_file1=`ls $snaps_dir1*snap*$catalogue_number`
+pk_file2=`ls $snaps_dir2*snap*$catalogue_number`
+
+if [ -n $pk_file1 ] ; then
+pk_file1='pk_not_found.dummy'
+echo 'pk file 1' $pk_file1
+fi
 
 halo_file1=$halo_dir1/$halo_name1
 halo_file2=$halo_dir2/$halo_name2
@@ -171,7 +173,7 @@ halo_list=$base_temp/halo.list
 profile_list=$base_temp/profile.list
 subhalo_list=$base_temp/subhalo.list
 
-ls -r $pk_file_base1* > $pk_list 
+ls -r $snaps_dir1/Pk* > $pk_list 
 ls -r $halo_dir1/*$zzzz*halos > $halo_list 
 ls -r $halo_dir1/*$zzzz*profiles > $profile_list
 ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
@@ -184,14 +186,14 @@ set_var1=$box_size' '$particle_number' '$n_bins' '$n_bins_th' '$r_bins' '$pk_ski
 set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
 evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
-halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2
+halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$snaps_dir2' '$halo_dir2
 
 all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$prefix' '$evolution_var' '
 
 execute=$base_analysis
 
 # Check if the Makefile has implemented WITH_MPI or not
-./$base_analysis/scripts/mpi_check.sh $base_analysis $2
+$base_analysis/scripts/mpi_check.sh $base_analysis $2
 
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis

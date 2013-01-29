@@ -5,7 +5,7 @@
 ################################################################
 include ../Makefile.config
 
-LIBS = libmath/libmath.a libio/libio.a libcosmo/libcosmo.a libhalo/libhalo.a
+LIBS = libmath/libmath.a libio/libio.a libcosmo/libcosmo.a libhalo/libhalo.a libgrid/libgrid.a
 SRCS = general_variables.c general_functions.c
 OBJ  = general_variables.o general_functions.o
 INCLUDE += general_variables.h general_functions.h
@@ -76,6 +76,7 @@ clean:
 		cd libmath ; ${MAKE} clean
 		cd libio ; ${MAKE} clean
 		cd libcosmo ; ${MAKE} clean
+		cd libgrid ; ${MAKE} clean
 		cd libhalo ; ${MAKE} clean
 		cd libparallel ; ${MAKE} clean
 		
@@ -86,6 +87,9 @@ libmath/libmath.a:
 
 libcosmo/libcosmo.a: 
 	cd libcosmo/ ; ${MAKE} libcosmo.a
+
+libgrid/libgrid.a: 
+	cd libgrid/ ; ${MAKE} libgrid.a
 
 libio/libio.a: 
 	cd libio/ ; ${MAKE} libio.a

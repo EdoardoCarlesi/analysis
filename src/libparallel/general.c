@@ -71,11 +71,11 @@ void init_comm_structures()
 	SizeHaloesStructHalo = (int*) calloc(NTask, sizeof(int));
 
 		// Init the cpu read by every box to default dummy values
-	pSettings[ThisTask].box.X[0] = Settings.box_size;
+	pSettings[ThisTask].box.X[0] = 1e+5;
 	pSettings[ThisTask].box.X[1] = 0;
-	pSettings[ThisTask].box.Y[0] = Settings.box_size;
+	pSettings[ThisTask].box.Y[0] = 1e+5;
 	pSettings[ThisTask].box.Y[1] = 0;
-	pSettings[ThisTask].box.Z[0] = Settings.box_size;
+	pSettings[ThisTask].box.Z[0] = 1e+5;
 	pSettings[ThisTask].box.Z[1] = 0;
 }
 

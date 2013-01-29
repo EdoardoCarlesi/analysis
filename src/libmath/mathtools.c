@@ -243,14 +243,13 @@ void cum_bin(int *n, int *nCum, int size)
 
 int* int_shellsort(int *array, int n)
 {
-	int i=0,j=0,inc=3, m=0, num = (int) (n/100), temp=0;
+	int i=0,j=0,inc=3, m=0, temp=0;
 
      while(inc>0)
      {
           for(i=0;i<n;i++)
 	{
 		m++;
-		print_counter(num);
 
                    j=i;
                    temp=array[i];
@@ -278,7 +277,7 @@ int* int_shellsort(int *array, int n)
 
 double* shellsort(double *array, int n)
 {
-	int i,j,inc=3, m=0, num = (int) (n/100);
+	int i,j,inc=3, m=0;
 	double temp;
 
      while(inc>0)
@@ -286,7 +285,6 @@ double* shellsort(double *array, int n)
           for(i=0;i<n;i++)
           {
 		m++;
-		print_counter(num);
 
                    j=i;
                    temp=array[i];

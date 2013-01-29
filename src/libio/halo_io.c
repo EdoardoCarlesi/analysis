@@ -63,10 +63,6 @@ void determine_simulation_settings()
 		}
 #endif
 	
-#ifdef WITH_MPI
-	if(ThisTask==0)
-#endif
-	{
 		fprintf(stdout, 
 #ifdef WITH_MPI
 		"\nTask=%d has %d haloes over the %e mass threshold of which:\n\
@@ -88,12 +84,7 @@ void determine_simulation_settings()
 		SETTINGS->n_spin,
 		SETTINGS->n_all
 		);
-	}
 
-#ifdef WITH_MPI
-	if(ThisTask==0)
-#endif
-	{
 		fprintf(stdout, 
 #ifdef WITH_MPI
 			"\tTask=%d has box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n", 
@@ -105,7 +96,6 @@ void determine_simulation_settings()
 				SETTINGS->box.Y[0], SETTINGS->box.Y[1], 
 				SETTINGS->box.Z[0], SETTINGS->box.Z[1] 
 			);
-	}
 
 }
 
@@ -116,9 +106,7 @@ void set_box(int i)
 	struct halo *HALO;
 	struct general_settings *SETTINGS;
 
-	double x, x_max, x_min;
-	double y, y_may, y_min;
-	double z, z_maz, z_min;
+	double x, y, z;
 
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
@@ -130,14 +118,15 @@ void set_box(int i)
 
 	x = HALO[i].Xc;
 	y = HALO[i].Yc;
-	x = HALO[i].Zc;
+	z = HALO[i].Zc;
 
+//		if(x != 0 && y != 0 && z != 0)
 		{		// Check X
 			if( x <	SETTINGS->box.X[0])
 				SETTINGS->box.X[0] = x;
 
 			if( x >	SETTINGS->box.X[1])
-				SETTINGS->box.X[1] = y;
+				SETTINGS->box.X[1] = x;
 
 				// Check Y
 			if( y <	SETTINGS->box.Y[0])
@@ -685,7 +674,6 @@ void read_profiles_file()
 	over2=over1;
 	radius2=radius1;
 	np2=np1;
-	print_counter(10000);
 
 	j++;
 	} else { // Skip this line
