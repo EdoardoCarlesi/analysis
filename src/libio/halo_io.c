@@ -189,13 +189,13 @@ void get_halo_files_urls()
 	fc_sub  = fopen(url_fc_sub,"r");
 	
 	if(fc==NULL) 
-		fprintf(stderr, "%s %s\n","Could not find halo list file: ", url_fc);
+		ERROR("Could not find file:", url_fc);
 
 	if(fc_pro==NULL) 
-		fprintf(stderr, "%s %s\n","Could not find profiles list file: ", url_fc_pro);
+		ERROR("Could not find file:", url_fc_pro);
 
 	if(fc_sub==NULL) 
-		fprintf(stderr, "%s %s\n","Could not find subhalo list file: ", url_fc_sub);
+		ERROR("Could not find file:", url_fc_sub);
 
 		lin = get_lines(fc, url_fc);
 		lin_pro = get_lines(fc_pro, url_fc_pro);
@@ -225,8 +225,8 @@ void get_halo_files_urls()
 		} else {
 #ifdef WITH_MPI
 			if(ThisTask==0)
-#endif
-				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc);
+#endif				
+				WARNING("Trying to read empty file", url_fc);
 		}
 
 	if(lin_sub > 0)
@@ -245,7 +245,7 @@ void get_halo_files_urls()
 #ifdef WITH_MPI
 			if(ThisTask==0)
 #endif
-				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc_sub);
+				WARNING("Trying to read empty file", url_fc_sub);
 		}
 
 	if(lin_pro > 0)
@@ -264,7 +264,7 @@ void get_halo_files_urls()
 #ifdef WITH_MPI
 			if(ThisTask==0)
 #endif
-				fprintf(stderr, "\nFile %s contains no URLS.\n", url_fc_pro);
+				WARNING("Trying to read empty file", url_fc_pro);
 		}
 
 }
@@ -330,13 +330,9 @@ void read_halo_file()
 #endif
 
 	if(h_file==NULL) 
-	{
-#ifdef WITH_MPI
-		fprintf(stderr, "Task=%d, halo file not found:%s\n", 
-			ThisTask, URLS->halo_file);
-#else
-		fprintf(stdout, "Halo file not found:%s\n", URLS->halo_file);
-#endif
+	{	
+		ERROR("File not found", URLS->halo_file);
+
 		} else {
 
 #ifdef WITH_MPI
@@ -559,9 +555,8 @@ void read_profiles_file()
 		p_file = fopen(URLS->profiles_file, "r");
 		SETTINGS->n_haloes = get_lines(p_file, URLS->profiles_file);
 
-		if(p_file==NULL) 
-			fprintf(stderr, "Profiles file not found:%s\n", 
-				URLS->profiles_file);
+		if(p_file==NULL)
+			ERROR("File not found", URLS->profiles_file);
 		else
 			fprintf(stdout, "Found profiles file:%s\n", 
 				URLS->profiles_file);

@@ -55,7 +55,7 @@ void read_pk_snapshots()
 			fprintf(stdout, "\nReading pk file list from: %s\n", Urls.pk_list);
 				pk = fopen(Urls.pk_list,"r");
 		if(pk==NULL) 
-				fprintf(stderr, "Could not find pk.list file: %s\n", Urls.pk_list);
+				ERROR("File not found", Urls.pk_list);
 
 		// Check that redshifts and snapshot number match
 	nPkSnaps = get_lines(pk, Urls.pk_list);
@@ -63,7 +63,7 @@ void read_pk_snapshots()
 
 	if(nPkSnaps != Urls.nPkFiles) 
 	{
-		fprintf(stderr, "\nWarning. Number of redshifts (%d) and number of snapshots (%d) does not match!\n", 
+		fprintf(stdout, "\nNumber of redshifts (%d) and number of snapshots (%d) does not match!\n", 
 			Urls.nPkFiles, nPkSnaps);
 	}
 

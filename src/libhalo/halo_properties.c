@@ -615,6 +615,7 @@ void sort_and_fit_mass_temperature_relation()
 #endif // Gas
 
 
+
 void compute_halo_properties()
 {
 		avg_subhalo();
@@ -630,80 +631,4 @@ void compute_halo_properties()
 		sort_gas_fraction();
 		sort_and_fit_mass_temperature_relation();
 #endif
-}
-
-
-
-int halo_condition(int i)
-{
-	int condition=0;
-
-	if(Settings.use_spin == 1)
-	{
-		if(Haloes[i].spin == 1)
-			condition = 1;
-		else 
-			condition = 0;
-	}
-		
-	else if(Settings.use_conc == 1)
-	{
-		if(Haloes[i].conc == 1)
-			condition = 1;
-		else 
-			condition = 0;
-	}
-
-	else if(Settings.use_mass == 1)
-	{
-		if(Haloes[i].mass == 1)
-			condition = 1;
-		else 
-			condition = 0;
-	}
-
-	else if(Settings.use_vir == 1)
-	{
-		if(Haloes[i].vir == 1)
-			condition = 1;
-		else 
-			condition = 0;
-	}
-
-	else if(Settings.use_all == 1)
-	{
-		if(Haloes[i].all == 1)
-			condition = 1;
-		else 
-			condition = 0;
-	}
-	
-	else 
-		condition = 0;
-	
-	return condition;
-}
-
-
-
-int n_haloes_per_criterion()
-{
-	int nTot=0;
-
-	if(Settings.use_spin == 1)
-		nTot = Settings.n_spin;
-
-	else if(Settings.use_all == 1)
-		nTot = Settings.n_all;
-
-	else if(Settings.use_vir == 1)
-		nTot = Settings.n_virialized;
-
-	else if(Settings.use_conc == 1)
-		nTot = Settings.n_concentration;
-
-	else if(Settings.use_mass == 1)
-		nTot = Settings.n_threshold;
-
-	return nTot;
 }

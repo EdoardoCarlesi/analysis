@@ -56,9 +56,10 @@ void compute_growth_factor()
 
 			if(K < kk) 
 			{
-				fprintf(stderr, 
-				"\n**Chosen k (%lf) is smaller than the numerical range. Setting k=%lf.\n", K, kk);
-				K = kk; 
+				fprintf(stdout, 
+					"\nChosen k (%lf) is smaller than the numerical range available.\n\
+						Setting k=%lf.\n", K, kk);
+					K = kk; 
 			}
 				// pk0 is the highest redshift power spectrum
 				// pkNorm is the z at which we want the GrowthFac to be exactly one

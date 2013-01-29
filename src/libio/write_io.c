@@ -372,30 +372,32 @@ void print_nfw()
 {
 // TODO //FIXME
 	int k=0, count=1, nTot=0;
-	char *out = merge_strings(Urls.output_prefix, "nfw_test.dat");
-	FILE *out_nfw = fopen(out, "w");
+	char out_url[200];
+	FILE *out_file=NULL;
 
 	nTot = NFW.bins;		
+	sprintf(out_url, "%s%s", Urls.output_prefix, "nfw_test.dat");
+	out_file = fopen(out_url, "w");
 
-	DUMP_MSG("Navarro Frenk White profile", out);
+	DUMP_MSG("Navarro Frenk White profile", out_url);
 
-		fprintf(out_nfw, "#");
-		FILE_HEADER(out_nfw, "r", count);
-		FILE_HEADER(out_nfw, "overd", count);
-		FILE_HEADER(out_nfw, "rho_NFW", count);
-		FILE_HEADER(out_nfw, "err", count);
-		fprintf(out_nfw, "\n");
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "r", count);
+		FILE_HEADER(out_file, "overd", count);
+		FILE_HEADER(out_file, "rho_NFW", count);
+		FILE_HEADER(out_file, "err", count);
+		fprintf(out_file, "\n");
 
 			for(k=0; k<nTot; k++)
 			{
-				fprintf(out_nfw, "%lf", NFW.radius[k]);
-				fprintf(out_nfw, "\t%lf", NFW.overd[k]);
-				fprintf(out_nfw, "\t%lf", NFW.profile[k]);
-				fprintf(out_nfw, "\t%lf", NFW.err[k]);
-				fprintf(out_nfw, "\n");
+				fprintf(out_file, "%lf", NFW.radius[k]);
+				fprintf(out_file, "\t%lf", NFW.overd[k]);
+				fprintf(out_file, "\t%lf", NFW.profile[k]);
+				fprintf(out_file, "\t%lf", NFW.err[k]);
+				fprintf(out_file, "\n");
 			}
 
-	fclose(out_nfw);
+	fclose(out_file);
 }
 
 
@@ -403,8 +405,11 @@ void print_nfw()
 void print_best_fit_results(){
 // TODO //FIXME
 	int i=0, count=1, nBins=HaloZ.n_bins;
-	char* out_url=merge_strings(Urls.output_prefix,"all_halo_best_fit_distributions.dat");
-	FILE* out_file=fopen(out_url,"w");
+	char out_url[200];
+	FILE* out_file=NULL; 
+
+	out_file=fopen(out_url,"w");
+	sprintf(out_url, "%s%s", Urls.output_prefix,"all_halo_best_fit_distributions.dat");
 	DUMP_MSG("best fit", out_url);
 	
 		fprintf(out_file, "#Concentration distribution best fit values, c_0=%lf, c_sig  :%lf \n", 

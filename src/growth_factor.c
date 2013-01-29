@@ -10,7 +10,7 @@
 
 int main(int argc, char **argv) 
 {
-	fprintf(stdout, "\nmain(). Growth factor calculation started.\n");
+	INFO_MSG("Computing growth factor");
 
 		initialize_internal_variables(argv);
 
@@ -24,7 +24,7 @@ int main(int argc, char **argv)
 
 		print_growth_factor();
 
-	fprintf(stdout, "\nmain(). Growth factor calculation done.\n");
+	INFO_MSG("Done growth factor computation");
 
 return 0;
 }

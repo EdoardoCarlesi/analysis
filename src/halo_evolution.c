@@ -15,7 +15,7 @@ int main(int argc, char **argv)
 {
 	int i=0; 
 
-	fprintf(stdout, "\nmain(). Computing halo evolutionary properties.\n");
+	INFO_MSG("Computing halo properties as a function of redshift");
 	
 	initialize_internal_variables(argv);
 
@@ -30,7 +30,7 @@ int main(int argc, char **argv)
 
 		print_evolution_to_file();
 
-	fprintf(stdout, "\nmain(). Halo evolutionary properties computed.\n");
+	INFO_MSG("Done halo properties computation");
 
 return 0;
 }

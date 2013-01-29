@@ -5,6 +5,7 @@
 
 #include "read_io.h"
 #include "../general_variables.h"
+#include "../general_functions.h"
 #include "../libcosmo/cosmological_relations.h"
 
 
@@ -14,7 +15,7 @@ int get_lines(FILE *f, char *url)
 	char line[2048];
 	
 		if(f==NULL) 
-			fprintf(stderr,"\nError in get_lines(). File %s could not be opened.\n", url);
+			ERROR("File not found when trying to get the number of lines", url);
 
 		while(!feof(f))
 		{
@@ -39,7 +40,7 @@ void read_redshift_file()
 		redshifts_file = fopen(Urls.a_outputs, "r");
 
 		if(redshifts_file == NULL) 
-			fprintf(stderr, "\nError opening redshift file %s\n", Urls.a_outputs);
+			ERROR("File not found", Urls.a_outputs);
 		else 
 			fprintf(stdout, "Redshift file opened correctly:%s\n", Urls.a_outputs);
 
@@ -101,8 +102,9 @@ void read_cosmology(char *curl)
 	fprintf(stdout, "\nread_cosmology(). Initializing H(z) and w(z) from file:%s\n", curl);
 
 	cfile=fopen(curl,"r");
-	if(cfile==NULL) 
-		fprintf(stderr, "Could not open file: %s.\n", curl);
+
+		if(cfile==NULL) 
+			ERROR("File not found", curl);
 
 		dim = get_lines(cfile, curl) - 1;
 

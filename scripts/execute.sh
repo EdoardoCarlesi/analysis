@@ -26,7 +26,7 @@ fi
 
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde000'
 model2='ude'
 box_size=75
 particle_number=256
@@ -38,7 +38,7 @@ catalogue_number=28
 
 # Number of bins for general distributions and for the radial alignment
 n_bins=20
-n_bins_th=1000
+n_bins_th=200
 r_bins=7
 
 # Scale of P(k) for growth factor calculation
@@ -52,15 +52,20 @@ mf_skip=1
 m_min=1.e+10
 m_max=0.8e+15
 
-#Minimum particles per halo or minimum mass per halo
+#Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=200
 m_th=1.e+10
+virial=2.5
+spin=0.15
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
 use_n_min=1
 
-# use_n_haloes = 0 means use all haloes, otherwise as specified
+# use_n_haloes = 0
 use_n_haloes=0
+
+# use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
+use_criterion=1
 
 #Computer settings
 swap=0
@@ -75,8 +80,6 @@ s8=0.8
 om=0.27
 ol=0.73
 dc=1.686
-virial=2.5
-spin=0.15
 
 # Integration redshifts
 z0=0
@@ -182,7 +185,7 @@ make clean
 
 url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1
 set_var1=$box_size' '$particle_number' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
-set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$n_min' '$use_n_min' '$use_n_haloes
+set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
 evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
 halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$pk_file_base2' '$snaps_dir2' '$halo_dir2

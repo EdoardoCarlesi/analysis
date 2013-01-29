@@ -137,7 +137,8 @@ int *generate_random_subset(int Nmax, int Nmin, int *subset)
 
 	if(Nmin > Nmax) 
 	{
-		fprintf(stderr, "\ngenerate_random_subset(). ERROR: Subset %d larger than dataset %d\n",Nmin,Nmax);
+		fprintf(stdout, "\nTrying to generate a subset %d larger than the dataset %d.\n",Nmin,Nmax);
+
 		} else {
 			srand ((int)time(NULL));
 

@@ -37,12 +37,9 @@ double sigma(double*, double, int);
 double log_sigma(double*, int);
 double* numerical_sigma(int, double*, double*);
 
-gsl_vector* least_square_nl_fit(struct data dat, 
-		struct parameters, gsl_multifit_function_fdf);
+gsl_vector* least_square_nl_fit(struct data dat, struct parameters, gsl_multifit_function_fdf);
 
 void print_state (size_t, gsl_multifit_fdfsolver*);
 
 double chi_square(double*, double*, double*, int, int);
 double goodness_of_fit(double*, double*, double*, int, int);
-
-void calculate_and_sort_chi2(void);

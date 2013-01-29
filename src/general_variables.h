@@ -68,11 +68,14 @@ extern struct general_settings
 	int n_bins_th;
 	int r_bins;
 
-	int use_n_min; // If =1 using n_min, otherwise using mass_min
+	int use_n_min; // If =1 using n_min as threshold criterion, otherwise using mass_min
+	int use_criterion; // 0 use all haloes, 1 use mass/number, 2 use spin, 3 use concentration, 
+			   // 4 use virialization, 5 use all combined criteria
 	int n_min;
 	double mass_min;
 	int n_haloes_to_use; // Use the first N haloes
-
+	
+	int use_none;
 	int use_mass;
 	int use_spin;
 	int use_vir;

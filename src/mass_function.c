@@ -14,7 +14,7 @@
 
 int main(int arg, char **argv)
 {
-	fprintf(stdout, "\nComputing the mass function, starting the main().\n");
+	INFO_MSG("Computing the halo mass function");
 
 	initialize_internal_variables(argv);
 
@@ -57,7 +57,11 @@ int main(int arg, char **argv)
 	
 	if(ThisTask==0)
 	{
-#endif
+#endif	
+		Settings.use_mass=1;
+		Settings.use_spin=1;
+
+		check_condition_consistency(); //FIXME
 		compute_numerical_mass_function();
 		compute_theoretical_mass_function();
 		print_numerical_mass_function();	
@@ -71,7 +75,7 @@ int main(int arg, char **argv)
 		if(ThisTask == 0)
 #endif
 
-	fprintf(stdout, "\nMass function computed.\n");
+	INFO_MSG("Done halo mass function computation");
 
 #ifdef WITH_MPI
 	MPI_Finalize();

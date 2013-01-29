@@ -3,10 +3,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "libhalo/nfw.h"
-#include "libio/read_io.h"
-#include "libmath/statistics.h"
-#include "libmath/mathtools.h"
 #include "general_variables.h"
 #include "general_functions.h"
 
@@ -18,8 +14,16 @@
 
 
 void initialize_internal_variables(char **argv){
-	fprintf(stdout, "Initializing internal variables...\n");
-		
+
+	INFO_MSG("Initializing internal variables");
+	
+#ifdef PRINT_INFO
+	int kk=0;
+ 	INFO_MSG("Printing info");
+	for(kk=1; kk<40; kk++) 
+		fprintf(stdout, "argv[%d]: %s \n", kk, argv[kk]);
+#endif
+
 	int count=1;
 
 	// Basic working file urls
@@ -47,6 +51,7 @@ void initialize_internal_variables(char **argv){
 	Settings.n_min = atof(argv[count++]);
 	Settings.use_n_min = atof(argv[count++]);
 	Settings.n_haloes_to_use = atoi(argv[count++]); 
+	Settings.use_criterion = atoi(argv[count++]); 
 	
 	// Cosmological parameters
 	Cosmo.h = atof(argv[count++]);
@@ -69,18 +74,9 @@ void initialize_internal_variables(char **argv){
 
 //	fprintf(stdout, "Prefix=%s\n", Urls.output_prefix);
 
-#ifdef PRINT_INFO
-	int kk=0;
- 
-	for(kk=1; kk<count; kk++) 
-		fprintf(stdout, "argv[%d]: %s \n", kk, argv[kk]);
-#endif
-
+	set_halo_selection_criterion();
+	
 	default_init();
-
-#ifdef _OPENMP
-	omp_set_num_threads(4);
-#endif
 }
 
 
@@ -156,165 +152,158 @@ void normalize_to_one(char * url_in, char * url_out)
 }
 
 
-
-char* merge_strings(char* str_1, char* str_2)
+	// Can be useful to check wether the criteria are changed somewhere else
+void check_condition_consistency()
 {
-	int dim=0; 
-	char *str_3=NULL;
+	int count=0;
+		
+		if(Settings.use_all == 1)
+			Settings.use_all = 0;			
+			else 
+				count++;
 
-		dim = strlen(str_1) + strlen(str_2) + 2;
-		str_3 = (char *) calloc(dim, sizeof(char));
+			if(Settings.use_vir == 1)
+					Settings.use_vir = 0;			
+				else 
+					count++;
 
-	sprintf(str_3, "%s%s", str_1, str_2);	
+				if(Settings.use_conc == 1)
+					Settings.use_conc = 0;			
+					else 
+						count++;
 
-	return str_3;
+			if(Settings.use_spin == 1)
+				Settings.use_spin = 0;			
+			else 
+				count++;
+
+		if(Settings.use_mass ==1)
+			Settings.use_mass=0;			
+			else 
+				count++;
+
+	if(count > 1)
+		WARNING("More than one halo condition has been set", "check_condition_consistency()");
 }
 
 
 
-void compute_files_ratio(char *url1, char *url2, char *url_out, int bins, int skip, int logStep)
+int halo_condition(int i)
 {
-	int n1=0, n2=0, i=0, j=0;
-	
-	double *vec_x1, *vec_y1, *vec_x2, *vec_y2;
-	double *arr_x1, *arr_y1, *arr_x2, *arr_y2;
-	double x=0, ratio=0, y1=0, y2=0, eps=0.001;
-	double max, max1, max2, min, min1, min2;
-	double *step=NULL;
-	char dummyline[2048];
+	int condition=0;
 
-	FILE *f1 = fopen(url1, "r");
-	FILE *f2 = fopen(url2, "r");
-	FILE *output = fopen(url_out, "w");
-
-	n1 = get_lines(f1, url1) - skip; 
-	n2 = get_lines(f2, url2) - skip; 
-
-	vec_x1 = (double *) malloc(n1 * sizeof(double));
-    	vec_y1 = (double *) malloc(n1 * sizeof(double));
-	vec_x2 = (double *) malloc(n2 * sizeof(double));
-	vec_y2 = (double *) malloc(n2 * sizeof(double));
-	arr_x1 = (double *) malloc(n1 * sizeof(double));
-    	arr_y1 = (double *) malloc(n1 * sizeof(double));
-	arr_x2 = (double *) malloc(n2 * sizeof(double));
-	arr_y2 = (double *) malloc(n2 * sizeof(double));
-
-	for(i=0;i<n1+skip;i++)
+	if(Settings.use_spin == 1)
 	{
-			fgets(dummyline, 2048, f1);
-
-		if(i>skip-eps)
-		{
-			j=i-skip;
-			sscanf(dummyline, "%lf %lf", &vec_x1[j], &vec_y1[j]);
-		}
+		if(Haloes[i].spin == 1)
+				condition = 1;
+		else 
+				condition = 0;
 	}
+		
+		else if(Settings.use_conc == 1)
+		{
+			if(Haloes[i].conc == 1)
+					condition = 1;
+			else 
+					condition = 0;
+		}
 
-		i=0;
-
-			while(!feof(f2))
+			else if(Settings.use_mass == 1)
 			{
-				fgets(dummyline, 2048, f2);
+				if(Haloes[i].mass == 1)
+						condition = 1;
+				else 
+						condition = 0;
+			}
 
-				if(i>skip-eps)
+				else if(Settings.use_vir == 1)
 				{
-					j=i-skip;
-					sscanf(dummyline, "%lf %lf", &vec_x2[j], &vec_y2[j]);
+					if(Haloes[i].vir == 1)
+							condition = 1;
+					else 
+							condition = 0;
 				}
-					i++;
-			}
 
-		fclose(f1);
-		fclose(f2);
-
-	/* Check if the arrays have to be inverted - GSL consistency */
-	if(vec_x1[n1-1] < vec_x1[0]) 
-	{
-		fprintf(stdout, "\nInvert array 1 \n");
-
-		for(i=0; i<n1; i++)
-		{
-			arr_x1[i]=vec_x1[n1-i-1];
-			arr_y1[i]=vec_y1[n1-i-1];
-		}
-
-		} else {
-			fprintf(stdout, "\nDo not invert array 1\n");
-
-			for(i=0; i<n1; i++)
+			else if(Settings.use_all == 1)
 			{
-				arr_x1[i]=vec_x1[i];
-				arr_y1[i]=vec_y1[i];
+				if(Haloes[i].all == 1)
+						condition = 1;
+				else 
+						condition = 0;
 			}
-
-		}
-
-	if(vec_x2[n2-1] < vec_x2[0]) 
-	{
-		fprintf(stdout, "\nInvert array 2\n");
-
-		for(i=0; i<n2; i++)
-		{
-			arr_x2[i]=vec_x2[n2-i-1];
-			arr_y2[i]=vec_y2[n2-i-1];
-		}
-
-		} else {
-		fprintf(stdout, "\nDo not invert array 2 \n");
 	
-			for(i=0; i<n2; i++)
-			{
-				arr_x2[i]=vec_x2[i];
-				arr_y2[i]=vec_y2[i];
-			}
-		}
-
-			max1=arr_x1[n1-1];
-			max2=arr_x2[n2-1];
+		else 
+			condition = 0;
 	
-		if(max1 > max2)
-		{		
-			max = max2;
-		} else {
-			max = max1;
-		}
+	return condition;
+}
 
-	min1=arr_x1[0];
-	min2=arr_x2[0];
 
-		if(min1 < min2) 
-		{
-			min = min2;
-		} else {
-			min = min1;
-		}
 
-	if(logStep==1)
-	{
-		step = log_stepper(min,max,bins);
-	} else {
-		step = lin_stepper(min,max,bins);
+int n_haloes_per_criterion()
+{
+	int nTot=0;
+
+	if(Settings.use_spin == 1)
+		nTot = Settings.n_spin;
+
+		else if(Settings.use_all == 1)
+			nTot = Settings.n_all;
+
+			else if(Settings.use_vir == 1)
+				nTot = Settings.n_virialized;
+
+				else if(Settings.use_conc == 1)
+					nTot = Settings.n_concentration;
+
+			else if(Settings.use_mass == 1)
+				nTot = Settings.n_threshold;
+
+		else
+			nTot = Settings.n_haloes;
+
+	return nTot;
+}
+
+
+
+void set_halo_selection_criterion()
+{
+		// Init all criteria to zero
+	Settings.use_mass = 0;
+	Settings.use_vir = 0;
+	Settings.use_spin = 0;
+	Settings.use_conc = 0;
+	Settings.use_all = 0;
+	
+	switch(Settings.use_criterion)
+	{	
+		case 1:
+			Settings.use_mass = 1;
+			INFO_MSG("Using halo mass/particle number selection criterion");
+				break;	
+		case 2:
+			Settings.use_vir = 1;
+			INFO_MSG("Using halo virialization selection criterion");
+				break;	
+	
+		case 3:
+			Settings.use_spin = 1;
+			INFO_MSG("Using halo spin selection criterion");
+				break;	
+	
+		case 4:
+			Settings.use_conc = 1;
+			INFO_MSG("Using halo concentration selection criterion");
+				break;	
+	
+		case 5:
+			Settings.use_all = 1;
+			INFO_MSG("Using all halo combined selection criteria");
+				break;	
+
+		default:
+			WARNING("No halo selection criterion specified",
+				"set_halo_selection_criterion()");
 	}
-
-		fprintf(stdout, "\nMAX: %e Min:%e\n", max, min);
-
-		for(i=0; i<bins; i++)
-		{
-			x = step[i];
-			y1 = get_interpolated_value(arr_x1, arr_y1, n1, x);
-			y2 = get_interpolated_value(arr_x2, arr_y2, n2, x);
-			ratio = y2/y1;
-			fprintf(output, "%e %lf \n", x, ratio);
-		}
-
-	free(vec_x1);
-	free(vec_x2);
-	free(vec_y1);
-	free(vec_y2);
-	free(arr_x1);
-	free(arr_x2);
-	free(arr_y1);
-	free(arr_y2);
-
-fclose(output);
 }
