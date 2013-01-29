@@ -1,3 +1,4 @@
+/*
 static int i;
 static int count;
 static int nTot;
@@ -5,6 +6,7 @@ static double z;
 static double M;
 static char out_url[200];
 static FILE *out_file;
+*/
 
 void print_theoretical_mass_function(void);
 void print_numerical_mass_function(void);

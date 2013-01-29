@@ -88,9 +88,18 @@ void default_init()
 	Cosmo.G=6.672e-8;
 	ThMassFunc.Mmin=Settings.Mmin;
 	ThMassFunc.Mmax=Settings.Mmax;
-	MassFunc.bins  = Settings.n_bins; 
-	ThMassFunc.bins = Settings.n_bins_th;
+	MassFunc.bins=Settings.n_bins; 
+	ThMassFunc.bins=Settings.n_bins_th;
 	Settings.use_cat=Urls.nCatalogueFiles-Settings.cat_number;
+
+	// Init box - set min 75, max 0 as initial values that will be 
+	// surely overwritten when the read_halo routine is called
+	Settings.box.X[0] = Settings.box_size;
+	Settings.box.X[1] = 0;
+	Settings.box.Y[0] = Settings.box_size;
+	Settings.box.Y[1] = 0;
+	Settings.box.Z[0] = Settings.box_size;
+	Settings.box.Z[1] = 0;
 	
 	// Init some commonly used structures to default values
 	GrowthFac.z = (double *) calloc(1, sizeof(double));

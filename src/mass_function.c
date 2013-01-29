@@ -1,8 +1,11 @@
 #include <stdio.h>
 
 #include "libio/write_io.h"
+#include "libio/halo_io.h"
+#include "libio/power_io.h"
 #include "libcosmo/tinker.h"
 #include "libcosmo/mass_function.h"
+#include "libcosmo/cosmological_relations.h"
 #include "general_functions.h"
 #include "general_variables.h"
 

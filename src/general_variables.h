@@ -88,6 +88,14 @@ extern struct general_settings
 	double Rmax;
 	double Mmin;
 	double Mmax;
+
+		struct
+		{
+			double X[2];	// X[0] min, X[1] max
+			double Y[2];
+			double Z[2];
+		} box;
+
 #ifndef GAS
 	double pMass;
 #else

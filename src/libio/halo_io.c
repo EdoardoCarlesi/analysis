@@ -51,46 +51,32 @@ void determine_simulation_settings()
 		(4*3.14*HALO[0].Rvir*HALO[0].Rvir*HALO[0].Rvir*200);
 	}
 
-	if(Settings.use_n_min == 1)
-	{
-#ifdef WITH_MPI
-		fprintf(stdout, "\nTask=%d has %d haloes over the %d particles threshold of which:\n\
-		- %d virialized\n\
-		- %d with the right concentration\n\
-		- %d satisfying the spin criterion\n\
-		and %d haloes complying with all criteria.\n", 
-		ThisTask, 
-#else
-		fprintf(stdout, "\nThere are %d haloes over the %d particles threshold of which:\n\
-		- %d virialized\n\
-		- %d with the right concentration\n\
-		- %d satisfying the spin criterion\n\
-		and %d haloes complying with all criteria.\n", 
-#endif
-		SETTINGS->n_threshold, Settings.n_min,
-		SETTINGS->n_virialized,
-		SETTINGS->n_concentration, 
-		SETTINGS->n_spin,
-		SETTINGS->n_all
-		);		
-
-#ifndef GAS
 		// Now set the mass_min to the value determined by the n_part
 		// Check how to do this with DM and GAS particles
+#ifndef GAS
 		if(Settings.use_n_min == 1)
 			Settings.mass_min = Settings.n_min * Settings.pMass; 
+#else
+		if(Settings.use_n_min == 1)
+		{
+			// Error message
+		}
 #endif
 	
-	} else {
 #ifdef WITH_MPI
-		fprintf(stdout, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
+	if(ThisTask==0)
+#endif
+	{
+		fprintf(stdout, 
+#ifdef WITH_MPI
+		"\nTask=%d has %d haloes over the %e mass threshold of which:\n\
 		- %d virialized\n\
 		- %d with the right concentration\n\
 		- %d satisfying the spin criterion\n\
 		and %d haloes complying with all criteria.\n", 
 		ThisTask, 
 #else
-		fprintf(stdout, "\nThere are %d haloes over the %e mass threshold of which:\n\
+		"\nThere are %d haloes over the %e mass threshold of which:\n\
 		- %d virialized\n\
 		- %d with the right concentration\n\
 		- %d satisfying the spin criterion\n\
@@ -103,6 +89,70 @@ void determine_simulation_settings()
 		SETTINGS->n_all
 		);
 	}
+
+#ifdef WITH_MPI
+	if(ThisTask==0)
+#endif
+	{
+		fprintf(stdout, 
+#ifdef WITH_MPI
+			"\tTask=%d has box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n", 
+				ThisTask,
+#else
+			"\tFound box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n",
+#endif
+				SETTINGS->box.X[0], SETTINGS->box.X[1], 
+				SETTINGS->box.Y[0], SETTINGS->box.Y[1], 
+				SETTINGS->box.Z[0], SETTINGS->box.Z[1] 
+			);
+	}
+
+}
+
+
+
+void set_box(int i)
+{
+	struct halo *HALO;
+	struct general_settings *SETTINGS;
+
+	double x, x_max, x_min;
+	double y, y_may, y_min;
+	double z, z_maz, z_min;
+
+#ifdef WITH_MPI
+	HALO = pHaloes[ThisTask];
+	SETTINGS = &pSettings[ThisTask];
+#else
+	HALO = Haloes;
+	SETTINGS = &Settings;
+#endif
+
+	x = HALO[i].Xc;
+	y = HALO[i].Yc;
+	x = HALO[i].Zc;
+
+		{		// Check X
+			if( x <	SETTINGS->box.X[0])
+				SETTINGS->box.X[0] = x;
+
+			if( x >	SETTINGS->box.X[1])
+				SETTINGS->box.X[1] = y;
+
+				// Check Y
+			if( y <	SETTINGS->box.Y[0])
+				SETTINGS->box.Y[0] = y;
+
+			if( y >	SETTINGS->box.Y[1])
+				SETTINGS->box.Y[1] = y;
+
+				// Check Z
+			if( z <	SETTINGS->box.Z[0])
+				SETTINGS->box.Z[0] = z;
+
+			if( z >	SETTINGS->box.Z[1])
+				SETTINGS->box.Z[1] = z;
+		}
 }
 
 
@@ -292,7 +342,7 @@ void set_halo_url()
 
 void read_halo_file()
 {
-	int b=0, n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
+	int n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
 	double a=0; // Dummy variable to read useless columns
 	char dummyline[LINE_SIZE]; 
 	FILE *h_file;
@@ -453,6 +503,9 @@ void read_halo_file()
 #endif // Extra Gas
 #endif // Gas
 #endif // Use Mpc
+		
+		// Check the size of the box corresponding to the current task
+	set_box(n);
 
 		// Checking the various threshold conditions
 	if(Settings.use_n_min == 1)
@@ -643,7 +696,7 @@ void read_profiles_file()
 
 	fprintf(stdout,"\n");
 
-	close(p_file);
+	fclose(p_file);
 }
 
 

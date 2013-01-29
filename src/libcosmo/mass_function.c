@@ -178,7 +178,7 @@ void init_ThMassFunc()
 void init_sigmas()
 {
 	int k=0, nTot=0; 
-	double M=0, Mmax=0, Mmin=0, sig=0, halfstep=0; 
+	double M=0, Mmax=0, Mmin=0, sig=0; 
 	double *m_steps=NULL; 
 
 	nTot = ThMassFunc.bins;
