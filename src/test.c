@@ -5,11 +5,13 @@
 #include <stdlib.h>
 #include <malloc.h>
 
+#include "libio/write_io.h"
 #include "libio/halo_io.h"
 #include "libhalo/halo_properties.h"
 #include "general_variables.h"
 
 #include "libgrid/grid.h"
+#include "libgrid/density.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -27,8 +29,6 @@ int main(int argc, char **argv)
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
-
-	MPI_Status stat;
 
 	init_comm_structures();
 
@@ -64,8 +64,11 @@ int main(int argc, char **argv)
 	if(ThisTask==0)
 	{
 		// Do your (serial / OpenMP) operations	
-		init_grid(32);
-		fill_grid();
+		init_grid(128);
+		fill_grid_CIC();
+		print_grid_CIC();
+		init_density();
+		find_density_maxima_and_minima();
 	}
 
 	MPI_Finalize();

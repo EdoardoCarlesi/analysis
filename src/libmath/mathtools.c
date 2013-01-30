@@ -4,6 +4,7 @@
 #include <gsl/gsl_spline.h>
 #include <gsl/gsl_integration.h>
 #include <gsl/gsl_histogram.h>
+#include <gsl/gsl_sort_vector.h>
 
 #include <math.h>
 #include <stdio.h>
@@ -88,6 +89,53 @@ double maximum(double *array, int size)
 
 
 
+void maxima(double *array, int size, double *val, int *pos, int NMax)
+{
+	INFO_MSG("Searching for func maxima...");
+	size_t i=0, j=0, index=0;
+	
+	gsl_vector *v = gsl_vector_calloc(size);
+	gsl_permutation *p = gsl_permutation_calloc(size);
+	
+		for(i=0; i<size; i++)
+			gsl_vector_set(v, i, array[i]);
+
+				gsl_sort_vector_index(p, v);
+
+	for(j=0; j<NMax; j++)
+	{
+		index = gsl_permutation_get(p, size-j-1);
+		val[j] = array[index];
+		pos[j] = index;
+	}
+
+}
+
+
+
+void minima(double *array, int size, double *val, int *pos, int NMax)
+{
+	size_t i=0, j=0, index=0;
+	
+	gsl_vector *v = gsl_vector_calloc(size);
+	gsl_permutation *p = gsl_permutation_calloc(size);
+	
+		for(i=0; i<size; i++)
+			gsl_vector_set(v, i, array[i]);
+
+				gsl_sort_vector_index(p, v);
+
+	for(j=0; j<NMax; j++)
+	{
+		index = gsl_permutation_get(p, j);
+		val[j] = array[index];
+		pos[j] = index;
+	}
+
+}
+
+
+
 double minimum(double *array, int size)
 {
 	int i=0;
@@ -158,7 +206,7 @@ int *generate_random_subset(int Nmax, int Nmin, int *subset)
 }
 
 
-	
+
 int int_maximum(int *array, int size)
 {
 		int max=array[0], i=0;
@@ -210,12 +258,12 @@ void average_bin (double* array_x, double* array_y, double* bins, double* binned
 			gsl_histogram_accumulate (g, array_x[i], array_y[i]);
 		}
 
-		for(j=0; j<bin_size-1; j++)
-		{
-			binned_array[j] = g->bin[j]/h->bin[j];
-			if(h->bin[j]>0)	// Assuming poissonian error
-				error_array[j] = g->bin[j] / sqrt(h->bin[j]);
-		}
+			for(j=0; j<bin_size-1; j++)
+			{
+				binned_array[j] = g->bin[j]/h->bin[j];
+					if(h->bin[j]>0)	// Assuming poissonian error
+						error_array[j] = g->bin[j] / sqrt(h->bin[j]);
+			}
 
 	gsl_histogram_free(h);
 	gsl_histogram_free(g);

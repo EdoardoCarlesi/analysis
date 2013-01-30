@@ -21,4 +21,8 @@ void print_evolution_to_file(void);
 void print_number_densities(void);
 void print_growth_factor(void);
 
+void print_halo_density(void);
+void print_grid_CIC(void);
+void print_grid_CIC(void);
+
 void print_nfw(void);

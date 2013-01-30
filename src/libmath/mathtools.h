@@ -6,6 +6,12 @@
 double average(double*, int);
 double maximum(double*, int);
 double minimum(double*, int);
+
+	// Finds N maxima/minima togheter with their array position
+	// Needs the array, its dimension, then two arrays for the values and the positions to store
+void maxima(double*, int, double*, int*, int);
+void minima(double*, int, double*, int*, int);
+
 int int_maximum(int*, int);
 
 double* shellsort(double* , int);

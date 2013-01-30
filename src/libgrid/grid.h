@@ -1,4 +1,3 @@
-
 extern struct node
 {
 	struct halo *HALO;	
@@ -6,6 +5,7 @@ extern struct node
 	int n_haloes;
 
 	double M;
+	double M_CIC;
 	double X[3];
 	double X_cm[3];
 
@@ -20,12 +20,20 @@ extern struct grid
 	double L;
 	double grid_size;
 	double half_grid;	
+	double cell_volume;
 
 } Grid;
 
 
 void init_grid(int);
 
-void fill_grid(void);
+void fill_grid_NGP(void);
+void fill_grid_CIC(void);
 
-void assign_halo_to_node(int);
+void NGP_assignment(int);
+void CIC_assignment(int);
+
+void find_nodes_CIC(int*, int);
+void set_fac_CIC(double*, double*);
+
+void free_nodes(void);

@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <math.h>
 
+#include "../libgrid/density.h"
+#include "../libgrid/grid.h"
+
 #include "../general_variables.h"
 #include "../general_functions.h"
 
@@ -296,6 +299,68 @@ void print_all_halo_properties_to_one_file()
 
 	fclose(out_file);
 }
+
+
+
+void print_grid_CIC()
+{
+	count = 1;
+	nTot = Grid.N;
+	sprintf(out_url, "%s%d%s", "../output/halo_cic_grid_N_", nTot, "_cells.dat");
+	out_file = fopen(out_url, "w");
+
+	DUMP_MSG("CIC assignment", out_url);
+
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "M_CIC  ", count);
+		FILE_HEADER(out_file, "rho_CIC", count);
+		FILE_HEADER(out_file, "x    ", count);
+		FILE_HEADER(out_file, "y    ", count);
+		FILE_HEADER(out_file, "z    ", count);
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot*nTot*nTot; i++) 
+			{
+				if(Node[i].M_CIC > 0)
+				{
+					fprintf(out_file, "%e", Node[i].M_CIC);
+					fprintf(out_file, "\t%lf", Node[i].M_CIC / Grid.cell_volume);
+					fprintf(out_file, "\t%lf", Node[i].X[0]);
+					fprintf(out_file, "\t%lf", Node[i].X[1]);
+					fprintf(out_file, "\t%lf", Node[i].X[2]);
+					fprintf(out_file, "\n"); 
+				}
+			}
+
+	fclose(out_file);
+}
+
+
+
+void print_halo_density()
+{
+	count = 1;
+	nTot = Density.N;
+	sprintf(out_url, "%sN_%d%s", "../output/halo_density_test_", nTot, "_cells_.dat");
+	out_file = fopen(out_url, "w");
+
+	DUMP_MSG("Halo density", out_url);
+
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "r      ", count);
+		FILE_HEADER(out_file, "rho    ", count);
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++) 
+			{
+				fprintf(out_file, "%e", Density.r_n[i]);
+				fprintf(out_file, "\t%e", Density.rho[i]);
+				fprintf(out_file, "\n"); 
+			}
+
+	fclose(out_file);
+}
+
 
 
 
