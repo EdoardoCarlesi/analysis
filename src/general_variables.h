@@ -116,7 +116,6 @@ extern struct cosmology
 	double OmegaB;
 	double OmegaDM;
 #endif
-
 	double G; 
 	double H_0;
 	double h;
@@ -306,6 +305,8 @@ extern struct halo
 	double VY_gas;
 	double VZ_gas;
 #endif
+	double *m_gas;
+	double *u_gas;
 #endif  // GAS
 } *Haloes, *SubHaloes, **pHaloes, **pSubHaloes;
 

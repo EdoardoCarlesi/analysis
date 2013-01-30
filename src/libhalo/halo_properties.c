@@ -84,6 +84,31 @@ void free_halo_properties()
 }
 
 
+
+void free_halo_profiles(int i)
+{
+	struct halo *HALO;
+
+#ifdef WITH_MPI
+		HALO = pHaloes[ThisTask];
+#else
+		HALO = Haloes;
+#endif
+		free(HALO[i].radius);
+		free(HALO[i].rho);
+		free(HALO[i].over_rho);
+		free(HALO[i].err);
+		free(HALO[i].over_err);
+		free(HALO[i].bin);
+		free(HALO[i].err_dn);
+
+#ifdef WITH_GAS
+	free(HALO[i].m_gas);
+	free(HALO[i].u_gas);
+#endif
+}
+
+
 	// TODO: add mass cut
 void sort_axis_alignement()
 {

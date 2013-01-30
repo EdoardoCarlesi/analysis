@@ -575,16 +575,23 @@ void read_halo_file()
 
 void read_profiles_file()
 {
-	int nr=0, k=0, j=0, np1=0, np2=0, halo_bins=0, counter=0, kk=0;
-	double a, over, over1, over2, over3, radius1, radius2, err_p;
+	int i=0, j=0, k=0; 
+	int npart=0, halo_bins=0, counter=0;
+	int neg_r=0, npart_old=0;
+
+	double radius, overd, dens, v_circ, a;
+	double overd_old, radius_old;
+
+#ifdef GAS
+	double m_gas, u_gas;
+#endif
+
 	char dummyline[LINE_SIZE]; 
 	FILE *p_file=NULL;
 
 	struct halo *HALO;
 	struct general_settings *SETTINGS;
 	struct internal_urls *URLS;
-	
-	Settings.tick=0;
 
 #ifdef WITH_MPI
 	URLS = &pUrls[ThisTask];
@@ -609,23 +616,32 @@ void read_profiles_file()
 		HALO = Haloes;
 #endif
 
-		Settings.tick=0;
-		err_p=1; over3=500;
-
-		if(Cosmo.err >0. && Cosmo.err <5.) 
-			err_p = Cosmo.err;
-
 		while(counter < SETTINGS->n_threshold)
 		{
 			fgets(dummyline, LINE_SIZE, p_file);
+
 			if(j>= SETTINGS->halo_skip) 
 			{
-				sscanf(dummyline, "%lf %d %lf %lf %lf", 
-					&radius1, &np1, &a, &over1, &over);	
-
+				sscanf(dummyline, 
+#ifndef GAS
+		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
+		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
+		%lf  %lf  %lf  %lf", 
+		&radius, &npart, &a, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
+		&a, 	 &a,     &a, &a	// 24
+#else
+		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
+		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
+		%lf  %lf  %lf  %lf  %lf  %lf  %lf", 
+		&radius, &npart, &a, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
+		&a, 	 &a,     &a, &a,     &m_gas,&a	     &u_gas  // 27
+#endif
+	);
 				halo_bins = HALO[counter].n_bins;
 
-				if(kk==0)
+				if(i==0)
 				{	
 					HALO[counter].radius = 
 						(double *) calloc(halo_bins,sizeof(double));
@@ -639,50 +655,60 @@ void read_profiles_file()
 						(double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].over_err = 
 						(double *) calloc(halo_bins,sizeof(double));
+#ifdef GAS
+					HALO[counter].u_gas = 
+						(double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].m_gas = 
+						(double *) calloc(halo_bins,sizeof(double));
+#endif
 				}
 
-				HALO[counter].radius[kk] = sqrt(radius1*radius1);	
-				HALO[counter].rho[kk] = over1;
-				HALO[counter].over_rho[kk] = Cosmo.OmegaM*over;
-				HALO[counter].bin[kk] = np1-np2;
-				HALO[counter].err[kk] = err_p*over1/sqrt(np1-np2); 
-				HALO[counter].over_err[kk] = err_p*over/sqrt(np1-np2); 
+					HALO[counter].radius[i] = sqrt(radius*radius);	
+					HALO[counter].rho[i] = dens;
+					HALO[counter].over_rho[i] = Cosmo.OmegaM*overd;
+					HALO[counter].bin[i] = npart-npart_old;
+					HALO[counter].err[i] = overd/sqrt(npart-npart_old); 
+					HALO[counter].over_err[i] = overd/sqrt(npart-npart_old); 
 
-			if(HALO[counter].err[kk] == 0.) 
-				HALO[counter].err[kk] = 2*err_p*HALO[counter].err[kk-1]; 
+			if(HALO[counter].err[i] == 0.) 
+				HALO[counter].err[i] = HALO[counter].err[i-1]; 
 	
-			if(HALO[counter].over_err[kk] == 0.) 
-				HALO[counter].over_err[kk] = 2*err_p*HALO[counter].over_err[kk-1]; 
+			if(HALO[counter].over_err[i] == 0.) 
+				HALO[counter].over_err[i] = HALO[counter].over_err[i-1]; 
 
-			if(radius1<0.) 
+			if(radius<0.) 
 			{
-				nr++;
+				neg_r++;
 			}
 
-			np2=np1;
-			kk++;
+			npart_old=npart;
+			i++;
 	
-		if(kk == halo_bins) 
+		if(i == halo_bins) 
 		{
-			HALO[counter].neg_r_bins=nr; 
-			kk=0;
-			np1=0;
-			nr=0;
+			HALO[counter].neg_r_bins=neg_r; 
+	
+			i=0;
+			npart=0;
+			neg_r=0;
 			counter++;
 		}
 
-	over2=over1;
-	radius2=radius1;
-	np2=np1;
+	overd_old=overd;
+	radius_old=radius;
+	npart_old=npart;
 
 	j++;
-	} else { // Skip this line
-	j++;
+
+	} 
+		else 
+	{ // Skip this line
+		j++;
 	}
+
 	k++;
-	}
 
-	fprintf(stdout,"\n");
+	}
 
 	fclose(p_file);
 }
