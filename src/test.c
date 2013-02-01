@@ -61,7 +61,7 @@ int main(int argc, char **argv)
 		// Get rid of the unused structures
 	free_comm_structures();
 
-	if(ThisTask==0)
+	if(ThisTask==10)
 	{
 		// Do your (serial / OpenMP) operations	
 		init_grid(128);

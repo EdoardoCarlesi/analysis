@@ -1,7 +1,7 @@
 void initialize_halo_properties_structure(void);
 
 void free_halo_properties(void);
-void free_halo_profiles(void);
+void free_halo_profiles(int);
 
 void sort_axis_alignement(void);
 void sort_lambda(void);

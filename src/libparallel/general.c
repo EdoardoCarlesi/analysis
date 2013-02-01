@@ -13,8 +13,6 @@
 int ThisTask;
 int NTask;
 
-int *SizeDispl;
-int *SizeHaloes;
 int *SizeDisplStructHalo;
 int *SizeHaloesStructHalo;
 
@@ -65,8 +63,6 @@ void init_comm_structures()
 	pSettings = (struct general_settings *) calloc(NTask, sizeof(struct general_settings));
 	pHaloes = (struct halo **) calloc(NTask, sizeof(struct halo *));
 	pUrls = (struct internal_urls *) calloc(NTask, sizeof(struct internal_urls));
-	SizeDispl = (int*) calloc(NTask, sizeof(int));			
-	SizeHaloes = (int*) calloc(NTask, sizeof(int));
 	SizeDisplStructHalo = (int*) calloc(NTask, sizeof(int));			
 	SizeHaloesStructHalo = (int*) calloc(NTask, sizeof(int));
 
@@ -115,9 +111,7 @@ void free_comm_structures()
 	free(pSettings);
 	free(pHaloes);
 	free(pUrls);
-	free(SizeDispl);
 	free(SizeDisplStructHalo);
-	free(SizeHaloes);
 	free(SizeHaloesStructHalo);
 }
 
@@ -155,14 +149,11 @@ void gather_halo_structures()
 				Settings.n_concentration);
 			fprintf(stdout, "Gathering %d haloes satisfying all...\n", Settings.n_all);
 
-			SizeDispl[0] = 0;
 			SizeDisplStructHalo[0] = 0;
 	
 			Haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
 		}
 
-		MPI_Gather(&pSettings[ThisTask].n_haloes, 1, MPI_INT, SizeHaloes, 1, MPI_INT, 0, MPI_COMM_WORLD);	
-	
 		MPI_Gather(&pSettings[ThisTask].n_haloes_size, 1, MPI_INT, 
 			SizeHaloesStructHalo, 1, MPI_INT, 0, MPI_COMM_WORLD);	
 
@@ -171,9 +162,12 @@ void gather_halo_structures()
 			{
 				for(n=1; n<NTask; n++)
 				{	
-					SizeDispl[n] = SizeHaloes[n-1]+SizeDispl[n-1];
 					SizeDisplStructHalo[n] = SizeHaloesStructHalo[n-1]+SizeDisplStructHalo[n-1];
 				}
+
+				for(n=0; n<NTask; n++)
+					fprintf(stdout, "Size[%d]=%d, Displ[%d]=%d\n", 
+					n, SizeHaloesStructHalo[n], n, SizeDisplStructHalo[n]);
 			}
 
 	MPI_Gatherv(&pHaloes[ThisTask][0], pSettings[ThisTask].n_haloes*sizeof(struct halo), MPI_BYTE, 

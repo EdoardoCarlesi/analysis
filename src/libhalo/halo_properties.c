@@ -18,6 +18,10 @@
 #include <omp.h>
 #endif
 
+#ifdef WITH_MPI
+#include "../libparallel/general.h"
+#endif
+
 
 void initialize_halo_properties_structure()
 {

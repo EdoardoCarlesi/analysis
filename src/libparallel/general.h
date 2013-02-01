@@ -7,8 +7,6 @@ extern struct Cpu
 
 } *cpu;
 
-extern int *SizeDispl;
-extern int *SizeHaloes;
 extern int *SizeDisplStructHalo;
 extern int *SizeHaloesStructHalo;
 
