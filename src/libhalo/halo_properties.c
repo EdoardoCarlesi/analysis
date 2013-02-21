@@ -138,6 +138,13 @@ void sort_axis_alignement()
 			for(i=0; i<nBins-1; i++)
 				Rbins[i] = 0.5*(radius[i+1]+radius[i]);
 
+#ifdef _OPENMP
+		omp_set_num_threads(OMP_THREADS);
+#endif
+		
+//#		pragma omp parallel for			\
+		private(j, k, A, B, R)
+
 			for(j=0; j<max_haloes; j++) 
 			{
 				for(k=j; k<max_haloes; k++)
