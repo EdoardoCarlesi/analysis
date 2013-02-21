@@ -219,18 +219,12 @@ extern struct halo
 	int mass; 
 	int all;
 
-	double Xc;
-	double Yc;
-	double Zc;
-	double VXc;
-	double VYc;
-	double VZc;
-	double Lx;
-	double Ly;
-	double Lz;
-	double Eax; 
-	double Eay; 
-	double Eaz; 
+	double X[3];
+	double V[3];
+	double L[3];
+	double Ea[3]; 
+	double a[3];
+
 	double Mvir;
 	double Rvir;
 	double Rmax;
@@ -244,19 +238,18 @@ extern struct halo
 	double ecc;
 	double lambda;
 	double lambdaE;
-	double rho0;
-	double c;
-	double r2;
-	double aa;
-	double bb;
-	double cc;
+
 	double shape;
 	double triax;
 	double z_form;
+
+	double c;
+	double rho0;
+	double r2;
 	double c_nfw;
-	double chi_nfw;
-	double rs_nfw;
 	double rho0_nfw;
+	double rs_nfw;
+	double chi_nfw;
 
 	int *id_satellites;
 
@@ -273,15 +266,11 @@ extern struct halo
 	int N_gas;
 	double M_dm;
 	double M_gas;
-	double Eax_gas;
-	double Eay_gas;
-	double Eaz_gas;
-	double Ebx_gas;
-	double Eby_gas;
-	double Ebz_gas;
-	double Ecx_gas;
-	double Ecy_gas;
-	double Ecz_gas;
+
+	double Ea_gas[3];
+	double Eb_gas[3];
+	double Ec_gas[3];
+
 	double lambda_gas;
 	double lambdaE_gas;
 	double b_gas;
@@ -291,22 +280,16 @@ extern struct halo
 	double b_fraction;
 	double Cum_u_gas;
 	double T_gas;
-#ifdef EXTRA_GAS
-	double X_dm;
-	double Y_dm;
-	double Z_dm;
-	double VX_dm;
-	double VY_dm;
-	double VZ_dm;
-	double X_gas;
-	double Y_gas;
-	double Z_gas;
-	double VX_gas;
-	double VY_gas;
-	double VZ_gas;
-#endif
+
 	double *m_gas;
 	double *u_gas;
+
+#ifdef EXTRA_GAS
+	double X_dm[3];
+	double V_dm[3];
+	double X_gas[3];
+	double V_gas[3];
+#endif
 #endif  // GAS
 } *Haloes, *SubHaloes, **pHaloes, **pSubHaloes;
 
