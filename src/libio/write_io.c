@@ -3,9 +3,6 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../libgrid/density.h"
-#include "../libgrid/grid.h"
-
 #include "../general_variables.h"
 #include "../general_functions.h"
 
@@ -304,6 +301,7 @@ void print_all_halo_properties_to_one_file()
 
 void print_grid_CIC()
 {
+/*
 	count = 1;
 	nTot = Grid.N;
 	sprintf(out_url, "%s%d%s", "../output/halo_cic_grid_N_", nTot, "_cells.dat");
@@ -333,12 +331,14 @@ void print_grid_CIC()
 			}
 
 	fclose(out_file);
+*/
 }
 
 
 
 void print_halo_density()
 {
+/*
 	count = 1;
 	nTot = Density.N;
 	sprintf(out_url, "%sN_%d%s", "../output/halo_density_test_", nTot, "_cells_.dat");
@@ -359,6 +359,7 @@ void print_halo_density()
 			}
 
 	fclose(out_file);
+*/
 }
 
 

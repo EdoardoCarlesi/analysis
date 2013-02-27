@@ -15,9 +15,9 @@
 
 void sort_host_axis_alignment_and_spatial_anisotropy()
 {
-	int i=0, j=0, k=0, totSub=0, totSubNmin=0, nBins=0;
+	int i=0, j=0, k=0, m=0, totSub=0, totSubNmin=0, nBins=0;
 	int *costh_bin_y, *cosphi_bin_y;
-	double R, cMax, cMin, halfstep, cpMax, cpMin, halfstep2, ct, anis;
+	double sum, R=0, cMax, cMin, halfstep, cpMax, cpMin, halfstep2, ct=0, anis=0;
 	double *costh, *costh_bin, *cosphi, *cosphi_bin; 
 
 	totSub = Settings.n_subhaloes;
@@ -38,26 +38,27 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 		costh_bin = (double*) calloc(nBins, sizeof(double));
 		costh_bin_y = (int*) calloc(nBins-1, sizeof(int));
 
+
 		for(i=0; i< totSub; i++)
 		{
 			k = SubHaloes[i].host;
-
-			R = sqrt (
-				pow(SubHaloes[i].Xc - Haloes[k].Xc,2) +
-				pow(SubHaloes[i].Yc - Haloes[k].Yc,2) +
-				pow(SubHaloes[i].Zc - Haloes[k].Zc,2) );
-
-			ct = (
-				SubHaloes[i].Eax*(SubHaloes[i].Xc - Haloes[k].Xc)+
-				SubHaloes[i].Eay*(SubHaloes[i].Yc - Haloes[k].Yc)+ 
-				SubHaloes[i].Eaz*(SubHaloes[i].Zc - Haloes[k].Zc)
-				) / R; 
 	
-			anis = (
-				Haloes[k].Eax*(SubHaloes[i].Xc - Haloes[k].Xc)+
-				Haloes[k].Eay*(SubHaloes[i].Yc - Haloes[k].Yc)+ 
-				Haloes[k].Eaz*(SubHaloes[i].Zc - Haloes[k].Zc)
-				) / R;
+			sum = 0; ct = 0; R = 0; anis = 0;
+
+			for(m=0; m<3; m++)
+				sum += pow2(SubHaloes[i].X[m] - Haloes[k].X[m]);
+
+			R = sqrt(sum);
+
+			for(m=0; m<3; m++)
+				ct += SubHaloes[i].Ea[m]*(SubHaloes[i].X[m] - Haloes[k].X[m]);
+	
+			ct = ct / R; 
+	
+			for(m=0; m<3; m++)
+				anis += Haloes[k].Ea[m]*(SubHaloes[i].X[m] - Haloes[k].X[m]);
+	
+			anis = anis / R;
 			
 				if(SubHaloes[i].n_part > Settings.n_min-1)
 				{
@@ -250,8 +251,8 @@ void sort_sub_lambda()
 
 double *generate_average_from_random_set(double* all_r)
 {
-	int n=0, j=0, i=0, k=0, host=0, TOT_ITER=10, subDim=0, totSub=0,*subset=NULL; 
-	double r=0, *all_r_new=NULL; 
+	int n=0, j=0, i=0, k=0, m=0, host=0, TOT_ITER=10, subDim=0, totSub=0,*subset=NULL; 
+	double r=0, sum=0, *all_r_new=NULL; 
 
 	subDim=Settings.min_subhaloes; 
 	totSub=Settings.n_subhaloes;
@@ -272,9 +273,12 @@ double *generate_average_from_random_set(double* all_r)
 				host = SubHaloes[i].host;
 				if(i==subset[k] && host != SubHaloes[i].id) 
 				{
-					r = sqrt(pow(Haloes[host].Xc - SubHaloes[i].Xc, 2) 
-						+ pow(Haloes[host].Yc - SubHaloes[i].Yc, 2) 
-						+ pow(Haloes[host].Zc - SubHaloes[i].Zc, 2));
+					sum = 0;
+
+					for(m=0; m<3; m++)
+						sum += pow2(Haloes[host].X[m] - SubHaloes[i].X[m]); 
+
+					r = sqrt(sum);
 					all_r[k] = r/Haloes[host].Rvir;
 					k++;
 				}
@@ -349,9 +353,9 @@ void n_r_subhalo_subset()
 
 void n_r_subhalo()
 {
-	int i=0, host=0, cumul=0, totSub=0, nBins=0; 
+	int i=0, m=0, host=0, cumul=0, totSub=0, nBins=0; 
 	int *cum_n_r=NULL, *n_r=NULL; 
-	double r, rMin, rMax;
+	double r, rMin, rMax, sum=0;
 	double *R=NULL, *all_r=NULL;
 
 	totSub = Settings.n_subhaloes;
@@ -370,9 +374,13 @@ void n_r_subhalo()
 			host = SubHaloes[i].host;
 			if(host != SubHaloes[i].id) 
 			{
-				r = sqrt(pow(Haloes[host].Xc - SubHaloes[i].Xc, 2) 
-					+ pow(Haloes[host].Yc - SubHaloes[i].Yc, 2) 
-					+ pow(Haloes[host].Zc - SubHaloes[i].Zc, 2));
+				sum = 0;
+
+				for(m=0; m<3; m++)
+					sum += pow2(Haloes[host].X[m] - SubHaloes[i].X[m]);
+
+				r = sqrt(sum);
+
 				all_r[i] = r/Haloes[host].Rvir;
 				}
 			}
@@ -407,9 +415,9 @@ void n_r_subhalo()
 
 void sort_velocity_distribution()
 {
-	int totSub=0, i=0, k=0, nBins=0;
+	int totSub=0, i=0, k=0, m=0, nBins=0;
 	int *vel_y=NULL;	
-	double vHost=0, vel_0=0, halfstep=0, velMax=0, velMin=0, vDiff=0; 
+	double vHost=0, vel_0=0, halfstep=0, velMax=0, velMin=0, vDiff=0, sum=0; 
 	double *vel=NULL, *vel_x=NULL;
 
 	totSub = Settings.n_subhaloes;
@@ -427,12 +435,16 @@ void sort_velocity_distribution()
 			k = SubHaloes[i].host;
 			if(k != SubHaloes[i].id) 
 			{
-				vHost = sqrt(pow(Haloes[k].VXc, 2) + pow(Haloes[k].VYc, 2) + pow(Haloes[k].VZc, 2));
-				vDiff = sqrt( 
-						pow(Haloes[k].VXc - SubHaloes[i].VXc, 2)+
-						pow(Haloes[k].VYc - SubHaloes[i].VYc, 2)+
-						pow(Haloes[k].VZc - SubHaloes[i].VZc, 2)
-					);
+				sum = 0;
+				for(m=0; m<3; m++)
+					sum += pow2(Haloes[k].V[m]);
+				vHost = sqrt(sum);
+
+				sum = 0;
+				for(m=0; m<3; m++)
+					sum += pow2(Haloes[k].V[m]- SubHaloes[i].V[m]);
+				vDiff = sqrt( sum);
+
 				vel[i]=vDiff/vHost;
 				}	
 			}	

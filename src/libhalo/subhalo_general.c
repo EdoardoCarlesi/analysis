@@ -88,28 +88,16 @@ void copy_subhalo_properties(int host, int n_sub)
 {
 //int index = find_subhalo_index(host);
 // TODO for the moment just sort them in the subhaloes struct, then use find_subhalo_index to sort them properly
-	int index=host;
+	int m=0, index=host;
 
 	fprintf(stdout,"\nCopying (sub)halo properties into subhalo structures.\n");
 
 		SubHaloes[index].Rvir = Haloes[n_sub].Rvir; 
 		SubHaloes[index].Vmax = Haloes[n_sub].Vmax; 
                 SubHaloes[index].n_part = Haloes[n_sub].n_part; 
-                SubHaloes[index].Xc = Haloes[n_sub].Xc; 
-                SubHaloes[index].Yc = Haloes[n_sub].Yc; 
-                SubHaloes[index].Zc = Haloes[n_sub].Zc; 
-                SubHaloes[index].VXc = Haloes[n_sub].VXc; 
-                SubHaloes[index].VYc = Haloes[n_sub].VYc; 
-                SubHaloes[index].VZc = Haloes[n_sub].VZc; 
-                SubHaloes[index].Eax = Haloes[n_sub].Eax; 
-                SubHaloes[index].Eay = Haloes[n_sub].Eay; 
-                SubHaloes[index].Eaz = Haloes[n_sub].Eaz; 
                 SubHaloes[index].Mvir = Haloes[n_sub].Mvir; 
                 SubHaloes[index].c = Haloes[n_sub].c; 
                 SubHaloes[index].shape = Haloes[n_sub].shape; 
-                SubHaloes[index].aa = Haloes[n_sub].aa; 
-                SubHaloes[index].bb = Haloes[n_sub].bb; 
-                SubHaloes[index].cc = Haloes[n_sub].cc; 
                 SubHaloes[index].triax = Haloes[n_sub].triax; 
                 SubHaloes[index].lambda = Haloes[n_sub].lambda; 
                 SubHaloes[index].c_nfw = Haloes[n_sub].c_nfw; 
@@ -120,6 +108,14 @@ void copy_subhalo_properties(int host, int n_sub)
                 SubHaloes[index].Ekin = Haloes[n_sub].Ekin; 
                 SubHaloes[index].AngMom = Haloes[n_sub].AngMom; 
                 SubHaloes[index].Jcirc = Haloes[n_sub].Jcirc; 
+
+		for(m=0; m<3; m++)
+		{
+              	  SubHaloes[index].X[m] = Haloes[n_sub].X[m]; 
+              	  SubHaloes[index].V[m] = Haloes[n_sub].V[m]; 
+              	  SubHaloes[index].Ea[m] = Haloes[n_sub].Ea[m]; 
+              	  SubHaloes[index].a[m] = Haloes[n_sub].a[m]; 
+		}
 
 	fprintf(stdout,"\n");
 }

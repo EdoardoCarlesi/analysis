@@ -79,13 +79,9 @@ void init_comm_structures()
 
 void init_cpu_struct()
 {
-	char task[4];
-
-	sprintf(task, "%d", ThisTask);
-
 		cpu = (struct Cpu*) calloc(NTask, sizeof(struct Cpu));
-			sprintf(cpu[ThisTask].name, "%s%04d", num3, task);
 
+		sprintf(cpu[ThisTask].name, "%04d", ThisTask);
 }
 
 

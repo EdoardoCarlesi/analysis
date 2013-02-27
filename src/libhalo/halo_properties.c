@@ -116,9 +116,9 @@ void free_halo_profiles(int i)
 	// TODO: add mass cut
 void sort_axis_alignement()
 {
-	int *Nbins, j=0, k=0, i=0, max_haloes, nBins, skip;
+	int *Nbins, m=0, j=0, k=0, i=0, max_haloes, nBins, skip;
 	double *radius, *Rbins, *Abins, *Bbins; 
-	double Rmin, Rmax, R, A, B;
+	double Rmin, Rmax, R, A, B, sum;
 
 	fprintf(stdout,"Computing halo major axis alignement angles for %d bins.\n", HaloZ.r_bins);
 	
@@ -141,30 +141,29 @@ void sort_axis_alignement()
 #ifdef _OPENMP
 		omp_set_num_threads(OMP_THREADS);
 #endif
-		
+
 //#		pragma omp parallel for			\
 		private(j, k, A, B, R)
-
 			for(j=0; j<max_haloes; j++) 
 			{
 				for(k=j; k<max_haloes; k++)
 				{
-					A = 0; B = 0; R = 0;
-					R = sqrt(
-						pow(Haloes[j].Xc - Haloes[k].Xc,2) +
-						pow(Haloes[j].Yc - Haloes[k].Yc,2) +
-						pow(Haloes[j].Zc - Haloes[k].Zc,2) );
+					A = 0; B = 0; R = 0; sum = 0;
+
+					for(m=0; m<3; m++)
+						sum += pow2(Haloes[j].X[m] - Haloes[k].X[m]);
+	
+					R = sqrt(sum);
 
 				if(R > Rmin && R < Rmax)
 				{
-					A = 
-						Haloes[j].Eax*Haloes[k].Eax +
-						Haloes[j].Eay*Haloes[k].Eay + 
-						Haloes[j].Eaz*Haloes[k].Eaz;
-					B = (
-						Haloes[j].Eax*(Haloes[j].Xc - Haloes[k].Xc) +
-						Haloes[j].Eay*(Haloes[j].Yc - Haloes[k].Yc) + 
-						Haloes[j].Eaz*(Haloes[j].Zc - Haloes[k].Zc) ) / R;
+					for(m=0; m<3; m++)
+						A += Haloes[j].Ea[m]*Haloes[k].Ea[m];
+
+					for(m=0; m<3; m++)
+						B += Haloes[j].Ea[m]*(Haloes[j].X[m] - Haloes[k].X[m]);
+
+						B /= R;
 
 				for(i=0; i<nBins-1; i++) 
 				{
@@ -623,14 +622,13 @@ void sort_and_fit_mass_temperature_relation()
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
-			average_bin(mass, temperature, mass_bin, temperature_bin
+			average_bin(mass, temperature, mass_bin, temperature_bin,
 					temperature_error, nBins, nHaloes);
 
 			for(i=0; i<nBins-1; i++)
 			{
-				HaloZ.gas_T[i]=temperature_bin[i];
 				HaloZ.mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
-				temperature_error[i] = HaloZ.gas_T[i]/sqrt(MF.n_bin[i]);
+				HaloZ.gas_T[i]=temperature_bin[i];
 			}
 	
 			a[0] = 1.5; 

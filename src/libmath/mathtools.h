@@ -3,6 +3,9 @@
 #define ln_10 log(10)
 #define D_H 3000 
 
+#define pow2(a) ((a)*(a))
+#define pow3(a) ((a)*(a)*(a))
+
 double average(double*, int);
 double maximum(double*, int);
 double minimum(double*, int);

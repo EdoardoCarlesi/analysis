@@ -1,7 +1,8 @@
+#define pow2(a) ((a)*(a))
+#define pow3(a) ((a)*(a)*(a))
+
 #define WARNING(str1, str2) fprintf(stderr, "\n\t\tWARNING! %s: %s.\n", str1, str2)
-
 #define ERROR(str1, str2) fprintf(stderr, "\n\t\tERROR! %s: %s.\n", str1, str2)
-
 #define INFO_MSG(str) fprintf(stdout, "\n\t%s.\n", str)
 
 void initialize_internal_variables(char **);

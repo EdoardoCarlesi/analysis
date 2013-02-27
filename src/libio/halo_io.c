@@ -29,26 +29,22 @@ void determine_simulation_settings()
 	SETTINGS = &Settings;
 #endif
 
-#ifdef WITH_MPI
 	if(ThisTask==0)
-#endif
 	{
 #ifndef GAS
 	Settings.pMass = HALO[0].Mvir/HALO[0].n_part;
-	Settings.rho_0 = Settings.pMass*pow(Settings.n_part_1D,3)*pow(Settings.box_size, -3);
+	Settings.rho_0 = Settings.pMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 	fprintf(stdout, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
 #else
 	Settings.dmMass  = HALO[0].M_dm/HALO[0].N_dm;
 	Settings.gasMass = HALO[0].M_gas/HALO[0].N_gas; 
-	Settings.rho_dm = Settings.dmMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
-	Settings.rho_b = Settings.gasMass*pow(Settings.nP_1D,3)*pow(Settings.box_size, -3);
+	Settings.rho_dm = Settings.dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
+	Settings.rho_b = Settings.gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 	Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
 	fprintf(stdout, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
 	fprintf(stdout, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
 #endif
-
-		Settings.rho_c = (3*HALO[0].Mvir) /
-		(4*3.14*HALO[0].Rvir*HALO[0].Rvir*HALO[0].Rvir*200);
+	Settings.rho_c = (3*HALO[0].Mvir)/(4*3.14*pow3(HALO[0].Rvir)*200);
 	}
 
 		// Now set the mass_min to the value determined by the n_part
@@ -63,39 +59,23 @@ void determine_simulation_settings()
 		}
 #endif
 	
-		fprintf(stdout, 
-#ifdef WITH_MPI
-		"\nTask=%d has %d haloes over the %e mass threshold of which:\n\
-		- %d virialized\n\
-		- %d with the right concentration\n\
-		- %d satisfying the spin criterion\n\
-		and %d haloes complying with all criteria.\n", 
-		ThisTask, 
-#else
-		"\nThere are %d haloes over the %e mass threshold of which:\n\
-		- %d virialized\n\
-		- %d with the right concentration\n\
-		- %d satisfying the spin criterion\n\
-		and %d haloes complying with all criteria.\n", 
-#endif
-		SETTINGS->n_threshold, Settings.mass_min,
-		SETTINGS->n_virialized,
-		SETTINGS->n_concentration, 
-		SETTINGS->n_spin,
-		SETTINGS->n_all
-		);
+		fprintf(stdout, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
+					- %d virialized\n\
+					- %d with the right concentration\n\
+					- %d satisfying the spin criterion\n\
+					and %d haloes complying with all criteria.\n", 
+					ThisTask, 
+					SETTINGS->n_threshold, Settings.mass_min,
+					SETTINGS->n_virialized,
+					SETTINGS->n_concentration, 
+					SETTINGS->n_spin,
+					SETTINGS->n_all);
 
-		fprintf(stdout, 
-#ifdef WITH_MPI
-			"\tTask=%d has box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n", 
+		fprintf(stdout, "\tTask=%d has box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n", 
 				ThisTask,
-#else
-			"\tFound box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n",
-#endif
 				SETTINGS->box.X[0], SETTINGS->box.X[1], 
 				SETTINGS->box.Y[0], SETTINGS->box.Y[1], 
-				SETTINGS->box.Z[0], SETTINGS->box.Z[1] 
-			);
+				SETTINGS->box.Z[0], SETTINGS->box.Z[1]);
 
 }
 
@@ -103,10 +83,10 @@ void determine_simulation_settings()
 
 void set_box(int i)
 {
+	int j=0;
+	double x[3];
 	struct halo *HALO;
 	struct general_settings *SETTINGS;
-
-	double x, y, z;
 
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
@@ -116,31 +96,16 @@ void set_box(int i)
 	SETTINGS = &Settings;
 #endif
 
-	x = HALO[i].Xc;
-	y = HALO[i].Yc;
-	z = HALO[i].Zc;
+	for(j=0; j<3; j++)
+		x[j] = HALO[i].X[j];
 
-//		if(x != 0 && y != 0 && z != 0)
-		{		// Check X
-			if( x <	SETTINGS->box.X[0])
-				SETTINGS->box.X[0] = x;
+		for(j=0; j<3; j++)
+		{		
+			if( x[j] < SETTINGS->box.X[j])
+				SETTINGS->box.X[j] = x[j];
 
-			if( x >	SETTINGS->box.X[1])
-				SETTINGS->box.X[1] = x;
-
-				// Check Y
-			if( y <	SETTINGS->box.Y[0])
-				SETTINGS->box.Y[0] = y;
-
-			if( y >	SETTINGS->box.Y[1])
-				SETTINGS->box.Y[1] = y;
-
-				// Check Z
-			if( z <	SETTINGS->box.Z[0])
-				SETTINGS->box.Z[0] = z;
-
-			if( z >	SETTINGS->box.Z[1])
-				SETTINGS->box.Z[1] = z;
+			if( x[j] > SETTINGS->box.X[j])
+				SETTINGS->box.X[j] = x[j];
 		}
 }
 
@@ -148,6 +113,7 @@ void set_box(int i)
 	 /* Set additional halo properties derived from the basic ones */
 void set_additional_halo_properties(int n)
 {
+	int i=0;
 	double c = 0.0; 
 	struct halo *HALO;
 
@@ -162,14 +128,12 @@ void set_additional_halo_properties(int n)
 		// NFW initial guess parameters
 	HALO[n].c = c;
 	HALO[n].rho0 = (200/3)*c*c*c*(1./(log(1+c) - c/(1+c)));
-	HALO[n].AngMom = HALO[n].lambda * sqrt(2)*HALO[n].Mvir *
-			HALO[n].Rvir * sqrt(HALO[n].Mvir/HALO[n].Rvir);
-	HALO[n].shape = HALO[n].cc/HALO[n].aa;
-	HALO[n].triax = (pow(HALO[n].aa, 2.0) - pow(HALO[n].bb, 2.0))/
-				(pow(HALO[n].aa, 2.0) - pow(HALO[n].cc, 2.0));
-	HALO[n].ecc = sqrt(1 - 2*pow(HALO[n].lambdaE,2));
+	HALO[n].shape = HALO[n].a[2]/HALO[n].a[0];
+
+	HALO[n].triax = (pow2(HALO[n].a[0]) - pow2(HALO[n].a[1]))/(pow2(HALO[n].a[0]) - pow2(HALO[n].a[2]));
+	HALO[n].ecc = sqrt(1 - 2*pow2(HALO[n].lambdaE));
 	HALO[n].th_vir=2*HALO[n].Ekin/HALO[n].Epot;	
-	HALO[n].abs_th_vir=sqrt(HALO[n].th_vir*HALO[n].th_vir);	
+	HALO[n].abs_th_vir=sqrt(pow2(HALO[n].th_vir)); 
 
 #ifdef GAS
 		HALO[n].N_dm = HALO[n].n_part - HALO[n].N_gas;
@@ -179,24 +143,13 @@ void set_additional_halo_properties(int n)
 		HALO[n].T_gas = 0.0; 
 #else
 		HALO[n].T_gas = convert_u_to_T(HALO[n].Cum_u_gas);
+		
+		for(i=0; i<3; i++)
+		{
+			HALO[n].X_dm[i] = (HALO[n].Mvir*HALO[n].X[i] - HALO[n].X_gas[i])/HALO[n].M_dm;
+			HALO[n].V_dm[i] = (HALO[n].Mvir*HALO[n].V[i] - HALO[n].V_gas[i])/HALO[n].M_dm;
+		}
 
-		HALO[n].X_dm = 
-	(HALO[n].Mvir*HALO[n].Xc - HALO[n].X_gas)/HALO[n].M_dm;
-
-		HALO[n].Y_dm =
-	(HALO[n].Mvir*HALO[n].Yc - HALO[n].Y_gas)/HALO[n].M_dm;
-
-		HALO[n].Z_dm = 
-	(HALO[n].Mvir*HALO[n].Zc - HALO[n].Z_gas)/HALO[n].M_dm;
-
-		HALO[n].VX_dm = 
-	(HALO[n].Mvir*HALO[n].VXc - HALO[n].VX_gas)/HALO[n].M_dm;
-
-		HALO[n].VY_dm = 
-	(HALO[n].Mvir*HALO[n].VYc - HALO[n].VY_gas)/HALO[n].M_dm;
-
-		HALO[n].VZ_dm = 
-	(HALO[n].Mvir*HALO[n].VZc - HALO[n].VZ_gas)/HALO[n].M_dm;
 #endif // EXTRA_GAS
 #endif // GAS
 }
@@ -211,7 +164,7 @@ void get_halo_files_urls()
 
 	struct internal_urls *URLS;
 
-	fprintf(stdout, "\nget_halo_files_urls() for %d halo files.\n", Urls.nCatalogueFiles);
+	INFO_MSG("Reading halo file urls...");
 
 #ifdef WITH_MPI
 	URLS = &pUrls[ThisTask];
@@ -331,7 +284,7 @@ void set_halo_url()
 
 void read_halo_file()
 {
-	int n=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
+	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
 	double a=0; // Dummy variable to read useless columns
 	char dummyline[LINE_SIZE]; 
 	FILE *h_file;
@@ -427,15 +380,15 @@ void read_halo_file()
 #endif	// Extra Gas
 #endif // GAS
 	&HALO[n].id,		&HALO[n].host,		&HALO[n].n_satellites,	
-	&HALO[n].Mvir, 		&HALO[n].n_part,	&HALO[n].Xc, 	
-	&HALO[n].Yc, 		&HALO[n].Zc, 		&HALO[n].VXc, 	
-	&HALO[n].VYc, 		&HALO[n].VZc, 		&HALO[n].Rvir, 
+	&HALO[n].Mvir, 		&HALO[n].n_part,	&HALO[n].X[0], 	
+	&HALO[n].X[1], 		&HALO[n].X[2], 		&HALO[n].V[0], 	
+	&HALO[n].V[1], 		&HALO[n].V[2],		&HALO[n].Rvir, 
 	&HALO[n].Rmax, 		&HALO[n].r2, 		&a, 				
 	&a,			&HALO[n].Vmax, 		&a, 			
 	&a, 			&HALO[n].lambda, 	// First 20 entries
-	&HALO[n].lambdaE,	&HALO[n].Lx, 		&HALO[n].Ly, 			
-	&HALO[n].Lz, 		&HALO[n].bb,		&HALO[n].cc, 		
-	&HALO[n].Eax, 		&HALO[n].Eay, 		&HALO[n].Eaz,		
+	&HALO[n].lambdaE,	&HALO[n].L[0], 		&HALO[n].L[1], 			
+	&HALO[n].L[2], 		&HALO[n].a[1],		&HALO[n].a[2], 		
+	&HALO[n].Ea[0], 	&HALO[n].Ea[1],		&HALO[n].Ea[2],		
 	&a, 			&a, 			&a, 
 	&a, 			&a,			&a, 				
 	&a,			&HALO[n].n_bins,	&a, 			
@@ -444,14 +397,14 @@ void read_halo_file()
 #ifdef GAS
 	, &HALO[n].N_gas, 	&HALO[n].M_gas, 	&HALO[n].lambda_gas, 		
 	&HALO[n].lambdaE_gas, 	&a,			&a, 			
-	&a, 			&HALO[n].b_gas, 
-	&HALO[n].c_gas, 	&HALO[n].Eax_gas, 	&HALO[n].Eay_gas, 		
-	&HALO[n].Eaz_gas, 	&a,			&a, 			
+	&a, 			&HALO[n].a_gas[1], 
+	&HALO[n].a_gas[2], 	&HALO[n].Ea_gas[0], 	&HALO[n].Ea_gas[1], 		
+	&HALO[n].Ea_gas[2], 	&a,			&a, 			
 	&a,			&a,			&a, 			
 	&a, 			&HALO[n].Ekin_gas, 	&HALO[n].Epot_gas
 #ifdef EXTRA_GAS
-	, &HALO[n].X_gas,	&HALO[n].Y_gas, 	&HALO[n].Z_gas, 		
-	&HALO[n].VX_gas, 	&HALO[n].VY_gas, 	&HALO[n].VZ_gas,	
+	, &HALO[n].X_gas[0],	&HALO[n].X_gas[1], 	&HALO[n].X_gas[2], 		
+	&HALO[n].V_gas[0], 	&HALO[n].V_gas[1], 	&HALO[n].V_gas[2],	
 	&HALO[n].Cum_u_gas
 #endif
 #endif
@@ -463,34 +416,26 @@ void read_halo_file()
 #endif
 #endif
 	// In the new catalogues haloes' major axis is normalized to one
-	HALO[n].aa = 1.0; 
+	HALO[n].a[0] = 1.0; 
 
 	set_additional_halo_properties(n);
 
 #ifdef USE_UNIT_MPC
 	HALO[n].Rvir *= 1.e-3;
-	HALO[n].Xc *= 1.e-3;
-	HALO[n].Yc *= 1.e-3;
-	HALO[n].Zc *= 1.e-3;
-	HALO[n].VXc *= 1.e-3;
-	HALO[n].VYc *= 1.e-3;
-	HALO[n].VZc *= 1.e-3;
+
+	for(i=0; i<3; i++)
+	{
+		HALO[n].X[i] *= 1.e-3;
+		HALO[n].V[i] *= 1.e-3;
 #ifdef GAS
 #ifdef EXTRA_GAS
-	HALO[n].X_gas *= 1.e-3;
-	HALO[n].Y_gas *= 1.e-3;
-	HALO[n].Z_gas *= 1.e-3;
-	HALO[n].VX_gas *= 1.e-3;
-	HALO[n].VY_gas *= 1.e-3;
-	HALO[n].VZ_gas *= 1.e-3;
-	HALO[n].X_dm *= 1.e-3;
-	HALO[n].Y_dm *= 1.e-3;
-	HALO[n].Z_dm *= 1.e-3;
-	HALO[n].VX_dm *= 1.e-3;
-	HALO[n].VY_dm *= 1.e-3;
-	HALO[n].VZ_dm *= 1.e-3;
+	HALO[n].X_gas[i] *= 1.e-3;
+	HALO[n].V_gas[i] *= 1.e-3;
+	HALO[n].X_dm[i] *= 1.e-3;
+	HALO[n].V_dm[i] *= 1.e-3;
 #endif // Extra Gas
 #endif // Gas
+	}
 #endif // Use Mpc
 		
 		// Check the size of the box corresponding to the current task
@@ -636,7 +581,7 @@ void read_profiles_file()
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf", 
 		&radius, &npart, &a, &overd, &dens, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
-		&a, 	 &a,     &a, &a,     &m_gas,&a	     &u_gas  // 27
+		&a, 	 &a,     &a, &a,     &m_gas,&a,	     &u_gas  // 27
 #endif
 	);
 				halo_bins = HALO[counter].n_bins;

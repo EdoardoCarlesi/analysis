@@ -1,3 +1,8 @@
+#ifndef WITH_MPI
+#define ThisTask 0
+#define NTask 1
+#endif
+
 extern struct power_spectrum 
 {
 	int npts;
@@ -267,9 +272,8 @@ extern struct halo
 	double M_dm;
 	double M_gas;
 
+	double a_gas[3];
 	double Ea_gas[3];
-	double Eb_gas[3];
-	double Ec_gas[3];
 
 	double lambda_gas;
 	double lambdaE_gas;

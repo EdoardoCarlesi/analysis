@@ -1,13 +1,3 @@
-/*
-static int i;
-static int count;
-static int nTot;
-static double z;
-static double M;
-static char out_url[200];
-static FILE *out_file;
-*/
-
 void print_theoretical_mass_function(void);
 void print_numerical_mass_function(void);
 
@@ -22,7 +12,6 @@ void print_number_densities(void);
 void print_growth_factor(void);
 
 void print_halo_density(void);
-void print_grid_CIC(void);
 void print_grid_CIC(void);
 
 void print_nfw(void);
