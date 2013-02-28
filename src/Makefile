@@ -8,11 +8,9 @@ include ../Makefile.config
 LIBS = libmath/libmath.a libio/libio.a libcosmo/libcosmo.a libhalo/libhalo.a
 SRCS = general_variables.c general_functions.c
 OBJ  = general_variables.o general_functions.o
-INCLUDE += general_variables.h general_functions.h
 
 ifeq (${WITH_MPI}, "on")
 LIBS    += libparallel/libparallel.a
-INCLUDE += libparallel/general.h
 endif
 
 ifeq (${ADD_LIB}, "on")

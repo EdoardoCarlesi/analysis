@@ -10,10 +10,19 @@
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_multifit_nlin.h>
 
-#include "power_law.h"
-#include "statistics.h"
+#include "math.h"
+
+/*
+ * Declare functions
+ */
+int power_law_f(const gsl_vector*, void *, gsl_vector*);
+int d_power_law_f(const gsl_vector*, void *, gsl_matrix*);
+int fd_power_law_f(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
 
 
+/*
+ * Initialize functions
+ */ 
 int power_law_f(const gsl_vector *x, void *data, gsl_vector *f)
 {
 	size_t n, i; 

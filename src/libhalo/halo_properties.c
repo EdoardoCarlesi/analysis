@@ -3,16 +3,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../general_variables.h"
-#include "../general_functions.h"
-#include "../libmath/mathtools.h"
-#include "../libmath/log_norm.h"
-#include "../libmath/power_law.h"
-#include "../libcosmo/mass_function.h"
-#include "../libcosmo/cosmological_relations.h"
+#include "../libmath/math.h"
+#include "../libcosmo/cosmo.h"
+#include "../general_def.h"
 
-#include "halo_properties.h"
-#include "subhalo_general.h"
+#include "halo.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -23,104 +18,33 @@
 #endif
 
 
-void initialize_halo_properties_structure()
-{
-	int rBins, nBins;
-
-	rBins=Settings.r_bins; 
-	nBins=Settings.n_bins;
-
-			// Halo axis alignment
-		HaloZ.r_bins=rBins-1; rBins--;
-		HaloZ.R = (double*) calloc(rBins, sizeof(double));
-		HaloZ.Th_p = (double*) calloc(rBins, sizeof(double));
-		HaloZ.Th_c = (double*) calloc(rBins, sizeof(double));
-		HaloZ.N_pairs = (int*) calloc(rBins, sizeof(double));
-			// Other halo properties
-		HaloZ.n_bins=nBins-1; nBins--;
-		HaloZ.c = (double*) calloc(nBins, sizeof(double));
-		HaloZ.c_avg = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_c = (double*) calloc(nBins, sizeof(double));
-		HaloZ.l = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_l = (double*) calloc(nBins, sizeof(double));
-		HaloZ.err_p_l = (double*) calloc(nBins, sizeof(double));
-		HaloZ.shape = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_shape = (double*) calloc(nBins, sizeof(double));
-		HaloZ.n_shape = (int*) calloc(nBins, sizeof(double));
-		HaloZ.triax = (double*) calloc(nBins, sizeof(double));
-		HaloZ.p_triax = (double*) calloc(nBins, sizeof(double));
-		HaloZ.n_triax = (int*) calloc(nBins, sizeof(double));
-		HaloZ.mass = (double*) calloc(nBins, sizeof(double));
-		HaloZ.radVel = (double*) calloc(nBins, sizeof(double));
-		HaloZ.err_radVel = (double*) calloc(nBins, sizeof(double));
+/*
+ * Declare functions
+ */
+void sort_axis_alignement(void);
+void sort_lambda(void);
+void sort_concentration(void);
+void sort_radial_velocity(void);
+void sort_shape_and_triaxiality(void);
+void sort_nfw_fit(void);
 
 #ifdef GAS
-	HaloZ.gas_T = (double*) calloc(nBins, sizeof(double));
-	HaloZ.gas_u = (double*) calloc(nBins, sizeof(double));
-	HaloZ.gas_fraction = (double*) calloc(nBins, sizeof(double));
+void sort_gas_fraction(void);
+void sort_and_fit_mass_temperature_relation(void);
 #endif
-}
 
 
-
-void free_halo_properties()
-{
-		free(HaloZ.c);
-		free(HaloZ.p_c);
-		free(HaloZ.l);
-		free(HaloZ.p_l);
-		free(HaloZ.err_p_l);
-		free(HaloZ.p_shape);
-		free(HaloZ.n_shape);
-		free(HaloZ.shape);
-		free(HaloZ.triax);
-		free(HaloZ.p_triax);
-		free(HaloZ.n_triax);
-		free(HaloZ.mass);
-		free(HaloZ.radVel);
-		free(HaloZ.err_radVel);
-		free(Haloes);
-#ifdef GAS
-		free(HaloZ.gas_T);
-		free(HaloZ.gas_u);
-		free(HaloZ.gas_fraction);
-#endif 
-}
-
-
-
-void free_halo_profiles(int i)
-{
-	struct halo *HALO;
-
-#ifdef WITH_MPI
-		HALO = pHaloes[ThisTask];
-#else
-		HALO = Haloes;
-#endif
-		free(HALO[i].radius);
-		free(HALO[i].rho);
-		free(HALO[i].over_rho);
-		free(HALO[i].err);
-		free(HALO[i].over_err);
-		free(HALO[i].bin);
-		free(HALO[i].err_dn);
-
-#ifdef WITH_GAS
-	free(HALO[i].m_gas);
-	free(HALO[i].u_gas);
-#endif
-}
-
-
-	// TODO: add mass cut
+/*
+ * Initialize functions
+ */ 
 void sort_axis_alignement()
 {
+	// TODO: add mass cut
 	int *Nbins, m=0, j=0, k=0, i=0, max_haloes, nBins, skip;
 	double *radius, *Rbins, *Abins, *Bbins; 
 	double Rmin, Rmax, R, A, B, sum;
 
-	fprintf(stdout,"Computing halo major axis alignement angles for %d bins.\n", HaloZ.r_bins);
+	fprintf(stdout,"Computing halo major axis alignement angles for %d bins.\n", HaloProperties[HALO_INDEX].r_bins);
 	
 		max_haloes = Settings.n_haloes;
 		skip = Settings.halo_skip; 
@@ -138,12 +62,8 @@ void sort_axis_alignement()
 			for(i=0; i<nBins-1; i++)
 				Rbins[i] = 0.5*(radius[i+1]+radius[i]);
 
-#ifdef _OPENMP
-		omp_set_num_threads(OMP_THREADS);
-#endif
-
-//#		pragma omp parallel for			\
-		private(j, k, A, B, R)
+#		pragma omp parallel for			\
+		private(m, i, j, k, A, B, R, sum) shared(Haloes, Rmin, Rmax)
 			for(j=0; j<max_haloes; j++) 
 			{
 				for(k=j; k<max_haloes; k++)
@@ -155,15 +75,15 @@ void sort_axis_alignement()
 	
 					R = sqrt(sum);
 
-				if(R > Rmin && R < Rmax)
-				{
-					for(m=0; m<3; m++)
-						A += Haloes[j].Ea[m]*Haloes[k].Ea[m];
+					if(R > Rmin && R < Rmax)
+					{
+						for(m=0; m<3; m++)
+							A += Haloes[j].Ea[m]*Haloes[k].Ea[m];
 
-					for(m=0; m<3; m++)
-						B += Haloes[j].Ea[m]*(Haloes[j].X[m] - Haloes[k].X[m]);
+						for(m=0; m<3; m++)
+							B += Haloes[j].Ea[m]*(Haloes[j].X[m] - Haloes[k].X[m]);
 
-						B /= R;
+							B /= R;
 
 				for(i=0; i<nBins-1; i++) 
 				{
@@ -174,10 +94,10 @@ void sort_axis_alignement()
 						Nbins[i] ++;
 					}
 
-				HaloZ.R[i]=Rbins[i]; 
-				HaloZ.Th_c[i]=Abins[i]; 
-				HaloZ.Th_p[i]=Bbins[i]; 
-				HaloZ.N_pairs[i]=Nbins[i];
+				HaloProperties[HALO_INDEX].R[i]=Rbins[i]; 
+				HaloProperties[HALO_INDEX].Th_c[i]=Abins[i]; 
+				HaloProperties[HALO_INDEX].Th_p[i]=Bbins[i]; 
+				HaloProperties[HALO_INDEX].N_pairs[i]=Nbins[i];
 
 				}
 			}
@@ -222,6 +142,8 @@ void sort_shape_and_triaxiality()
 	array_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
 	array_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
 
+#	pragma omp parallel	\
+	shared(Haloes, nHaloes, array_shape, array_triax) private(i,m)
 		for(i=0; i<nHaloes; i++)
 		{
 			if(halo_condition(i) == 1)
@@ -232,8 +154,8 @@ void sort_shape_and_triaxiality()
 			}
 		}
 
-			HaloZ.s0 = average(array_shape, nHaloesCut);
-			HaloZ.t0 = average(array_triax, nHaloesCut);
+			HaloProperties[HALO_INDEX].s0 = average(array_shape, nHaloesCut);
+			HaloProperties[HALO_INDEX].t0 = average(array_triax, nHaloesCut);
 
 				sMax = maximum(array_shape, nHaloesCut); 
 				sMin = minimum(array_shape, nHaloesCut);
@@ -255,12 +177,12 @@ void sort_shape_and_triaxiality()
 			{
 				p_s = (double) array_shape_bin_y[i]/nHaloesCut;
 				p_t = (double) array_triax_bin_y[i]/nHaloesCut;
-				HaloZ.shape[i]=array_shape_bin[i]+half_s;
-				HaloZ.triax[i]=array_triax_bin[i]+half_t;
-				HaloZ.p_shape[i]=p_s;
-				HaloZ.p_triax[i]=p_t;
-				HaloZ.n_shape[i]=array_shape_bin_y[i];
-				HaloZ.n_triax[i]=array_triax_bin_y[i];
+				HaloProperties[HALO_INDEX].shape[i]=array_shape_bin[i]+half_s;
+				HaloProperties[HALO_INDEX].triax[i]=array_triax_bin[i]+half_t;
+				HaloProperties[HALO_INDEX].p_shape[i]=p_s;
+				HaloProperties[HALO_INDEX].p_triax[i]=p_t;
+				HaloProperties[HALO_INDEX].n_shape[i]=array_shape_bin_y[i];
+				HaloProperties[HALO_INDEX].n_triax[i]=array_triax_bin_y[i];
 			}
 
 	free(array_shape); 
@@ -317,8 +239,8 @@ void sort_radial_velocity()
 
 			for(i=0; i<nBins; i++)	
 			{
-				HaloZ.radVel[i]=radial_velocity_bin[i];
-				HaloZ.err_radVel[i]=radial_velocity_error[i];
+				HaloProperties[HALO_INDEX].radVel[i]=radial_velocity_bin[i];
+				HaloProperties[HALO_INDEX].err_radVel[i]=radial_velocity_error[i];
 			}
 	
 	free(radial_velocity_error); 
@@ -329,6 +251,73 @@ void sort_radial_velocity()
 	fprintf(stdout, "\n");
 }
 
+
+
+void sort_numerical_mass_function(void)
+{
+	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, i=0; 
+	double dn_norm=1., volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
+	double *mass, *mass_bin; 
+	int *n_mass, *cum_n_mass;
+
+	fprintf(stdout, "\nSorting mass function for %d halos in %d bins\n", nHaloes, nBins);
+	
+		Settings.tick=0;
+	
+		mass = (double*) calloc(nHaloes, sizeof(double));
+		mass_bin = (double*) calloc(nBins, sizeof(double));
+		n_mass = (int*) calloc(nBins-1, sizeof(int));
+		cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
+
+	fprintf(stdout, "\nAllocating memory for mass function structures...\n");
+
+	MassFunc[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
+	MassFunc[MF_INDEX].mass_halfstep = (double*) calloc(nBins-1, sizeof(double));
+	MassFunc[MF_INDEX].n = (double*) calloc(nBins-1, sizeof(double));
+	MassFunc[MF_INDEX].n_tot = (int*) calloc(nBins-1, sizeof(int));
+	MassFunc[MF_INDEX].n_bin = (int*) calloc(nBins-1, sizeof(int));
+	MassFunc[MF_INDEX].dn  = (double*) calloc(nBins-1, sizeof(double));
+	MassFunc[MF_INDEX].err = (double*) calloc(nBins-1, sizeof(double));
+	MassFunc[MF_INDEX].err_dn = (double*) calloc(nBins-1, sizeof(double));
+
+#		pragma omp parallel for 	\
+		shared(Haloes, mass) private(i)
+		for(i=0; i<nHaloes; i++)
+			mass[i] = Haloes[i].Mvir;			
+	
+		mMin=minimum(mass, nHaloes)*0.999;
+		mMax=maximum(mass, nHaloes)*1.001;
+		mass_bin = log_stepper(mMin, mMax, nBins);
+	
+		lin_bin(mass, mass_bin, nBins, nHaloes, n_mass);	
+		
+		cum_bin(n_mass, cum_n_mass, nBins-1);
+
+			volume=Settings.box_size*Settings.box_size*Settings.box_size;
+
+		for(i=0; i<nBins-1; i++)
+		{
+			halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
+			dn_norm = 2*halfstep/nHaloes;
+			dM = mass_bin[i+1]-mass_bin[i];
+			MassFunc[MF_INDEX].mass[i]=mass_bin[i];
+			MassFunc[MF_INDEX].mass_halfstep[i]=mass_bin[i]+halfstep;
+			MassFunc[MF_INDEX].dn[i]=n_mass[i]/(volume*dM);
+			MassFunc[MF_INDEX].n[i]=cum_n_mass[i]/volume;
+			MassFunc[MF_INDEX].err_dn[i]=sqrt(n_mass[i])/(volume*dM);
+			MassFunc[MF_INDEX].err[i]=sqrt(cum_n_mass[i])/volume;
+
+			MassFunc[MF_INDEX].n_bin[i]=n_mass[i];
+			MassFunc[MF_INDEX].n_tot[i]=cum_n_mass[i];
+		}
+	
+		free(cum_n_mass);
+		free(mass_bin); 
+		free(n_mass); 
+		free(mass); 
+
+	fprintf(stdout, "\nSorting done.\n");
+}
 
 
 void sort_lambda()
@@ -392,14 +381,14 @@ void sort_lambda()
 
 			l_0 = params[0]; 
 			sig = params[1];
-			HaloZ.l_0=l_0;
-			HaloZ.l_sig=sig;
+			HaloProperties[HALO_INDEX].l_0=l_0;
+			HaloProperties[HALO_INDEX].l_sig=sig;
 
 		for(i=0; i<nBins-1; i++)
 		{		
-			HaloZ.l[i]=lambda_bin_x[i];
-			HaloZ.p_l[i]=lambda_double_y[i];
-			HaloZ.err_p_l[i]=lambda_err_y[i];
+			HaloProperties[HALO_INDEX].l[i]=lambda_bin_x[i];
+			HaloProperties[HALO_INDEX].p_l[i]=lambda_double_y[i];
+			HaloProperties[HALO_INDEX].err_p_l[i]=lambda_err_y[i];
 		}	
 
 	free(bin_x);
@@ -496,14 +485,14 @@ void sort_concentration()
 				sig = params[1]; 
 				max=maximum(c_bin_y, nBins-1);
 			
-				HaloZ.c_0=c_0;
-				HaloZ.c_sig=sig;
+				HaloProperties[HALO_INDEX].c_0=c_0;
+				HaloProperties[HALO_INDEX].c_sig=sig;
 			*/
 
 			for(i=0; i<nBins-1; i++)
 			{	
-				HaloZ.c[i]=c_bin_x[i];
-				HaloZ.p_c[i]=c_bin_y[i];
+				HaloProperties[HALO_INDEX].c[i]=c_bin_x[i];
+				HaloProperties[HALO_INDEX].p_c[i]=c_bin_y[i];
 			}
 
 			for(i=0; i<nHaloesCut; i++) 
@@ -530,7 +519,7 @@ void sort_concentration()
 
 			for(i=0; i<nBins-1; i++)
 			{
-				HaloZ.c_avg[i]=c_avg_mass[i];
+				HaloProperties[HALO_INDEX].c_avg[i]=c_avg_mass[i];
 			}
 	
 /*	
@@ -576,7 +565,7 @@ void sort_gas_fraction()
 		for(i=0; i<nHaloes; i++)
 		{
 			mass[i] = Haloes[i].Mvir;
-			gas_fraction[i] = Haloes[i].b_fraction;
+			gas_fraction[i] = Haloes[i].gas_only.b_fraction;
 		}
 	
 			mass_bin = log_stepper(mMin, mMax, nBins);
@@ -585,8 +574,8 @@ void sort_gas_fraction()
 
 		for(i=0; i<nBins-1; i++)
 		{
-			HaloZ.mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
-			HaloZ.gas_fraction[i]=gas_fraction_bin[i];
+			HaloProperties[HALO_INDEX].mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
+			HaloProperties[HALO_INDEX].gas_fraction[i]=gas_fraction_bin[i];
 		}
 
 	free(mass);
@@ -618,7 +607,7 @@ void sort_and_fit_mass_temperature_relation()
 		for(i=0; i<nHaloes; i++)
 		{
 			mass[i] = Haloes[i].Mvir;
-			temperature[i] = Haloes[i].T_gas;
+			temperature[i] = Haloes[i].gas_only.T;
 		}
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
@@ -627,8 +616,8 @@ void sort_and_fit_mass_temperature_relation()
 
 			for(i=0; i<nBins-1; i++)
 			{
-				HaloZ.mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
-				HaloZ.gas_T[i]=temperature_bin[i];
+				HaloProperties[HALO_INDEX].mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
+				HaloProperties[HALO_INDEX].gas_T[i]=temperature_bin[i];
 			}
 	
 			a[0] = 1.5; 
@@ -653,17 +642,16 @@ void sort_and_fit_mass_temperature_relation()
 
 void compute_halo_properties()
 {
-		avg_subhalo();
 
-		compute_numerical_mass_function();
+		sort_numerical_mass_function();
 
-			sort_axis_alignement();
-			sort_shape_and_triaxiality();
-			sort_lambda();
-			sort_concentration();
-
+	//	sort_axis_alignement();
+	//	sort_shape_and_triaxiality();
+	//	sort_lambda();
+	//	sort_concentration();
+	//	fit_and_store_nfw_parameters();
 #ifdef GAS
-		sort_gas_fraction();
-		sort_and_fit_mass_temperature_relation();
+//		sort_gas_fraction();
+//		sort_and_fit_mass_temperature_relation();
 #endif
 }

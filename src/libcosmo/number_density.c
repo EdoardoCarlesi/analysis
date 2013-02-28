@@ -6,22 +6,28 @@
 #include <string.h>
 #include <math.h>
 
-#include "tinker.h"
-#include "mass_function.h"
-#include "number_density.h"
-#include "cosmological_relations.h"
+#include "../libio/io.h"
+#include "../libmath/math.h"
+#include "../general_def.h"
 
-#include "../libio/power_io.h"
-#include "../libio/halo_io.h"
-#include "../libmath/mathtools.h"
-#include "../general_functions.h"
-#include "../general_variables.h"
+#include "cosmo.h"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
 
+/*
+ * Declare functions
+ */
+double integrand_tin_n_M_z(double,void*);
+double integrand_num_n_M_z(double,void*);
+int snaps_within_z_range(void);
+
+
+/*
+ * Initialize functions
+ */ 
 void get_n_M_z(double M)
 {
 	int k=0, nTot=0, nPks=0;
@@ -34,17 +40,17 @@ void get_n_M_z(double M)
 	NumDen.n_th = (double*) calloc(nTot, sizeof(double));
 	NumDen.n_num = (double*) calloc(nTot, sizeof(double));
 
-	for(k=0; k<NumDen.npts; k++)
+	for(k=0; k<nTot; k++)
 	{
 		NumDen.z[k] = Pks[nPks-k-1].z;
 
 		NumDen.n_th[k] = 
-			get_interpolated_value(MassFuncZ[k].mass, 
-				MassFuncZ[k].n, MassFuncZ[k].bins, M);
+			get_interpolated_value(MassFunc[k].mass, 
+				MassFunc[k].n, MassFunc[k].bins, M);
 
 		NumDen.n_num[k] = 
-			get_interpolated_value(MassFuncZ[k].mass, 
-				MassFuncZ[k].n, MassFuncZ[k].bins, M);
+			get_interpolated_value(MassFunc[k].mass, 
+				MassFunc[k].n, MassFunc[k].bins, M);
 	}
 }
 
@@ -107,49 +113,6 @@ double* integrate_number_density(double z0, double z1)
 		result[1] = result1;
 	
 	return result;
-}
-
-
-
-void compute_number_density()
-{
-	int index=0, m=0, nPk=0, nBin=0, nFc=0; 
-	double zz=0;
-
-	fprintf(stdout, "\ncompute_number_density().\n");
-
-	nPk = Urls.nPkFiles;
-	nFc = Urls.nCatalogueFiles;
-	nBin = MassFunc.bins;
-	
-	init_pks();
-	
-	initialize_mass_function_datastore();
-
-		do {
-			index = nPk-m-1;
-			zz=Pks[index].z;
-			Settings.zStart = zz;
-
-			fprintf(stdout,"\nstep %d, analyzing snapshot at redshift z: %lf\n", m, zz);
-	
-			Urls.halo_file = (char *) calloc(strlen(Urls.urls[nFc-m-1]), sizeof(char));
- 			strcpy(Urls.halo_file, Urls.urls[nFc-m-1]);
-			read_halo_file();
-
-#ifndef TH_ONLY
-			compute_numerical_mass_function();
-#endif
-			compute_theoretical_mass_function();
-
-			ThMassFunc.Mmin=0.1*MassFunc.mass[0];
-			ThMassFunc.Mmax=10*MassFunc.mass[nBin-1];
-			store_mf(m);
-
-			fprintf(stdout, "Done z: %lf. zMax: %lf \n", zz, NumDen.zMax);
-			m++;
-
-		} while(zz<NumDen.zMax);
 }
 
 

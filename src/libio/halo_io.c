@@ -2,11 +2,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "read_io.h"
-#include "halo_io.h"
-#include "../general_functions.h"
-#include "../general_variables.h"
-#include "../libcosmo/cosmological_relations.h"
+
+#include "../libcosmo/cosmo.h"
+#include "../libmath/math.h"
+#include "../general_def.h"
+
+#include "io.h"
 
 #ifdef WITH_MPI
 #include "../libparallel/general.h"
@@ -14,8 +15,18 @@
 
 #define LINE_SIZE 4096
 
+/*
+ *  Function definition
+ */
+void set_additional_halo_properties(int);
 
+void determine_simulation_settings(void);
 
+void set_box(int);
+
+/*
+ *  Function implementation
+ */
 void determine_simulation_settings()
 {
 	struct halo *HALO;
@@ -32,19 +43,19 @@ void determine_simulation_settings()
 	if(ThisTask==0)
 	{
 #ifndef GAS
-	Settings.pMass = HALO[0].Mvir/HALO[0].n_part;
-	Settings.rho_0 = Settings.pMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
-	fprintf(stdout, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
+		Settings.pMass = HALO[0].Mvir/HALO[0].n_part;
+		Settings.rho_0 = Settings.pMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
+		fprintf(stdout, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
 #else
-	Settings.dmMass  = HALO[0].M_dm/HALO[0].N_dm;
-	Settings.gasMass = HALO[0].M_gas/HALO[0].N_gas; 
-	Settings.rho_dm = Settings.dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
-	Settings.rho_b = Settings.gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
-	Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
-	fprintf(stdout, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
-	fprintf(stdout, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
+		Settings.dmMass  = HALO[0].dm.M/HALO[0].dm.N;
+		Settings.gasMass = HALO[0].gas.M/HALO[0].gas.N; 
+		Settings.rho_dm = Settings.dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
+		Settings.rho_b = Settings.gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
+		Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
+		fprintf(stdout, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
+		fprintf(stdout, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
 #endif
-	Settings.rho_c = (3*HALO[0].Mvir)/(4*3.14*pow3(HALO[0].Rvir)*200);
+		Settings.rho_c = (3*HALO[0].Mvir)/(4*3.14*pow3(HALO[0].Rvir)*200);
 	}
 
 		// Now set the mass_min to the value determined by the n_part
@@ -71,11 +82,11 @@ void determine_simulation_settings()
 					SETTINGS->n_spin,
 					SETTINGS->n_all);
 
-		fprintf(stdout, "\tTask=%d has box edges\n \tX=%lf  |  %lf\n \tY=%lf  |  %lf\n \tZ=%lf  |  %lf\n", 
-				ThisTask,
-				SETTINGS->box.X[0], SETTINGS->box.X[1], 
-				SETTINGS->box.Y[0], SETTINGS->box.Y[1], 
-				SETTINGS->box.Z[0], SETTINGS->box.Z[1]);
+		fprintf(stdout, "\nTask=%d has box edges:\n \t\tX=%lf  |  %lf\n \t\tY=%lf  |  %lf\n \t\tZ=%lf  |  %lf\n", 
+					ThisTask,
+					SETTINGS->box.X[0][0], SETTINGS->box.X[0][1], 
+					SETTINGS->box.X[1][0], SETTINGS->box.X[1][1], 
+					SETTINGS->box.X[2][0], SETTINGS->box.X[2][1]);
 
 }
 
@@ -101,11 +112,11 @@ void set_box(int i)
 
 		for(j=0; j<3; j++)
 		{		
-			if( x[j] < SETTINGS->box.X[j])
-				SETTINGS->box.X[j] = x[j];
+			if( x[j] < SETTINGS->box.X[j][0])
+				SETTINGS->box.X[j][0] = x[j];
 
-			if( x[j] > SETTINGS->box.X[j])
-				SETTINGS->box.X[j] = x[j];
+			if( x[j] > SETTINGS->box.X[j][1])
+				SETTINGS->box.X[j][1] = x[j];
 		}
 }
 
@@ -128,26 +139,27 @@ void set_additional_halo_properties(int n)
 		// NFW initial guess parameters
 	HALO[n].c = c;
 	HALO[n].rho0 = (200/3)*c*c*c*(1./(log(1+c) - c/(1+c)));
-	HALO[n].shape = HALO[n].a[2]/HALO[n].a[0];
 
+	HALO[n].shape = HALO[n].a[2]/HALO[n].a[0];
 	HALO[n].triax = (pow2(HALO[n].a[0]) - pow2(HALO[n].a[1]))/(pow2(HALO[n].a[0]) - pow2(HALO[n].a[2]));
+
 	HALO[n].ecc = sqrt(1 - 2*pow2(HALO[n].lambdaE));
 	HALO[n].th_vir=2*HALO[n].Ekin/HALO[n].Epot;	
 	HALO[n].abs_th_vir=sqrt(pow2(HALO[n].th_vir)); 
 
 #ifdef GAS
-		HALO[n].N_dm = HALO[n].n_part - HALO[n].N_gas;
-		HALO[n].M_dm = HALO[n].Mvir - HALO[n].M_gas;
-		HALO[n].b_fraction = HALO[n].M_gas/HALO[n].Mvir;
+		HALO[n].dm.N = HALO[n].n_part - HALO[n].gas.N;
+		HALO[n].dm.M = HALO[n].Mvir - HALO[n].gas.M;
+		HALO[n].gas_only.b_fraction = HALO[n].gas.M/HALO[n].Mvir;
 #ifndef EXTRA_GAS
-		HALO[n].T_gas = 0.0; 
+		HALO[n].gas_only.T = 0.0; 
 #else
-		HALO[n].T_gas = convert_u_to_T(HALO[n].Cum_u_gas);
+		HALO[n].gas_only.T = convert_u_to_T(HALO[n].gas_only.Cum_u);
 		
 		for(i=0; i<3; i++)
 		{
-			HALO[n].X_dm[i] = (HALO[n].Mvir*HALO[n].X[i] - HALO[n].X_gas[i])/HALO[n].M_dm;
-			HALO[n].V_dm[i] = (HALO[n].Mvir*HALO[n].V[i] - HALO[n].V_gas[i])/HALO[n].M_dm;
+			HALO[n].dm.X[i] = (HALO[n].Mvir*HALO[n].X[i] - HALO[n].gas.X[i])/HALO[n].dm.M;
+			HALO[n].dm.V[i] = (HALO[n].Mvir*HALO[n].V[i] - HALO[n].gas.V[i])/HALO[n].dm.M;
 		}
 
 #endif // EXTRA_GAS
@@ -164,11 +176,12 @@ void get_halo_files_urls()
 
 	struct internal_urls *URLS;
 
-	INFO_MSG("Reading halo file urls...");
 
 #ifdef WITH_MPI
+	TASK_INFO_MSG(ThisTask, "reading halo file urls...");
 	URLS = &pUrls[ThisTask];
 #else
+	INFO_MSG("Reading halo file urls...");
 	URLS = &Urls;
 #endif
 
@@ -195,29 +208,23 @@ void get_halo_files_urls()
 
 		URLS->nCatalogueFiles = lin;
 
-		URLS->urls = 
-			(char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
-		URLS->urls_profiles = 
-			(char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
-		URLS->urls_satellites = 
-			(char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
+		URLS->urls = (char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
+		URLS->urls_profiles = (char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
+		URLS->urls_satellites = (char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
 
 	if(lin > 0)
 	{
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc);
-			URLS->urls[n] = 
-				(char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls[n] = (char*) calloc(strlen(dummyline), sizeof(char));
 			strcpy(URLS->urls[n], dummyline);
 			URLS->urls[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc);
 
 		} else {
-#ifdef WITH_MPI
 			if(ThisTask==0)
-#endif				
 				WARNING("Trying to read empty file", url_fc);
 		}
 
@@ -226,17 +233,14 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_sub);
-			URLS->urls_satellites[n] = 
-				(char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls_satellites[n] = (char*) calloc(strlen(dummyline), sizeof(char));
 			strcpy(URLS->urls_satellites[n], dummyline);
 			URLS->urls_satellites[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc_sub);
 
 		} else {
-#ifdef WITH_MPI
 			if(ThisTask==0)
-#endif
 				WARNING("Trying to read empty file", url_fc_sub);
 		}
 
@@ -245,17 +249,14 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_pro);
-			URLS->urls_profiles[n] = 
-				(char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls_profiles[n] = (char*) calloc(strlen(dummyline), sizeof(char));
 			strcpy(URLS->urls_profiles[n], dummyline);
 			URLS->urls_profiles[n][strlen(dummyline)-1]='\0';
 		}
 	fclose(fc_pro);
 
 		} else {
-#ifdef WITH_MPI
 			if(ThisTask==0)
-#endif
 				WARNING("Trying to read empty file", url_fc_pro);
 		}
 
@@ -276,8 +277,11 @@ void set_halo_url()
 	URLS = &Urls;
 #endif
 
-	URLS->halo_file = (char*) calloc(strlen(URLS->urls[n])-1, sizeof(char));
+	URLS->halo_file = (char*) calloc(strlen(URLS->urls[n])+1, sizeof(char));
 	strcpy(URLS->halo_file, URLS->urls[n]);
+
+	URLS->profiles_file = (char*) calloc(strlen(URLS->urls_profiles[n])+1, sizeof(char));
+	strcpy(URLS->profiles_file, URLS->urls_profiles[n]);
 }
 
 
@@ -296,25 +300,23 @@ void read_halo_file()
 	Settings.tick=0;
 
 #ifdef WITH_MPI
-	if(ThisTask==0)
-		skip = 1;
-		else
-			skip = 0;
-
 	URLS = &pUrls[ThisTask];
 	SETTINGS = &pSettings[ThisTask];
 #else
-	skip = 1;
 	URLS = &Urls;
 	SETTINGS = &Settings;
 #endif
+
+		if(ThisTask==0)
+			skip = 1;
+		else
+			skip = 0;
 
 		h_file = fopen(URLS->halo_file, "r");
 		SETTINGS->n_haloes = get_lines(h_file, URLS->halo_file) - skip;
 
 #ifdef WITH_MPI
-		pHaloes[ThisTask] = (struct halo*) calloc(SETTINGS->n_haloes, 
-				sizeof(struct halo));
+		pHaloes[ThisTask] = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
 		HALO = pHaloes[ThisTask];
 #else
 		Haloes = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
@@ -351,7 +353,7 @@ void read_halo_file()
 			{
 				sscanf(dummyline,
 #ifndef GAS
-	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -359,7 +361,7 @@ void read_halo_file()
 	",
 #else // There is a gas component
 #ifndef EXTRA_GAS
-	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -368,7 +370,7 @@ void read_halo_file()
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	", 
 #else	// Use extra gas columns
-	"%ld %d  %d  %lf %d  %lf %lf %lf %lf %lf \
+	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
@@ -395,20 +397,20 @@ void read_halo_file()
 	&HALO[n].Ekin,	 	&HALO[n].Epot, 		// First 40 entries
 	&a, 			&a,			&HALO[n].c_nfw
 #ifdef GAS
-	, &HALO[n].N_gas, 	&HALO[n].M_gas, 	&HALO[n].lambda_gas, 		
-	&HALO[n].lambdaE_gas, 	&a,			&a, 			
-	&a, 			&HALO[n].a_gas[1], 
-	&HALO[n].a_gas[2], 	&HALO[n].Ea_gas[0], 	&HALO[n].Ea_gas[1], 		
-	&HALO[n].Ea_gas[2], 	&a,			&a, 			
+	, &HALO[n].gas.N, 	&HALO[n].gas.M, 	&HALO[n].gas_only.lambda, 		
+	&HALO[n].gas_only.lambdaE, 	&a,			&a, 			
+	&a, 			&HALO[n].gas_only.a[1], 
+	&HALO[n].gas_only.a[2], 	&HALO[n].gas_only.Ea[0],&HALO[n].gas_only.Ea[1], 		
+	&HALO[n].gas_only.Ea[2], 	&a,			&a, 			
 	&a,			&a,			&a, 			
-	&a, 			&HALO[n].Ekin_gas, 	&HALO[n].Epot_gas
+	&a, 			&HALO[n].gas_only.Ekin, 	&HALO[n].gas_only.Epot
 #ifdef EXTRA_GAS
-	, &HALO[n].X_gas[0],	&HALO[n].X_gas[1], 	&HALO[n].X_gas[2], 		
-	&HALO[n].V_gas[0], 	&HALO[n].V_gas[1], 	&HALO[n].V_gas[2],	
-	&HALO[n].Cum_u_gas
+	, &HALO[n].gas.X[0],	&HALO[n].gas.X[1], 	&HALO[n].gas.X[2], 		
+	&HALO[n].gas.V[0], 	&HALO[n].gas.V[1], 	&HALO[n].gas.V[2],	
+	&HALO[n].gas_only.Cum_u
 #endif
 #endif
-	); // */
+	); 
 #ifdef GAS
 #ifndef EXTRA_GAS
 	// The cumulative u has to be read from the profile catalogues
@@ -429,10 +431,10 @@ void read_halo_file()
 		HALO[n].V[i] *= 1.e-3;
 #ifdef GAS
 #ifdef EXTRA_GAS
-	HALO[n].X_gas[i] *= 1.e-3;
-	HALO[n].V_gas[i] *= 1.e-3;
-	HALO[n].X_dm[i] *= 1.e-3;
-	HALO[n].V_dm[i] *= 1.e-3;
+		HALO[n].gas.X[i] *= 1.e-3;
+		HALO[n].gas.V[i] *= 1.e-3;
+		HALO[n].dm.X[i] *= 1.e-3;
+		HALO[n].dm.V[i] *= 1.e-3;
 #endif // Extra Gas
 #endif // Gas
 	}
@@ -511,7 +513,6 @@ void read_halo_file()
 		SETTINGS->n_all=all;
 	
 	determine_simulation_settings();	
-
 		
 	fclose(h_file);
 }
@@ -520,7 +521,7 @@ void read_halo_file()
 
 void read_profiles_file()
 {
-	int i=0, j=0, k=0; 
+	int skip=0, i=0, j=0, k=0; 
 	int npart=0, halo_bins=0, counter=0;
 	int neg_r=0, npart_old=0;
 
@@ -547,13 +548,17 @@ void read_profiles_file()
 #endif
 
 		p_file = fopen(URLS->profiles_file, "r");
-		SETTINGS->n_haloes = get_lines(p_file, URLS->profiles_file);
 
 		if(p_file==NULL)
-			ERROR("File not found", URLS->profiles_file);
+			ERROR("Profiles file not found", URLS->profiles_file);
 		else
 			fprintf(stdout, "Found profiles file:%s\n", 
 				URLS->profiles_file);
+
+		if(ThisTask==0)
+			skip = 1;
+		else
+			skip = 0;
 
 #ifdef WITH_MPI
 		HALO = pHaloes[ThisTask];
@@ -565,9 +570,9 @@ void read_profiles_file()
 		{
 			fgets(dummyline, LINE_SIZE, p_file);
 
-			if(j>= SETTINGS->halo_skip) 
-			{
-				sscanf(dummyline, 
+		if(j >= skip) 
+		{
+			sscanf(dummyline, 
 #ifndef GAS
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
@@ -583,48 +588,37 @@ void read_profiles_file()
 		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a,     &m_gas,&a,	     &u_gas  // 27
 #endif
-	);
+		);
 				halo_bins = HALO[counter].n_bins;
 
-				if(i==0)
+				if(i == 0)
 				{	
-					HALO[counter].radius = 
-						(double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].rho = 
-						(double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].over_rho = 
-						(double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].bin = 
-						(double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].err = 
-						(double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].over_err = 
-						(double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].radius = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].rho = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].err = (double *) calloc(halo_bins,sizeof(double));
 #ifdef GAS
-					HALO[counter].u_gas = 
-						(double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].m_gas = 
-						(double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].gas_only.u = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].gas_only.m = (double *) calloc(halo_bins,sizeof(double));
 #endif
 				}
 
-					HALO[counter].radius[i] = sqrt(radius*radius);	
+					HALO[counter].radius[i] = sqrt(pow2(radius));	
 					HALO[counter].rho[i] = dens;
-					HALO[counter].over_rho[i] = Cosmo.OmegaM*overd;
-					HALO[counter].bin[i] = npart-npart_old;
-					HALO[counter].err[i] = overd/sqrt(npart-npart_old); 
-					HALO[counter].over_err[i] = overd/sqrt(npart-npart_old); 
+					HALO[counter].err[i] = dens/sqrt(npart-npart_old); 
+#ifdef GAS
+					HALO[counter].gas_only.u[i] = u_gas;
+					HALO[counter].gas_only.m[i] = m_gas;
+#endif
+			//fprintf(stderr,dummyline);
+			//fprintf(stderr, "\nHaloR  [%d][%d]=%e ", counter, i, HALO[counter].radius[i]);
+			//fprintf(stderr, "HaloGas[%d][%d]=%f ", counter, i, HALO[counter].u_gas[i]);
+			//fprintf(stderr, "HaloRho[%d][%d]=%f\n", counter, i, HALO[counter].rho[i]);
 
 			if(HALO[counter].err[i] == 0.) 
 				HALO[counter].err[i] = HALO[counter].err[i-1]; 
-	
-			if(HALO[counter].over_err[i] == 0.) 
-				HALO[counter].over_err[i] = HALO[counter].over_err[i-1]; 
 
 			if(radius<0.) 
-			{
 				neg_r++;
-			}
 
 			npart_old=npart;
 			i++;
@@ -642,11 +636,9 @@ void read_profiles_file()
 	overd_old=overd;
 	radius_old=radius;
 	npart_old=npart;
-
 	j++;
-
 	} 
-		else 
+	else 
 	{ // Skip this line
 		j++;
 	}
@@ -656,34 +648,4 @@ void read_profiles_file()
 	}
 
 	fclose(p_file);
-}
-
-
-
-int get_files_redshift_position(char *fileName)
-{ 
-	return (int) (atoi(&fileName[0])*10 + atoi(&fileName[1]))/10;
-}
-
-
-
-int* read_cross_correlated_haloes(char* halo_cc_list, int n_halos_comp, int* cc_ids){
-	int hh=0, aa=0, bb=0; 
-	char dummyline[128]; 
-	FILE *cc_list = fopen(halo_cc_list, "r");
-	
-	fprintf(stdout, "Reading cross correlation file:%s\n", halo_cc_list);
-
-	do {
-		fgets(dummyline, 128, cc_list);
-		sscanf(dummyline,"%d %d", &aa, &bb); 
-
-		if(Haloes[bb].abs_th_vir<Cosmo.virial)
-		{
-			cc_ids[hh] = bb;
-			hh++;
-		}
-	} while(hh<n_halos_comp);
-
-	return cc_ids;
 }

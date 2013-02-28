@@ -3,8 +3,11 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "../general_variables.h"
-#include "../general_functions.h"
+#include "../libhalo/halo.h"
+#include "../libcosmo/cosmo.h"
+#include "../general_def.h"
+
+#include "io.h"
 
 // Define some useful macros
 #define FILE_HEADER(fout, info, count) fprintf(fout, info "(%i)\t",count++)
@@ -54,7 +57,7 @@ void print_number_densities()
 void print_all_subhalo_properties_to_one_file()
 {
 	count = 1;
-	nTot = SubHaloZ.n_bins;
+	nTot = SubHaloProperties[HALO_INDEX].n_bins;
 	z = GrowthFac.z[Settings.use_cat];
  	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_all_sub_statistics.dat");
 	out_file = fopen(out_url,"w");
@@ -85,23 +88,23 @@ void print_all_subhalo_properties_to_one_file()
 
 			for(i=0; i<nTot; i++)	
 			{
-				fprintf(out_file, "%lf"  , SubHaloZ.l[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.p_l[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.shape[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.triax[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.costh[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.costh_count[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.cosphi[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.cosphi_count[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.r_sub[i]);
-				fprintf(out_file, "\t%d" , SubHaloZ.n_r_sub[i]);
-				fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.vel_sub[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.p_vel_sub[i]);
-				fprintf(out_file, "\t%e" , SubHaloZ.mass_sub[i]);
-				fprintf(out_file, "\t%d" , SubHaloZ.cum_n_sub[i]);
-				fprintf(out_file, "\t%lf", SubHaloZ.r_sub_subset[i]);
-				fprintf(out_file, "\t%d" , SubHaloZ.cum_n_r_sub_subset[i]);
+				fprintf(out_file, "%lf"  , SubHaloProperties[HALO_INDEX].l[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].p_l[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].shape[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].triax[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].costh[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].costh_count[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].cosphi[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].cosphi_count[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].r_sub[i]);
+				fprintf(out_file, "\t%d" , SubHaloProperties[HALO_INDEX].n_r_sub[i]);
+				fprintf(out_file, "\t%d" , SubHaloProperties[HALO_INDEX].cum_n_r_sub[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].vel_sub[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].p_vel_sub[i]);
+				fprintf(out_file, "\t%e" , SubHaloProperties[HALO_INDEX].mass_sub[i]);
+				fprintf(out_file, "\t%d" , SubHaloProperties[HALO_INDEX].cum_n_sub[i]);
+				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].r_sub_subset[i]);
+				fprintf(out_file, "\t%d" , SubHaloProperties[HALO_INDEX].cum_n_r_sub_subset[i]);
 				fprintf(out_file, "\n");
 			}
 
@@ -113,7 +116,7 @@ void print_all_subhalo_properties_to_one_file()
 void print_theoretical_mass_function()
 {
 	count = 1;
-	nTot = ThMassFunc.bins-1;
+	nTot = ThMassFunc[MF_INDEX].bins-1;
 	z = GrowthFac.z[Settings.use_cat];
 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_theoretical_mass_function.dat");
 	out_file = fopen(out_url, "w");
@@ -128,9 +131,9 @@ void print_theoretical_mass_function()
 
 			for(i=0; i<nTot; i++)
 			{
-				fprintf(out_file,"%e", ThMassFunc.mass[i]);
-				fprintf(out_file,"\t%e", ThMassFunc.n[i]);
-				fprintf(out_file,"\t%e", ThMassFunc.dn[i]);
+				fprintf(out_file,"%e", ThMassFunc[MF_INDEX].mass[i]);
+				fprintf(out_file,"\t%e", ThMassFunc[MF_INDEX].n[i]);
+				fprintf(out_file,"\t%e", ThMassFunc[MF_INDEX].dn[i]);
 				fprintf(out_file,"\n");
 			}
 
@@ -249,7 +252,7 @@ void print_evolution_to_file()
 void print_all_halo_properties_to_one_file()
 {
 	count = 1;
-	nTot = HaloZ.n_bins-1;
+	nTot = HaloProperties[HALO_INDEX].n_bins-1;
 	z = GrowthFac.z[Settings.use_cat];
 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_all_halo_statistical_properties.dat");
 	out_file = fopen(out_url,"w");
@@ -276,19 +279,19 @@ void print_all_halo_properties_to_one_file()
 			for(i=0; i<nTot; i++)	
 			{
 
-				fprintf(out_file, "%e", MassFunc.mass[i]);
-				fprintf(out_file, "\t%lf", HaloZ.c_avg[i]);
-				fprintf(out_file, "\t%lf", HaloZ.c[i]);
-				fprintf(out_file, "\t%lf", HaloZ.p_c[i]);
-				fprintf(out_file, "\t%lf", HaloZ.l[i]);
-				fprintf(out_file, "\t%lf", HaloZ.p_l[i]);
-				fprintf(out_file, "\t%lf", HaloZ.triax[i]);
-				fprintf(out_file, "\t%lf", HaloZ.p_triax[i]);
-				fprintf(out_file, "\t%lf", HaloZ.shape[i]);
-				fprintf(out_file, "\t%lf", HaloZ.p_shape[i]);
+				fprintf(out_file, "%e", MassFunc[MF_INDEX].mass[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].c_avg[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].c[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_c[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].l[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_l[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].triax[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_triax[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].shape[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_shape[i]);
 #ifdef GAS
-				fprintf(out_file, "\t%lf", HaloZ.gas_T[i]);
-				fprintf(out_file, "\t%lf", HaloZ.gas_fraction[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_T[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_fraction[i]);
 
 #endif
 				fprintf(out_file, "\n");
@@ -368,7 +371,7 @@ void print_halo_density()
 void print_axis_alignment()
 {
 	count = 1;
-	nTot = HaloZ.r_bins-1;
+	nTot = HaloProperties[HALO_INDEX].r_bins-1;
 	z = GrowthFac.z[Settings.use_cat];
 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_axis_alignement.dat");
 	out_file = fopen(out_url, "w");
@@ -384,10 +387,10 @@ void print_axis_alignment()
 
 			for(i=0; i<nTot; i++) 
 			{
-				fprintf(out_file, "%lf", HaloZ.R[i]);
-				fprintf(out_file, "\t%lf", HaloZ.Th_c[i]/HaloZ.N_pairs[i]);
-				fprintf(out_file, "\t%lf", HaloZ.Th_p[i]/HaloZ.N_pairs[i]);
-				fprintf(out_file, "\t%d", HaloZ.N_pairs[i]);
+				fprintf(out_file, "%lf", HaloProperties[HALO_INDEX].R[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].Th_c[i]/HaloProperties[HALO_INDEX].N_pairs[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].Th_p[i]/HaloProperties[HALO_INDEX].N_pairs[i]);
+				fprintf(out_file, "\t%d", HaloProperties[HALO_INDEX].N_pairs[i]);
 				fprintf(out_file, "\n"); 
 			}
 
@@ -399,7 +402,7 @@ void print_axis_alignment()
 void print_numerical_mass_function()
 {
 	count = 1;
-	nTot = MassFunc.bins-1;
+	nTot = MassFunc[MF_INDEX].bins-1;
 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
 	out_file = fopen(out_url, "w");
 
@@ -418,14 +421,14 @@ void print_numerical_mass_function()
 
 			for(i=0; i<nTot; i++) 
 			{
-				fprintf(out_file, "%e", MassFunc.mass[i]);
-				fprintf(out_file, "\t%e", MassFunc.n[i]);
-				fprintf(out_file, "\t%d\t", MassFunc.n_tot[i]);
-				fprintf(out_file, "\t%e", MassFunc.err[i]);
-				fprintf(out_file, "%e", MassFunc.mass_halfstep[i]);
-				fprintf(out_file, "\t%e", MassFunc.dn[i]);
-				fprintf(out_file, "\t%d\t", MassFunc.n_bin[i]);
-				fprintf(out_file, "\t%e", MassFunc.err_dn[i]);
+				fprintf(out_file, "%e", MassFunc[MF_INDEX].mass[i]);
+				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].n[i]);
+				fprintf(out_file, "\t%d\t", MassFunc[MF_INDEX].n_tot[i]);
+				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].err[i]);
+				fprintf(out_file, "%e", MassFunc[MF_INDEX].mass_halfstep[i]);
+				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].dn[i]);
+				fprintf(out_file, "\t%d\t", MassFunc[MF_INDEX].n_bin[i]);
+				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].err_dn[i]);
 				fprintf(out_file,"\n");
 			}
 
@@ -433,7 +436,7 @@ void print_numerical_mass_function()
 }
 
 
-
+/*
 void print_nfw()
 {
 // TODO //FIXME
@@ -461,7 +464,7 @@ void print_nfw()
 
 	fclose(out_file);
 }
-
+*/
 
 
 void print_best_fit_results(){
@@ -471,21 +474,21 @@ void print_best_fit_results(){
 	DUMP_MSG("best fit", out_url);
 	
 		fprintf(out_file, "#Concentration distribution best fit values, c_0=%lf, c_sig  :%lf \n", 
-			HaloZ.c_0,HaloZ.c_sig );
+			HaloProperties[HALO_INDEX].c_0,HaloProperties[HALO_INDEX].c_sig );
 		fprintf(out_file, "#Lambda parameter distribution best fit values, l_0  :%lf, l_sig  :%lf \n", 
-			HaloZ.l_0,HaloZ.l_sig );
+			HaloProperties[HALO_INDEX].l_0,HaloProperties[HALO_INDEX].l_sig );
 		fprintf(out_file, "#Average shape parameter s_0  :%lf, average triaxiality t_0    :%lf \n", 
-			HaloZ.s0,HaloZ.t0);
+			HaloProperties[HALO_INDEX].s0,HaloProperties[HALO_INDEX].t0);
 
-		fprintf(out_file, "#lambda_0  = %lf\n", SubHaloZ.l_0);
-		fprintf(out_file, "#cos(th_0) = %lf\n", SubHaloZ.costh0);
-		fprintf(out_file, "#cos(phi_0)= %lf\n", SubHaloZ.cosphi0);
-		fprintf(out_file, "#t0 = %lf\n", SubHaloZ.t0);
-		fprintf(out_file, "#s0 = %lf\n", SubHaloZ.s0);
+		fprintf(out_file, "#lambda_0  = %lf\n", SubHaloProperties[HALO_INDEX].l_0);
+		fprintf(out_file, "#cos(th_0) = %lf\n", SubHaloProperties[HALO_INDEX].costh0);
+		fprintf(out_file, "#cos(phi_0)= %lf\n", SubHaloProperties[HALO_INDEX].cosphi0);
+		fprintf(out_file, "#t0 = %lf\n", SubHaloProperties[HALO_INDEX].t0);
+		fprintf(out_file, "#s0 = %lf\n", SubHaloProperties[HALO_INDEX].s0);
 		fprintf(out_file, "\n");
 
 #ifdef GAS
 			fprintf(out_file, "#Mass-Tx relation best fit values, ln_M0: %lf, alpha :%lf  \n", 
-				HaloZ.ln_M0, HaloZ.T_alpha);
+				HaloProperties[HALO_INDEX].ln_M0, HaloProperties[HALO_INDEX].T_alpha);
 #endif
 }

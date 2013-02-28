@@ -5,9 +5,10 @@
 #include <ctype.h>
 #include <malloc.h>
 #include <mpi.h>
-#include "general.h"
 
-#include "../general_variables.h"
+#include "../general_def.h"
+
+#include "general.h"
 
 
 int ThisTask;
@@ -30,7 +31,7 @@ void generate_url_for_tasks()
 		sprintf(profile_list_task, "%s.%s",Urls.profile_list, cpu[ThisTask].name);
 		sprintf(subhalo_list_task, "%s.%s",Urls.subhalo_list, cpu[ThisTask].name);
 
-		fprintf(stdout, "Task=%d is generating lists...\n", ThisTask);
+		TASK_INFO_MSG(ThisTask, "reading halo, profiles and substructure files lists...");
 	
 		sprintf(command, "%s s/%s/%s/ <%s >%s", 
 			"sed ", "0000", cpu[ThisTask].name, Urls.halo_list, halo_list_task);
@@ -44,16 +45,16 @@ void generate_url_for_tasks()
 			"sed ", "0000", cpu[ThisTask].name, Urls.subhalo_list, subhalo_list_task);
 				system(command);
 
-	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)-1, sizeof(char));
+	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].halo_list, halo_list_task);
 
-	pUrls[ThisTask].profile_list = (char*) calloc(strlen(profile_list_task)-1, sizeof(char));
+	pUrls[ThisTask].profile_list = (char*) calloc(strlen(profile_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].profile_list, profile_list_task);
 
-	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)-1, sizeof(char));
+	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].subhalo_list, subhalo_list_task);
 
-	fprintf(stdout, "Task=%d has done generating halo, profiles and subhalo lists.\n", ThisTask);
+		TASK_INFO_MSG(ThisTask, "has generated halo, profiles and substructure files lists.");
 }
 
 
@@ -66,13 +67,13 @@ void init_comm_structures()
 	SizeDisplStructHalo = (int*) calloc(NTask, sizeof(int));			
 	SizeHaloesStructHalo = (int*) calloc(NTask, sizeof(int));
 
-		// Init the cpu read by every box to default dummy values
-	pSettings[ThisTask].box.X[0] = 1e+5;
-	pSettings[ThisTask].box.X[1] = 0;
-	pSettings[ThisTask].box.Y[0] = 1e+5;
-	pSettings[ThisTask].box.Y[1] = 0;
-	pSettings[ThisTask].box.Z[0] = 1e+5;
-	pSettings[ThisTask].box.Z[1] = 0;
+	// Init the cpu read by every box to default dummy values
+	pSettings[ThisTask].box.X[0][0] = 1e+5;
+	pSettings[ThisTask].box.X[0][1] = 0;
+	pSettings[ThisTask].box.X[1][0] = 1e+5;
+	pSettings[ThisTask].box.X[1][1] = 0;
+	pSettings[ThisTask].box.X[2][0] = 1e+5;
+	pSettings[ThisTask].box.X[2][1] = 0;
 }
 
 
@@ -82,14 +83,14 @@ void init_cpu_struct()
 		cpu = (struct Cpu*) calloc(NTask, sizeof(struct Cpu));
 
 		sprintf(cpu[ThisTask].name, "%04d", ThisTask);
+	//	printf("CPU=%s\n",cpu[ThisTask].name); //, "%04d", ThisTask);
 }
 
 
 
 void free_comm_structures()
 {
-	fprintf(stdout, "\nTask=%d, freeing memory allocated for communication...\n", ThisTask);
-
+	TASK_INFO_MSG(ThisTask, "freeing memory allocated for communication");
 	free(pSettings);
 	free(pHaloes);
 	free(pUrls);
@@ -146,16 +147,11 @@ void gather_halo_structures()
 				{	
 					SizeDisplStructHalo[n] = SizeHaloesStructHalo[n-1]+SizeDisplStructHalo[n-1];
 				}
-
-				for(n=0; n<NTask; n++)
-					fprintf(stdout, "Size[%d]=%d, Displ[%d]=%d\n", 
-					n, SizeHaloesStructHalo[n], n, SizeDisplStructHalo[n]);
 			}
 
 	MPI_Gatherv(&pHaloes[ThisTask][0], pSettings[ThisTask].n_haloes*sizeof(struct halo), MPI_BYTE, 
 		Haloes, SizeHaloesStructHalo, SizeDisplStructHalo, MPI_BYTE, 0, MPI_COMM_WORLD);
 	
 if(ThisTask==0)
-	fprintf(stdout, "\nDone gathering.\n");
-
+	INFO_MSG("Done gathering");
 }

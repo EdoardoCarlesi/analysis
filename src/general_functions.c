@@ -3,10 +3,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "libio/read_io.h"
+#include "libio/io.h"
+#include "libhalo/halo.h"
+#include "libcosmo/cosmo.h"
 
-#include "general_variables.h"
-#include "general_functions.h"
+#include "general_def.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -68,19 +69,16 @@ void initialize_internal_variables(char **argv){
 
 		// Other urls related parameters
 		Urls.output_prefix = argv[count++];
-	INFO_MSG("Initialized internal variables");
-		INFO_MSG(Urls.output_prefix);
 		Urls.halo_list = argv[count++];
 		Urls.profile_list = argv[count++];
 		Urls.subhalo_list = argv[count++];
 		Urls.pk_list = argv[count++];
 		Urls.nCatalogueFiles = atoi(argv[count++]);
 
-//	set_halo_selection_criterion();
+	set_halo_selection_criterion();
 	
-//	default_init();
+	default_init();
 
-	INFO_MSG("Initialized internal variables");
 }
 
 
@@ -88,22 +86,32 @@ void initialize_internal_variables(char **argv){
 void default_init()
 {
 	// Setting extra useful variables
+	
+	MF_INDEX = 0;
+	PK_INDEX = 0;
+
+	Settings.use_cat=Urls.nCatalogueFiles-Settings.cat_number;
+
+	MassFunc = malloc(Settings.use_cat*sizeof(struct mass_function));
+	ThMassFunc = malloc(Settings.use_cat*sizeof(struct mass_function));
+	HaloProperties = malloc(Settings.use_cat*sizeof(struct halo_properties));
+	SubHaloProperties = malloc(Settings.use_cat*sizeof(struct halo_properties));
+
 	Cosmo.H_0=Cosmo.h*100;
 	Cosmo.G=6.672e-8;
-	ThMassFunc.Mmin=Settings.Mmin;
-	ThMassFunc.Mmax=Settings.Mmax;
-	MassFunc.bins=Settings.n_bins; 
-	ThMassFunc.bins=Settings.n_bins_th;
-	Settings.use_cat=Urls.nCatalogueFiles-Settings.cat_number;
+	ThMassFunc[MF_INDEX].Mmin=Settings.Mmin;
+	ThMassFunc[MF_INDEX].Mmax=Settings.Mmax;
+	ThMassFunc[MF_INDEX].bins=Settings.n_bins_th;
+	MassFunc[MF_INDEX].bins=Settings.n_bins; 
 
 	// Init box - set min 75, max 0 as initial values that will be 
 	// surely overwritten when the read_halo routine is called
-	Settings.box.X[0] = 100;
-	Settings.box.X[1] = 0;
-	Settings.box.Y[0] = 100;
-	Settings.box.Y[1] = 0;
-	Settings.box.Z[0] = 100;
-	Settings.box.Z[1] = 0;
+	Settings.box.X[0][0] = 100;
+	Settings.box.X[0][1] = 0;
+	Settings.box.X[1][0] = 100;
+	Settings.box.X[1][1] = 0;
+	Settings.box.X[2][0] = 100;
+	Settings.box.X[2][1] = 0;
 	
 	// Init some commonly used structures to default values
 	GrowthFac.z = (double *) calloc(1, sizeof(double));

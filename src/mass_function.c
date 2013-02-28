@@ -1,13 +1,10 @@
 #include <stdio.h>
 
-#include "libio/write_io.h"
-#include "libio/halo_io.h"
-#include "libio/power_io.h"
-#include "libcosmo/tinker.h"
-#include "libcosmo/mass_function.h"
-#include "libcosmo/cosmological_relations.h"
-#include "general_functions.h"
-#include "general_variables.h"
+#include "libio/io.h"
+#include "libcosmo/cosmo.h"
+#include "libhalo/halo.h"
+
+#include "general_def.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -65,7 +62,7 @@ int main(int arg, char **argv)
 		Settings.use_spin=1;
 
 		check_condition_consistency(); //FIXME
-		compute_numerical_mass_function();
+		sort_numerical_mass_function();
 		compute_theoretical_mass_function();
 		print_numerical_mass_function();	
 		print_theoretical_mass_function();	

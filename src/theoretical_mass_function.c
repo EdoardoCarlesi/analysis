@@ -1,13 +1,9 @@
 #include <stdio.h>
 
-#include "libio/power_io.h"
-#include "libio/write_io.h"
-#include "libcosmo/tinker.h"
-#include "libcosmo/cosmological_relations.h"
-#include "libcosmo/mass_function.h"
+#include "libio/io.h"
+#include "libcosmo/cosmo.h"
 
-#include "general_variables.h"
-#include "general_functions.h"
+#include "general_def.h"
 
 int main(int arg, char **argv)
 {
@@ -15,7 +11,7 @@ int main(int arg, char **argv)
 
 	initialize_internal_variables(argv);
 
-	ThMassFunc.bins = Settings.n_bins-1;
+	ThMassFunc[0].bins = Settings.n_bins-1;
 	
 			// First guess parameters and fits for the different mass functions
 		T_mf.A = 0.186; T_mf.a = 1.47; T_mf.b = 2.57; T_mf.c = 1.19;

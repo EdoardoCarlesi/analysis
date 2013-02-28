@@ -5,13 +5,10 @@
 #include <stdlib.h>
 #include <malloc.h>
 
-#include "libio/write_io.h"
-#include "libio/halo_io.h"
-#include "libhalo/halo_properties.h"
-#include "general_variables.h"
+#include "libio/io.h"
+#include "libhalo/halo.h"
 
-#include "libgrid/grid.h"
-#include "libgrid/density.h"
+#include "general_def.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -21,6 +18,7 @@
 
 int main(int argc, char **argv)
 {
+/*
 	char *halo_urls[2];
 
 	halo_urls[0] = "/home/edoardo/snapshot_029.0000.z0.000.AHF_halos";
@@ -72,6 +70,6 @@ int main(int argc, char **argv)
 	}
 
 	MPI_Finalize();
-
+*/
 	return 0;
 }

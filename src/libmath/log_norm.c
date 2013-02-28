@@ -10,10 +10,22 @@
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_multifit_nlin.h>
 
-#include "log_norm.h"
-#include "statistics.h"
+#include "math.h"
+
+/*
+ * Declare functions
+ */
+double dl_lognorm(double, double, double);
+double ds_lognorm(double, double, double);
+int lognorm_f(const gsl_vector*, void *, gsl_vector*);
+int d_lognorm_f(const gsl_vector*, void *, gsl_matrix*);
+int fd_lognorm_f(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
 
 
+
+/*
+ * Initialize functions
+ */ 
 double lognorm(double l, double l_0, double sig)
 {
 	double p, norm, arg;
@@ -26,14 +38,14 @@ double lognorm(double l, double l_0, double sig)
 }
 
 
-	/* Derivative of the distribution wrt the l_0 parameter */
+
 double dl_lognorm(double l, double l_0, double sig)
 {
 	return -1./(2*sig*sig)*(2/l_0 - 2*log(l)/l_0)*lognorm(l,l_0,sig);
 }
 
 
-	/* Derivative of the distribution wrt the sig parameter */
+
 double ds_lognorm(double l, double l_0, double sig)
 {	
 	return (-1./sig + pow(log(l/l_0),2)*pow(sig,-3))*lognorm(l,l_0,sig);
@@ -116,8 +128,8 @@ int fd_lognorm_f(const gsl_vector *x, void *data, gsl_vector * f, gsl_matrix *J)
 
 
 
-double* best_fit_lognorm (double *array_values, int nHaloes, int nBins, 
-		 	double *array_bins, double *array_values_bin, double *error) 
+double* best_fit_lognorm 
+(double *array_values, int nHaloes, int nBins, double *array_bins, double *array_values_bin, double *error) 
 {
 	double *params, l_0, sig;
 	struct parameters par;

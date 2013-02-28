@@ -6,15 +6,25 @@
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_integration.h>
 
-#include "cosmological_relations.h"
-#include "mass_function.h"
+#include "../libmath/math.h"
+#include "../general_def.h"
 
-#include "../libmath/mathtools.h"
-#include "../general_variables.h"
-#include "../general_functions.h"
+#include "cosmo.h"
 
 
+/*
+ * Declare functions
+ */
+double comoving_distance(double, double);
+double comoving_vol(double, void*);
+double integrate_comoving_volume(double, double);
+double H_z(double, void*);
+double inv_H_z(double, void*);
 
+
+/*
+ * Initialize functions
+ */ 
 double mass_temperature(double M)
 {
 	double alpha, log_M0;

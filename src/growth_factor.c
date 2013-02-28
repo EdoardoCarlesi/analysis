@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "libio/read_io.h"
-#include "libio/write_io.h"
-#include "libio/power_io.h"
-#include "libcosmo/power.h"
+#include "libio/io.h"
+#include "libcosmo/cosmo.h"
 
-#include "general_functions.h"
+#include "general_def.h"
 
 int main(int argc, char **argv) 
 {

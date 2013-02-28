@@ -10,7 +10,7 @@ AR?=ar
 
 .PHONY: all clean;
 
-OBJS = halo_properties.o halo_evolution.o nfw.o subhalo_properties.o subhalo_general.o
+OBJS = halo_properties.o nfw.o subhalo_properties.o halo_subhalo_general.o
 
 all: libhalo.a
 

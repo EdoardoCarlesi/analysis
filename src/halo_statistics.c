@@ -1,11 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "libio/write_io.h"
-#include "libio/halo_io.h"
-#include "libhalo/halo_properties.h"
-#include "general_functions.h"
-#include "general_variables.h"
+#include "libio/io.h"
+#include "libhalo/halo.h"
+
+#include "general_def.h"
 
 #ifdef WITH_MPI
 #include <mpi.h>
@@ -36,6 +35,12 @@ int main(int argc, char **argv)
 
 			read_halo_file();
 
+			read_profiles_file();
+	
+			fit_and_store_nfw_parameters();
+
+			free_halo_profiles();
+
 #ifdef WITH_MPI
 		MPI_Barrier(MPI_COMM_WORLD);
 
@@ -49,20 +54,20 @@ int main(int argc, char **argv)
 	
 		initialize_halo_properties_structure();
 
+		find_substructure();
+
 		compute_halo_properties();
 
-		print_axis_alignment();
-
-		print_all_halo_properties_to_one_file();
+	//	print_all_halo_properties_to_one_file();
 	
 #ifdef WITH_MPI
 	}
 
 	MPI_Barrier(MPI_COMM_WORLD);
 
-		if(ThisTask == 0)
+	if(ThisTask == 0)
 #endif
-	INFO_MSG("Done halo statistical properties at fixed z computation");
+	INFO_MSG("Computed halo statistical properties at fixed z");
 
 #ifdef WITH_MPI
 	MPI_Finalize();

@@ -11,16 +11,31 @@
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_multifit_nlin.h>
 
-#include "tinker.h"
-#include "mass_function.h"
-#include "../general_variables.h"
-#include "../libmath/statistics.h"
-#include "../libmath/mathtools.h"
+#include "../general_def.h"
+#include "../libmath/math.h"
+
+#include "cosmo.h"
 
 
+/*
+ * Declare functions
+ */
 struct tinker_mf T_mf;
 
+double mf_tinker(double, double, double, double, double);
+double dA_mf_tinker(double, double, double, double, double);
+double da_mf_tinker(double, double, double, double, double);
+double db_mf_tinker(double, double, double, double, double);
+double de_mf_tinker(double, double, double, double, double);
 
+int mf_tinker_f(const gsl_vector*, void *, gsl_vector*);
+int d_mf_tinker_f(const gsl_vector*, void *, gsl_matrix*);
+int fd_mf_tinker_f(const gsl_vector*, void *, gsl_vector*, gsl_matrix*);
+
+
+/*
+ * Initialize functions
+ */ 
 	/* Returns the differential number density of objects for the Tinker 2008 mf*/
 double tinker(double M, void *p)
 {
@@ -204,9 +219,9 @@ int fd_mf_tinker_f(const gsl_vector *x, void *data, gsl_vector * f, gsl_matrix *
 
 
 
-double* best_fit_mf_tinker(double *x_array, double* y_array, double* y_err, int nBins)
+void best_fit_mf_tinker(double *x_array, double* y_array, double* y_err, int nBins)
 {
-	double A, a, b, c, *params;
+	double A, a, b, c;
 	struct data dat;
 	struct parameters par;
 
@@ -252,17 +267,9 @@ double* best_fit_mf_tinker(double *x_array, double* y_array, double* y_err, int 
 		fprintf(stdout, "The best fit parameters for this distribution are: \n");
 		fprintf(stdout, "A: %e a: %lf b: %lf c: %lf \n", A, a, b, c);
 
-		/* Return the best fit parameters*/
-		params = (double*) calloc(4, sizeof(double));
-		params[0]=A;
-		params[1]=a; 
-		params[2]=b; 
-		params[3]=c; 
-
 		T_mf.A = A;
 		T_mf.a = a;
 		T_mf.b = b;
 		T_mf.c = c;
 
-	return params;
 }

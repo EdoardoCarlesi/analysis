@@ -3,16 +3,28 @@
 #include <stdlib.h>
 #include <math.h>
 
-#include "halo_properties.h"
-#include "subhalo_general.h"
-#include "../general_variables.h"
-#include "../general_functions.h"
-#include "../libmath/mathtools.h"
-#include "../libmath/log_norm.h"
-#include "../libmath/power_law.h"
-#include "../libcosmo/cosmological_relations.h"
+#include "../libmath/math.h"
+#include "../libcosmo/cosmo.h"
+#include "../general_def.h"
+
+#include "halo.h"
 
 
+/*
+ * Declare functions
+ */
+double* generate_average_from_random_set(double*);
+
+void n_r_subhalo(void);
+void n_r_subhalo_subset(void);
+void sort_eccentricity(void);
+void sort_velocity_distribution(void);
+void sort_host_axis_alignment_and_spatial_anisotropy(void);
+
+
+/*
+ * Initialize functions
+ */ 
 void sort_host_axis_alignment_and_spatial_anisotropy()
 {
 	int i=0, j=0, k=0, m=0, totSub=0, totSubNmin=0, nBins=0;
@@ -41,26 +53,26 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 
 		for(i=0; i< totSub; i++)
 		{
-			k = SubHaloes[i].host;
+			k = Haloes[i].host;
 	
 			sum = 0; ct = 0; R = 0; anis = 0;
 
 			for(m=0; m<3; m++)
-				sum += pow2(SubHaloes[i].X[m] - Haloes[k].X[m]);
+				sum += pow2(Haloes[i].X[m] - Haloes[k].X[m]);
 
 			R = sqrt(sum);
 
 			for(m=0; m<3; m++)
-				ct += SubHaloes[i].Ea[m]*(SubHaloes[i].X[m] - Haloes[k].X[m]);
+				ct += Haloes[i].Ea[m]*(Haloes[i].X[m] - Haloes[k].X[m]);
 	
 			ct = ct / R; 
 	
 			for(m=0; m<3; m++)
-				anis += Haloes[k].Ea[m]*(SubHaloes[i].X[m] - Haloes[k].X[m]);
+				anis += Haloes[k].Ea[m]*(Haloes[i].X[m] - Haloes[k].X[m]);
 	
 			anis = anis / R;
 			
-				if(SubHaloes[i].n_part > Settings.n_min-1)
+				if(Haloes[i].n_part > Settings.n_min-1)
 				{
 					costh[j] = sqrt(ct*ct);
 					j++;
@@ -84,17 +96,17 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 			halfstep = 0.5*(costh_bin[1]-costh_bin[0]);
 			halfstep2 = 0.5*(cosphi_bin[1]-cosphi_bin[0]);
 	
-			SubHaloZ.costh0=average(costh, totSubNmin);
-			SubHaloZ.cosphi0=average(cosphi, totSub);
+			SubHaloProperties[HALO_INDEX].costh0=average(costh, totSubNmin);
+			SubHaloProperties[HALO_INDEX].cosphi0=average(cosphi, totSub);
 	
-		fprintf(stdout, "AvgCosphi: %lf\n", SubHaloZ.cosphi0); 
+		fprintf(stdout, "AvgCosphi: %lf\n", SubHaloProperties[HALO_INDEX].cosphi0); 
 
 	for(j=0; j < nBins-1; j++)
 	{
-		SubHaloZ.costh[j] = costh_bin[j] + halfstep;
-		SubHaloZ.costh_count[j] = (double) costh_bin_y[j] / totSub;
-		SubHaloZ.cosphi[j] = cosphi_bin[j] + halfstep2;
-		SubHaloZ.cosphi_count[j] = (double) cosphi_bin_y[j] / totSub;
+		SubHaloProperties[HALO_INDEX].costh[j] = costh_bin[j] + halfstep;
+		SubHaloProperties[HALO_INDEX].costh_count[j] = (double) costh_bin_y[j] / totSub;
+		SubHaloProperties[HALO_INDEX].cosphi[j] = cosphi_bin[j] + halfstep2;
+		SubHaloProperties[HALO_INDEX].cosphi_count[j] = (double) cosphi_bin_y[j] / totSub;
 	}
 
 	free(cosphi);
@@ -109,147 +121,7 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 
 
 
-void sort_sub_shape_and_triaxiality()
-{
-	int i=0, j=0, nBins=Settings.n_bins, nHaloes=Settings.n_subhaloes_nmin; 
-	int *array_shape_bin_y, *array_triax_bin_y;
-	double sMax, sMin, tMax, tMin, p_s, p_t, half_s, half_t;
-	double *array_shape, *array_triax, *array_shape_bin, *array_triax_bin;
-
-	fprintf(stdout, "\nSorting subhalo shape and triaxiality.\n"); 
-
-	Settings.tick=0;
-	array_shape = (double*) calloc(nHaloes, sizeof(double));	
-	array_triax = (double*) calloc(nHaloes, sizeof(double));	
-	array_shape_bin = (double*) calloc(nBins, sizeof(double));	
-	array_triax_bin = (double*) calloc(nBins, sizeof(double));	
-	array_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
-	array_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
-
-		for(i=0; i<nHaloes; i++)
-		{
-			if(SubHaloes[i].n_part > Settings.n_min -1)
-			{
-				array_shape[j] = SubHaloes[i].shape;
-				array_triax[j] = SubHaloes[i].triax;
-				j++;
-				}
-					}
-	
-				array_shape = shellsort(array_shape, nHaloes);
-				array_triax = shellsort(array_triax, nHaloes);
-
-				sMax = array_shape[nHaloes-1]; sMin = array_shape[0];
-				tMax = array_triax[nHaloes-1]; tMin = array_triax[0];
-
-				array_shape_bin = lin_stepper(sMin, sMax, nBins);
-				lin_bin(array_shape, array_shape_bin, nBins, nHaloes, array_shape_bin_y);	
-
-				array_triax_bin = lin_stepper(tMin, tMax, nBins);
-				lin_bin(array_triax, array_triax_bin, nBins, nHaloes, array_triax_bin_y);	
-
-			half_s = 0.5*(array_shape_bin[1] - array_shape_bin[0]);
-			half_t = 0.5*(array_triax_bin[1] - array_triax_bin[0]);
-
-			SubHaloZ.s0 = average(array_shape, nHaloes);
-			SubHaloZ.t0 = average(array_triax, nHaloes);
-
-		for(i=0; i<nBins-1; i++)	
-		{
-			p_s = (double) array_shape_bin_y[i]/nHaloes;
-			p_t = (double) array_triax_bin_y[i]/nHaloes;
-			SubHaloZ.shape[i]=array_shape_bin[i]+half_s;
-			SubHaloZ.triax[i]=array_triax_bin[i]+half_t;
-			SubHaloZ.p_shape[i]=p_s;
-			SubHaloZ.p_triax[i]=p_t;
-			SubHaloZ.n_shape[i]=array_shape_bin_y[i];
-			SubHaloZ.n_triax[i]=array_triax_bin_y[i];
-		}
-
-	free(array_shape); 
-	free(array_triax);
-	free(array_shape_bin); 
-	free(array_triax_bin);
-	free(array_shape_bin_y); 
-	free(array_triax_bin_y);
-
-	fprintf(stdout, "\n");
-}
-
-
-
-void sort_sub_lambda()
-{
-	int nBins=Settings.n_bins, nHaloes, i=0, m=0, *lambda_int_y; 
-	double *bin_x, *params, *lambda, *lambda_err_y, *lambda_double_y;
-	double l_0, sig, halfstep, lMax, lMin, delta_l, norm, value;
-
-	fprintf(stdout, "\nSorting subhalo spin parameter.\n"); 
-
-	Settings.tick=0;
-	nHaloes=Settings.n_subhaloes_nmin;
-	lambda = (double*) calloc(nHaloes, sizeof(double));	
-	params = (double*) calloc(2, sizeof(double));
-
-	bin_x = (double*) calloc(nBins, sizeof(double));	
-	lambda_int_y = (int*) calloc(nBins-1, sizeof(int));	
-	lambda_double_y = (double*) calloc(nBins-1, sizeof(double));	
-	lambda_err_y = (double*) calloc(nBins-1, sizeof(double));	
-
-		for(i=0; i<nHaloes; i++)
-		{
-			if(SubHaloes[i].n_part > Settings.n_min-1)
-			{
-				lambda[m] = SubHaloes[i].lambda;
-				m++;
-				}
-			}
-		
-					lambda = shellsort(lambda, nHaloes);
-
-					lMax = lambda[nHaloes-1];  lMin = lambda[0];
-					delta_l = (lMax-lMin)/nBins; norm = 1./(delta_l*nHaloes);
-
-					bin_x = lin_stepper(lMin, lMax, nBins);
-
-					lin_bin(lambda, bin_x, nBins, nHaloes, lambda_int_y);	
-
-			for(i=0; i<nBins-1; i++)
-			{	
-				value = lambda_int_y[i];
-				lambda_err_y[i]=sqrt(value*norm); 
-				lambda_double_y[i]=norm*value; 
-			}
-
-				params = best_fit_lognorm(lambda, nHaloes, nBins, bin_x, lambda_double_y, lambda_err_y);
-
-				l_0 = params[0]; 
-				sig = params[1];
-				SubHaloZ.l_0=l_0;
-				SubHaloZ.l_sig=sig;
-
-				halfstep=(bin_x[1]-bin_x[0])*0.5;
-
-		for(i=0; i<nBins-1; i++)
-		{		
-			SubHaloZ.l[i]=bin_x[i]+halfstep;
-			SubHaloZ.p_l[i]=lambda_double_y[i];
-			SubHaloZ.err_p_l[i]=lambda_err_y[i];
-		}	
-
-	free(lambda);
-	free(lambda_int_y);
-	free(lambda_double_y);
-	free(lambda_err_y);
-	free(bin_x);
-	free(params);
-
-	fprintf(stdout, "\n");
-}
-
-
-
-double *generate_average_from_random_set(double* all_r)
+double* generate_average_from_random_set(double* all_r)
 {
 	int n=0, j=0, i=0, k=0, m=0, host=0, TOT_ITER=10, subDim=0, totSub=0,*subset=NULL; 
 	double r=0, sum=0, *all_r_new=NULL; 
@@ -257,7 +129,7 @@ double *generate_average_from_random_set(double* all_r)
 	subDim=Settings.min_subhaloes; 
 	totSub=Settings.n_subhaloes;
 
-	fprintf(stdout, "\nGenerating random subset from complete set of SubHaloes.\n");
+	fprintf(stdout, "\nGenerating random subset from complete set of Haloes.\n");
 
 	subset = (int*) calloc(subDim, sizeof(int)); 
 	all_r = (double*) calloc(subDim, sizeof(double));
@@ -270,13 +142,13 @@ double *generate_average_from_random_set(double* all_r)
 	
 			for(i=0; i<totSub; i++)
 			{
-				host = SubHaloes[i].host;
-				if(i==subset[k] && host != SubHaloes[i].id) 
+				host = Haloes[i].host;
+				if(i==subset[k] && host != Haloes[i].id) 
 				{
 					sum = 0;
 
 					for(m=0; m<3; m++)
-						sum += pow2(Haloes[host].X[m] - SubHaloes[i].X[m]); 
+						sum += pow2(Haloes[host].X[m] - Haloes[i].X[m]); 
 
 					r = sqrt(sum);
 					all_r[k] = r/Haloes[host].Rvir;
@@ -336,9 +208,9 @@ void n_r_subhalo_subset()
 
 	for(i=0; i<nBins-1; i++) 
 	{
-		SubHaloZ.r_sub_subset[i]=R[i];
-		SubHaloZ.n_r_sub_subset[i]=n_r[i];
-		SubHaloZ.cum_n_r_sub_subset[i]=cum_n_r[i]; 
+		SubHaloProperties[HALO_INDEX].r_sub_subset[i]=R[i];
+		SubHaloProperties[HALO_INDEX].n_r_sub_subset[i]=n_r[i];
+		SubHaloProperties[HALO_INDEX].cum_n_r_sub_subset[i]=cum_n_r[i]; 
 	}
 
 	free(R); 
@@ -371,13 +243,13 @@ void n_r_subhalo()
 
 		for(i=0; i<totSub; i++)
 		{
-			host = SubHaloes[i].host;
-			if(host != SubHaloes[i].id) 
+			host = Haloes[i].host;
+			if(host != Haloes[i].id) 
 			{
 				sum = 0;
 
 				for(m=0; m<3; m++)
-					sum += pow2(Haloes[host].X[m] - SubHaloes[i].X[m]);
+					sum += pow2(Haloes[host].X[m] - Haloes[i].X[m]);
 
 				r = sqrt(sum);
 
@@ -398,9 +270,9 @@ void n_r_subhalo()
 
 	for(i=0; i<nBins-1; i++) 
 	{
-		SubHaloZ.r_sub[i]=R[i];
-		SubHaloZ.n_r_sub[i]=n_r[i];
-		SubHaloZ.cum_n_r_sub[i]=cum_n_r[i]; 
+		SubHaloProperties[HALO_INDEX].r_sub[i]=R[i];
+		SubHaloProperties[HALO_INDEX].n_r_sub[i]=n_r[i];
+		SubHaloProperties[HALO_INDEX].cum_n_r_sub[i]=cum_n_r[i]; 
 	}
 
 	free(R); 	
@@ -432,8 +304,8 @@ void sort_velocity_distribution()
 
 		for(i=0; i<totSub; i++) 
 		{
-			k = SubHaloes[i].host;
-			if(k != SubHaloes[i].id) 
+			k = Haloes[i].host;
+			if(k != Haloes[i].id) 
 			{
 				sum = 0;
 				for(m=0; m<3; m++)
@@ -442,7 +314,7 @@ void sort_velocity_distribution()
 
 				sum = 0;
 				for(m=0; m<3; m++)
-					sum += pow2(Haloes[k].V[m]- SubHaloes[i].V[m]);
+					sum += pow2(Haloes[k].V[m]- Haloes[i].V[m]);
 				vDiff = sqrt( sum);
 
 				vel[i]=vDiff/vHost;
@@ -451,7 +323,7 @@ void sort_velocity_distribution()
 
 			vel = shellsort(vel, totSub);
 			vel_0 = average(vel, totSub); 
-			SubHaloZ.vel_0=vel_0;
+			SubHaloProperties[HALO_INDEX].vel_0=vel_0;
 
 			velMin = vel[0] ; 
 			velMax = vel[totSub-1];
@@ -461,9 +333,9 @@ void sort_velocity_distribution()
 
 		for(i=0; i<nBins-1; i++)
 		{
-			SubHaloZ.vel_sub[i]=vel_x[i];
-			SubHaloZ.n_vel_sub[i]=vel_y[i];
-			SubHaloZ.p_vel_sub[i]=(double) vel_y[i]/totSub;
+			SubHaloProperties[HALO_INDEX].vel_sub[i]=vel_x[i];
+			SubHaloProperties[HALO_INDEX].n_vel_sub[i]=vel_y[i];
+			SubHaloProperties[HALO_INDEX].p_vel_sub[i]=(double) vel_y[i]/totSub;
 		}
 	
 	free(vel);
@@ -473,58 +345,6 @@ void sort_velocity_distribution()
 	fprintf(stdout, "\n");
 }
 
-
-
-void sort_sub_mass_function()
-{
-	int totSub=Settings.n_subhaloes, nBins=Settings.n_bins, i=0, k=0, cumSat=0;
-	int *cum_n_mass, *n_mass;
-	double halfstep, mMax, mMin; 
-	double *mass, *mass_bin; 
-
-	fprintf(stdout, "\nSorting sub halo mass function");
-	Settings.tick=0;
-	
-	mass = (double*) calloc(totSub, sizeof(double));
-	mass_bin = (double*) calloc(nBins, sizeof(double));
-	n_mass = (int*) calloc(nBins-1, sizeof(int));
-	cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
-			
-	for(i=0; i<totSub; i++) 
-		mass[i] = SubHaloes[i].Mvir;
-
-		mass = shellsort(mass, totSub);
-		mMin = mass[0]; 
-		mMax = mass[totSub-1];
-		mass_bin = log_stepper(mMin, mMax, nBins);
-
-		lin_bin(mass, mass_bin, nBins, totSub, n_mass);	
-
-		SubHaloZ.avgMass=average(mass, totSub);
-
-			for(i=0; i<nBins-1; i++)
-			{
-				k = nBins - i - 1;
-				cumSat += n_mass[k];
-				cum_n_mass[k] = cumSat;
-			}
-
-
-		for(i=0; i<nBins-1; i++)
-		{
-			halfstep=(mass_bin[i+1]-mass_bin[i])*0.5;
-			SubHaloZ.mass_sub[i]=mass_bin[i]+halfstep;
-			SubHaloZ.n_sub[i]=n_mass[i];
-			SubHaloZ.cum_n_sub[i]=cum_n_mass[i];
-		}
-
-		free(mass); 
-		free(mass_bin); 
-		free(n_mass); 
-		free(cum_n_mass);
-
-	fprintf(stdout, "\n");
-}
 
 
 void sort_eccentricity()
@@ -558,8 +378,8 @@ void sort_eccentricity()
 
 	for(i=0; i<nBins-1; i++)
 	{
-		SubHaloZ.ecc[i]=ecc_bin[i];
-		SubHaloZ.n_ecc[i]=n_ecc[i];
+		SubHaloProperties[HALO_INDEX].ecc[i]=ecc_bin[i];
+		SubHaloProperties[HALO_INDEX].n_ecc[i]=n_ecc[i];
 	}
 
 	free(ecc);
@@ -575,19 +395,16 @@ void compute_subhalo_properties()
 {
 	fprintf(stdout,"\nComputing subhalo properties.\n");
 
-	initialize_subhalo_properties_structure(); // Allocates memory for subhalo properties distributions
-	
-	init_subhalo_struct(); // Allocates memory for the N subhalo structures
-
-	load_subhalo_list(); // Selects within the halo catalogue the SubHaloes and copies their properties into subhalo struct
 			
 			/* Do the actual computation of the properties */
 		sort_host_axis_alignment_and_spatial_anisotropy();
 		sort_velocity_distribution();
-		sort_sub_shape_and_triaxiality();
-		sort_sub_lambda();
-		sort_sub_mass_function();
-		//sort_eccentricity(); // TODO fix the eccentricity calculation
+		n_r_subhalo();
+		n_r_subhalo_subset();
+		sort_eccentricity();
+
+		Settings.use_sub = 1;
+		compute_halo_properties();
 
 	fprintf(stdout,"\n");
 }

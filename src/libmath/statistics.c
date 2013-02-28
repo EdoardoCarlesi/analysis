@@ -11,17 +11,21 @@
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 
-#include "statistics.h"
-#include "log_norm.h"
+#include "math.h"
 
 
+/*
+ * Declare functions
+ */
 struct data;
-
 struct parameters;
 
-struct chi2_reduced Chi2;
+void print_state(size_t, gsl_multifit_fdfsolver *);
 
 
+/*
+ * Initialize functions
+ */ 
 double mean(double *vec, int size)
 {
 	int i=0; 
@@ -151,27 +155,6 @@ gsl_vector* least_square_nl_fit(struct data dat, struct parameters par, gsl_mult
 }
 
 
-	/* This should generate the poissonian error */
-double *numerical_sigma(int size, double *x, double *y)
-{
-	int i=0;
-	double *n_s;
-
-	n_s = (double*) calloc(size, sizeof(double));
-
-	for(i=0; i<size; i++)
-	{
-		if(y[i]!=0){
-			n_s[i] = y[i];
-		} else {
-			n_s[i]=n_s[i-1];
-		}
-	}
-
-	return n_s;
-}
-
-
 
 void print_state (size_t iter, gsl_multifit_fdfsolver * s)
 {
@@ -186,15 +169,41 @@ void print_state (size_t iter, gsl_multifit_fdfsolver * s)
 
 double chi_square(double *y_th, double *y_ex, double *err, int size, int skip)
 {
-		int i=0;
-		double chi=0; 
+	int i=0;
+	double chi=0; 
 		
-			for(i=0; i<size; i++) 
-			{
-				if(i>skip-1){
-					chi+=pow(y_th[i]-y_ex[i],2.0)*pow(err[i],-2.0);  
-				}			
-			}
+		for(i=skip; i<size; i++) 
+			chi+=pow2(y_th[i-skip]-y_ex[i])/pow2(err[i]);  
 
 	return chi; 
+}
+
+
+
+double goodness_of_fit(double *y_th, double *y_ex, int size, int skip)
+{
+	int i=0;
+	double gof=0; 
+		
+		for(i=skip; i<size; i++) 
+			gof+=pow2(log(y_th[i-skip])-log(y_ex[i]));
+
+	gof /= (double) (size-skip);
+	
+	return gof; 
+}
+
+
+
+double percentage_error(double *y_th, double *y_ex, int size, int skip)
+{
+	int i=0;
+	double per=0; 
+		
+		for(i=skip; i<size; i++) 
+			per+=sqrt(pow2(y_th[i-skip]-y_ex[i]))/y_ex[i];
+
+	per /= (double) (size-skip);
+	
+	return per; 
 }

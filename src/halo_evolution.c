@@ -1,14 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "libio/halo_io.h"
-#include "libio/read_io.h"
-#include "libio/write_io.h"
-#include "libhalo/halo_properties.h"
-#include "libhalo/halo_evolution.h"
+#include "libio/io.h"
+#include "libhalo/halo.h"
 
-#include "general_variables.h"
-#include "general_functions.h"
+#include "general_def.h"
 
 
 int main(int argc, char **argv)

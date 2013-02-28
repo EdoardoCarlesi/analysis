@@ -7,14 +7,23 @@
 #include <gsl/gsl_deriv.h>
 #include <gsl/gsl_integration.h>
 
-#include "power.h"
-#include "mass_function.h"
-#include "../general_variables.h"
-#include "../libio/power_io.h"
-#include "../libmath/mathtools.h"
+#include "../libio/io.h"
+#include "../libmath/math.h"
+#include "../general_def.h"
+
+#include "cosmo.h"
 
 
-	/* Interpolated P(k) */
+/*
+ * Declare functions
+ */
+double correlation_integral(double, void*);
+void normalize_all_power_spectra_to_sigma8(void);
+
+
+/*
+ * Initialize functions
+ */ 
 double power_k(double k, int index)
 {
 	return get_interpolated_value(Pks[index].k, Pks[index].pk, 

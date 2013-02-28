@@ -12,10 +12,9 @@
 #include <string.h>
 #include <time.h>
 
-#include "mathtools.h"
-#include "../general_variables.h"
-#include "../general_functions.h"
+#include "../general_def.h"
 
+#include "math.h"
 
 
 double get_interpolated_value(double x_array[], double y_array[], int npts, double A)

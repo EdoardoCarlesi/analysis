@@ -2,13 +2,23 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
-#include "power_io.h"
-#include "../libio/read_io.h"
-#include "../libmath/mathtools.h"
-#include "../general_variables.h"
-#include "../general_functions.h"
+
+#include "../libio/io.h"
+#include "../libmath/math.h"
+#include "../general_def.h"
+
+#include "io.h"
 
 
+/*
+ * Define functions
+ */
+void fill_pk_file(int);
+
+
+/*
+ * Init functions
+ */
 void fill_pk_file(int num)
 {
 	FILE *f = fopen(Urls.urls_pks[num], "r");
