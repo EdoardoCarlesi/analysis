@@ -39,7 +39,6 @@ void sort_and_fit_mass_temperature_relation(void);
  */ 
 void sort_axis_alignement()
 {
-	// TODO: add mass cut
 	int *Nbins, m=0, j=0, k=0, i=0, max_haloes, nBins, skip;
 	double *radius, *Rbins, *Abins, *Bbins; 
 	double Rmin, Rmax, R, A, B, sum;
@@ -69,7 +68,9 @@ void sort_axis_alignement()
 				for(k=j; k<max_haloes; k++)
 				{
 					A = 0; B = 0; R = 0; sum = 0;
-
+				// Use haloes above a given threshold 
+				if(Haloes[j].Mvir > Settings.mass_min && Haloes[k].Mvir > Settings.mass_min)
+				{	
 					for(m=0; m<3; m++)
 						sum += pow2(Haloes[j].X[m] - Haloes[k].X[m]);
 	
@@ -94,13 +95,14 @@ void sort_axis_alignement()
 						Nbins[i] ++;
 					}
 
-				HaloProperties[HALO_INDEX].R[i]=Rbins[i]; 
-				HaloProperties[HALO_INDEX].Th_c[i]=Abins[i]; 
-				HaloProperties[HALO_INDEX].Th_p[i]=Bbins[i]; 
-				HaloProperties[HALO_INDEX].N_pairs[i]=Nbins[i];
+					HaloProperties[HALO_INDEX].R[i]=Rbins[i]; 
+					HaloProperties[HALO_INDEX].Th_c[i]=Abins[i]; 
+					HaloProperties[HALO_INDEX].Th_p[i]=Bbins[i]; 
+					HaloProperties[HALO_INDEX].N_pairs[i]=Nbins[i];
 
+					}
 				}
-			}
+			} // End if mass cut
 		}
 	}
 
@@ -124,8 +126,8 @@ void sort_shape_and_triaxiality()
 
 	fprintf(stdout, "\nSorting shape and triaxiality."); 
 
-	nBins=Settings.n_bins;
-	nHaloesCut=n_haloes_per_criterion();
+	nBins = Settings.n_bins;
+	nHaloesCut = n_haloes_per_criterion();
 
 #ifdef WITH_MPI
 // The loop has to be done using ALL the haloes, since they are not ordered
@@ -163,12 +165,10 @@ void sort_shape_and_triaxiality()
 				tMin = minimum(array_triax, nHaloesCut);
 
 			array_shape_bin = lin_stepper(sMin, sMax, nBins);
-			lin_bin(array_shape, array_shape_bin, nBins, 
-				nHaloesCut, array_shape_bin_y);	
+			lin_bin(array_shape, array_shape_bin, nBins, nHaloesCut, array_shape_bin_y);	
 
 			array_triax_bin = lin_stepper(tMin, tMax, nBins);
-			lin_bin(array_triax, array_triax_bin, nBins, 
-				nHaloesCut, array_triax_bin_y);	
+			lin_bin(array_triax, array_triax_bin, nBins, nHaloesCut, array_triax_bin_y);	
 
 			half_s = 0.5*(array_shape_bin[1]-array_shape_bin[0]);
 			half_t = 0.5*(array_triax_bin[1]-array_triax_bin[0]);
@@ -255,10 +255,25 @@ void sort_radial_velocity()
 
 void sort_numerical_mass_function(void)
 {
-	int nBins=Settings.n_bins, nHaloes=Settings.n_haloes, i=0; 
+	int nBins=0, nHaloes=0, i=0, j=0; 
 	double dn_norm=1., volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
 	double *mass, *mass_bin; 
 	int *n_mass, *cum_n_mass;
+
+	struct mass_function *MASSFUNC;
+
+	nBins=Settings.n_bins; 
+
+	if(Settings.use_sub == 0)
+	{
+		MASSFUNC = MassFunc;
+		nHaloes = Settings.n_haloes; 
+	}
+		else
+	{ 
+		MASSFUNC = SubMassFunc;
+		nHaloes = SubStructure.N_sub;
+	}
 
 	fprintf(stdout, "\nSorting mass function for %d halos in %d bins\n", nHaloes, nBins);
 	
@@ -271,22 +286,33 @@ void sort_numerical_mass_function(void)
 
 	fprintf(stdout, "\nAllocating memory for mass function structures...\n");
 
-	MassFunc[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
-	MassFunc[MF_INDEX].mass_halfstep = (double*) calloc(nBins-1, sizeof(double));
-	MassFunc[MF_INDEX].n = (double*) calloc(nBins-1, sizeof(double));
-	MassFunc[MF_INDEX].n_tot = (int*) calloc(nBins-1, sizeof(int));
-	MassFunc[MF_INDEX].n_bin = (int*) calloc(nBins-1, sizeof(int));
-	MassFunc[MF_INDEX].dn  = (double*) calloc(nBins-1, sizeof(double));
-	MassFunc[MF_INDEX].err = (double*) calloc(nBins-1, sizeof(double));
-	MassFunc[MF_INDEX].err_dn = (double*) calloc(nBins-1, sizeof(double));
+		MASSFUNC[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
+		MASSFUNC[MF_INDEX].mass_halfstep = (double*) calloc(nBins-1, sizeof(double));
+		MASSFUNC[MF_INDEX].n = (double*) calloc(nBins-1, sizeof(double));
+		MASSFUNC[MF_INDEX].n_tot = (int*) calloc(nBins-1, sizeof(int));
+		MASSFUNC[MF_INDEX].n_bin = (int*) calloc(nBins-1, sizeof(int));
+		MASSFUNC[MF_INDEX].dn  = (double*) calloc(nBins-1, sizeof(double));
+		MASSFUNC[MF_INDEX].err = (double*) calloc(nBins-1, sizeof(double));
+		MASSFUNC[MF_INDEX].err_dn = (double*) calloc(nBins-1, sizeof(double));
 
 #		pragma omp parallel for 	\
 		shared(Haloes, mass) private(i)
-		for(i=0; i<nHaloes; i++)
-			mass[i] = Haloes[i].Mvir;			
-	
-		mMin=minimum(mass, nHaloes)*0.999;
-		mMax=maximum(mass, nHaloes)*1.001;
+		for(i=0; i<Settings.n_haloes; i++)
+		{	
+			if(subhalo_condition(i) == 1)
+			{
+				mass[j] = Haloes[i].Mvir;
+				fprintf(stderr, "i=%d, M=%e\n", j, mass[j]);
+				j++;
+			} 
+				else if (Settings.use_sub == 0) 
+			{
+				mass[i] = Haloes[i].Mvir;			
+			}
+		}
+
+		mMin = minimum(mass, nHaloes)*0.999;
+		mMax = maximum(mass, nHaloes)*1.001;
 		mass_bin = log_stepper(mMin, mMax, nBins);
 	
 		lin_bin(mass, mass_bin, nBins, nHaloes, n_mass);	
@@ -300,15 +326,15 @@ void sort_numerical_mass_function(void)
 			halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
 			dn_norm = 2*halfstep/nHaloes;
 			dM = mass_bin[i+1]-mass_bin[i];
-			MassFunc[MF_INDEX].mass[i]=mass_bin[i];
-			MassFunc[MF_INDEX].mass_halfstep[i]=mass_bin[i]+halfstep;
-			MassFunc[MF_INDEX].dn[i]=n_mass[i]/(volume*dM);
-			MassFunc[MF_INDEX].n[i]=cum_n_mass[i]/volume;
-			MassFunc[MF_INDEX].err_dn[i]=sqrt(n_mass[i])/(volume*dM);
-			MassFunc[MF_INDEX].err[i]=sqrt(cum_n_mass[i])/volume;
+			MASSFUNC[MF_INDEX].mass[i]=mass_bin[i];
+			MASSFUNC[MF_INDEX].mass_halfstep[i]=mass_bin[i]+halfstep;
+			MASSFUNC[MF_INDEX].dn[i]=n_mass[i]/(volume*dM);
+			MASSFUNC[MF_INDEX].n[i]=cum_n_mass[i]/volume;
+			MASSFUNC[MF_INDEX].err_dn[i]=sqrt(n_mass[i])/(volume*dM);
+			MASSFUNC[MF_INDEX].err[i]=sqrt(cum_n_mass[i])/volume;
 
-			MassFunc[MF_INDEX].n_bin[i]=n_mass[i];
-			MassFunc[MF_INDEX].n_tot[i]=cum_n_mass[i];
+			MASSFUNC[MF_INDEX].n_bin[i]=n_mass[i];
+			MASSFUNC[MF_INDEX].n_tot[i]=cum_n_mass[i];
 		}
 	
 		free(cum_n_mass);
@@ -334,9 +360,9 @@ void sort_lambda()
 
 #ifdef WITH_MPI
 // The loop has to be done using ALL the haloes, since they are not ordered
-		nHaloes=Settings.n_haloes; 
+		nHaloes = Settings.n_haloes; 
 #else
-		nHaloes=Settings.n_threshold; 
+		nHaloes = Settings.n_threshold; 
 #endif
 
 	bin_x = (double*) calloc(nBins, sizeof(double));	
@@ -644,14 +670,17 @@ void compute_halo_properties()
 {
 
 		sort_numerical_mass_function();
+		//sort_shape_and_triaxiality();
+		sort_lambda();
+/*
+		if(Settings.use_sub != 1)
+			sort_axis_alignement();
 
-	//	sort_axis_alignement();
-	//	sort_shape_and_triaxiality();
-	//	sort_lambda();
 	//	sort_concentration();
-	//	fit_and_store_nfw_parameters();
+		fit_and_store_nfw_parameters();
 #ifdef GAS
-//		sort_gas_fraction();
-//		sort_and_fit_mass_temperature_relation();
+		sort_gas_fraction();
+		sort_and_fit_mass_temperature_relation();
 #endif
+*/
 }

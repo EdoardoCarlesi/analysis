@@ -79,9 +79,12 @@ double maximum(double *array, int size)
 {
 	int i=0;
 	double max=array[0];
- 
+
 		for(i=0;i<size;i++) 
-			if(array[i]>max) max = array[i];
+			if(array[i]>max) 
+				max = array[i];
+
+//	fprintf(stderr, "size=%d, max=%e\n", size, max);
 
 	return max;
 }

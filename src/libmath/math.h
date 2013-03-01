@@ -31,9 +31,10 @@ struct parameters
 double average(double*, int);
 double maximum(double*, int);
 double minimum(double*, int);
-int int_maximum(int*, int);
 void maxima(double*, int, double*, int*, int);
 void minima(double*, int, double*, int*, int);
+
+int int_maximum(int*, int);
 
 double mean(double*, int);
 double sigma(double*, double, int);

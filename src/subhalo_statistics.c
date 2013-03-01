@@ -16,7 +16,7 @@ int main(int argc, char **argv)
 	
 		compute_subhalo_properties();
 
-		Settings.min_subhaloes=400;
+		Settings.n_sub_min=400;
 
 		print_all_subhalo_properties_to_one_file();
 

@@ -3,6 +3,7 @@
 
 #include "libio/io.h"
 #include "libhalo/halo.h"
+#include "libcosmo/cosmo.h"
 
 #include "general_def.h"
 
@@ -17,6 +18,7 @@ int main(int argc, char **argv)
 	INFO_MSG("Computing halo statistical properties at fixed z");
 
 	initialize_internal_variables(argv);
+	initialize_halo_storage();
 
 #ifdef WITH_MPI
 	MPI_Init(&argc, &argv);
@@ -51,14 +53,20 @@ int main(int argc, char **argv)
 	if(ThisTask==0)
 	{
 #endif
-	
+		HALO_INDEX=0;
+		MF_INDEX=0;
+		PK_INDEX=0;
+
 		initialize_halo_properties_structure();
 
 		find_substructure();
 
-		compute_halo_properties();
+		//compute_halo_properties();
+		compute_subhalo_properties();
 
 	//	print_all_halo_properties_to_one_file();
+
+	//	free_halo_properties();
 	
 #ifdef WITH_MPI
 	}

@@ -32,8 +32,8 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 	double sum, R=0, cMax, cMin, halfstep, cpMax, cpMin, halfstep2, ct=0, anis=0;
 	double *costh, *costh_bin, *cosphi, *cosphi_bin; 
 
-	totSub = Settings.n_subhaloes;
-	totSubNmin = Settings.n_subhaloes_nmin;
+	totSub = SubStructure.N_sub;
+	totSubNmin = Settings.n_sub_threshold;
 	nBins = Settings.n_bins; 
 
 	fprintf(stdout, "\nSorting sub halo radial alignment for %d sub haloes\n", 
@@ -126,8 +126,8 @@ double* generate_average_from_random_set(double* all_r)
 	int n=0, j=0, i=0, k=0, m=0, host=0, TOT_ITER=10, subDim=0, totSub=0,*subset=NULL; 
 	double r=0, sum=0, *all_r_new=NULL; 
 
-	subDim=Settings.min_subhaloes; 
-	totSub=Settings.n_subhaloes;
+	subDim = Settings.n_sub_min; 
+	totSub = SubStructure.N_sub;
 
 	fprintf(stdout, "\nGenerating random subset from complete set of Haloes.\n");
 
@@ -183,7 +183,7 @@ void n_r_subhalo_subset()
 	int i, cumul=0, subDim=0, nBins=0, *n_r=NULL, *cum_n_r=NULL; 
 	double *all_r=NULL, *R=NULL, rMin, rMax;
 
-	subDim=Settings.min_subhaloes;
+	subDim=Settings.n_sub_min; 
 	nBins=Settings.n_bins;
 
 	fprintf(stdout, "\nSubhalo subset N(<R)\n");
@@ -230,7 +230,7 @@ void n_r_subhalo()
 	double r, rMin, rMax, sum=0;
 	double *R=NULL, *all_r=NULL;
 
-	totSub = Settings.n_subhaloes;
+	totSub = SubStructure.N_sub;
 	nBins = Settings.n_bins;
 
 	fprintf(stdout, "\nSubhalo N(<R)\n");
@@ -292,7 +292,7 @@ void sort_velocity_distribution()
 	double vHost=0, vel_0=0, halfstep=0, velMax=0, velMin=0, vDiff=0, sum=0; 
 	double *vel=NULL, *vel_x=NULL;
 
-	totSub = Settings.n_subhaloes;
+	totSub = SubStructure.N_sub;
 	nBins = Settings.n_bins;
 	
 	fprintf(stdout, "\nSorting sub halo velocity distribution.\n");
@@ -349,10 +349,13 @@ void sort_velocity_distribution()
 
 void sort_eccentricity()
 {	// FIXME
-	int totSub = Settings.n_subhaloes, nBins = Settings.n_bins, i=0; 
+	int totSub=0, nBins=0, i=0; 
 	int *cum_n_ecc=NULL, *n_ecc=NULL;
 	double e=0, eMax=0, eMin=0; 
 	double *ecc=NULL, *ecc_bin=NULL; 
+	
+	totSub = SubStructure.N_sub; 
+	nBins = Settings.n_bins; 
 
 	fprintf(stdout, "\nSorting eccentricity");
 	Settings.tick=0;
@@ -395,16 +398,18 @@ void compute_subhalo_properties()
 {
 	fprintf(stdout,"\nComputing subhalo properties.\n");
 
-			
-			/* Do the actual computation of the properties */
+
+		Settings.use_sub = 1;
+		compute_halo_properties();
+		Settings.use_sub = 0;
+	
+/*		
 		sort_host_axis_alignment_and_spatial_anisotropy();
 		sort_velocity_distribution();
 		n_r_subhalo();
 		n_r_subhalo_subset();
 		sort_eccentricity();
-
-		Settings.use_sub = 1;
-		compute_halo_properties();
+*/
 
 	fprintf(stdout,"\n");
 }

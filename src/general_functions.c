@@ -15,7 +15,15 @@
 #endif
 
 
+/*
+ * Define functions
+ */
+int subhalo_condition(int);
 
+
+/*
+ * Initialize functions
+ */
 void initialize_internal_variables(char **argv){
 
 	INFO_MSG("Initializing internal variables");
@@ -92,10 +100,11 @@ void default_init()
 
 	Settings.use_cat=Urls.nCatalogueFiles-Settings.cat_number;
 
-	MassFunc = malloc(Settings.use_cat*sizeof(struct mass_function));
-	ThMassFunc = malloc(Settings.use_cat*sizeof(struct mass_function));
-	HaloProperties = malloc(Settings.use_cat*sizeof(struct halo_properties));
-	SubHaloProperties = malloc(Settings.use_cat*sizeof(struct halo_properties));
+	MassFunc = malloc(30*sizeof(struct mass_function));
+	SubMassFunc = malloc(30*sizeof(struct mass_function));
+	ThMassFunc = malloc(30*sizeof(struct mass_function));
+	HaloProperties = malloc(30*sizeof(struct halo_properties));
+	SubHaloProperties = malloc(30*sizeof(struct halo_properties));
 
 	Cosmo.H_0=Cosmo.h*100;
 	Cosmo.G=6.672e-8;
@@ -127,40 +136,62 @@ void check_condition_consistency()
 	int count=0;
 		
 		if(Settings.use_all == 1)
-			Settings.use_all = 0;			
+			count++;
 			else 
-				count++;
+				Settings.use_all = 0;			
 
 			if(Settings.use_vir == 1)
-					Settings.use_vir = 0;			
+				count++;
 				else 
-					count++;
+					Settings.use_vir = 0;			
 
 				if(Settings.use_conc == 1)
-					Settings.use_conc = 0;			
+					count++;
 					else 
-						count++;
+					Settings.use_conc = 0;			
 
 			if(Settings.use_spin == 1)
-				Settings.use_spin = 0;			
-			else 
 				count++;
+				else 
+			Settings.use_spin = 0;			
 
-		if(Settings.use_mass ==1)
-			Settings.use_mass=0;			
+		if(Settings.use_mass == 1)
+			count++;
 			else 
-				count++;
+		Settings.use_mass=0;			
 
 	if(count > 1)
 		WARNING("More than one halo condition has been set", "check_condition_consistency()");
 }
 
 
+int subhalo_condition(int i)
+{
+
+	if(Settings.use_sub == 1 && Haloes[i].host > 0)
+	{	
+		//fprintf(stderr, "i=%d", i);
+		//fprintf(stderr, " UseSub=%d", Settings.use_sub);
+		//fprintf(stderr, " Host=%llu\n", Haloes[i].host);
+		return 1;
+	} else {
+		return 0;
+	}
+}
+
 
 int halo_condition(int i)
 {
 	int condition=0;
-
+	
+	if(subhalo_condition(i) || Settings.use_sub == 0) 	
+	{	
+/*		fprintf(stderr, "i=%d", i);
+		fprintf(stderr, " UseSub=%d", Settings.use_sub);
+		fprintf(stderr, " UseAll=%d", Settings.use_all);
+		fprintf(stderr, " UseVir=%d", Settings.use_vir);
+		fprintf(stderr, " Host=%llu\n", Haloes[i].host);
+*/
 	if(Settings.use_spin == 1)
 	{
 		if(Haloes[i].spin == 1)
@@ -203,7 +234,8 @@ int halo_condition(int i)
 	
 		else 
 			condition = 0;
-	
+	}
+
 	return condition;
 }
 
@@ -213,23 +245,26 @@ int n_haloes_per_criterion()
 {
 	int nTot=0;
 
-	if(Settings.use_spin == 1)
-		nTot = Settings.n_spin;
+		if(Settings.use_spin == 1)
+			nTot = Settings.n_spin;
 
-		else if(Settings.use_all == 1)
-			nTot = Settings.n_all;
+			else if(Settings.use_all == 1)
+				nTot = Settings.n_all;
 
-			else if(Settings.use_vir == 1)
-				nTot = Settings.n_virialized;
+				else if(Settings.use_vir == 1)
+					nTot = Settings.n_virialized;
 
-				else if(Settings.use_conc == 1)
-					nTot = Settings.n_concentration;
+					else if(Settings.use_conc == 1)
+						nTot = Settings.n_concentration;
 
-			else if(Settings.use_mass == 1)
-				nTot = Settings.n_threshold;
+				else if(Settings.use_mass == 1)
+					nTot = Settings.n_threshold;
 
-		else
-			nTot = Settings.n_haloes;
+			else
+				nTot = Settings.n_haloes;
+		// When using subhaloes neglect the former choices
+		if(Settings.use_sub == 1)
+			nTot = Settings.n_sub_threshold;
 
 	return nTot;
 }
@@ -240,10 +275,11 @@ void set_halo_selection_criterion()
 {
 		// Init all criteria to zero
 	Settings.use_mass = 0;
-	Settings.use_vir = 0;
 	Settings.use_spin = 0;
 	Settings.use_conc = 0;
+	Settings.use_vir = 0;
 	Settings.use_all = 0;
+	Settings.use_sub = 0;
 	
 	switch(Settings.use_criterion)
 	{	

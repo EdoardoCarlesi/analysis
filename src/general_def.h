@@ -84,9 +84,9 @@ extern struct general_settings
 	int n_haloes;
 	int n_haloes_size; // Used for MPI communication
 
-	int min_subhaloes;
-	int n_subhaloes;
-	int n_subhaloes_nmin;
+	int n_sub_min; // Minimum number of subhaloes per halo
+	int n_sub_threshold;
+
 	int n_bins;
 	int n_bins_th;
 	int r_bins;
@@ -183,7 +183,7 @@ extern struct mass_function
 	double *err;
 	double *err_dn;
 
-} *MassFunc, *ThMassFunc; 
+} *MassFunc, *SubMassFunc, *ThMassFunc; 
 
 
 extern struct num_density

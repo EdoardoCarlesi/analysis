@@ -20,7 +20,7 @@ int HALO_INDEX;
 
 int find_host_index(uint64_t);
 
-void stdout_halo_status(int);
+void stdout_halo_status(void);
 
 
 /*
@@ -72,6 +72,9 @@ void find_substructure()
 			realloc(SubStructure.host[host].sub_index, (SubStructure.host[host].n_sub+1) * sizeof(int));
 			SubStructure.host[host].sub_index[SubStructure.host[host].n_sub] = i;
 
+			if(halo_condition(i) == 1)
+				Settings.n_sub_threshold++;
+
 	//		fprintf(stderr, "%d) Sub id=%llu, index=%d, host_id=%llu, host_index=%d halo_index=%d\n", 
 	//			i, Haloes[i].id, i, Haloes[i].host, host, SubStructure.host[host].index);
 		}
@@ -97,40 +100,23 @@ int find_host_index(uint64_t host_id)
 }
 
 
-void compute_halo_and_subhalo_statistics()
+
+void stdout_halo_status()
 {
-	fprintf(stdout, "Reading halo url[%d]: %s\n", HALO_INDEX, Urls.urls[HALO_INDEX]);
-
-	Settings.use_cat = HALO_INDEX;
-	set_halo_url();
-
-		read_halo_file();
-
-		compute_halo_properties();
-		compute_subhalo_properties();
-
-	stdout_halo_status(HALO_INDEX);
-
-}
-
-
-
-void stdout_halo_status(int j)
-{
-	fprintf(stdout, "%lf",   HaloProperties[j].z);   
-	fprintf(stdout, "\t%lf", HaloProperties[j].c_0);   
-	fprintf(stdout, "\t%lf", HaloProperties[j].l_0);   
-	fprintf(stdout, "\t%lf", HaloProperties[j].s0);   
-	fprintf(stdout, "\t%lf", HaloProperties[j].t0);   
-	fprintf(stdout, "\t%lf", HaloProperties[j].avgSub);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].c_0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].l_0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].s0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].t0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].costh0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].cosphi0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[j].vel_0);   
-	fprintf(stdout, "\t%e",  SubHaloProperties[j].avgMass);   
+	fprintf(stdout, "%lf",   HaloProperties[HALO_INDEX].z);   
+	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].c_0);   
+	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].l_0);   
+	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].s0);   
+	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].t0);   
+	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].avgSub);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].c_0);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].l_0);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].s0);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].t0);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].costh0);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].cosphi0);   
+	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].vel_0);   
+	fprintf(stdout, "\t%e",  SubHaloProperties[HALO_INDEX].avgMass);   
 	fprintf(stdout, "\n");
 }
 
@@ -144,13 +130,6 @@ void initialize_halo_storage()
 
 	HaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
 	SubHaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
-
-		for(j=0; j<nTot; j++)
-		{
-			k = GrowthFac.npts - j - 1;
-			HaloProperties[j].z = GrowthFac.z[k];
-			SubHaloProperties[j].z = GrowthFac.z[k];
-		}
 }
 
 
