@@ -47,8 +47,9 @@ void determine_simulation_settings()
 		Settings.rho_0 = Settings.pMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		fprintf(stdout, "\nSetting particle mass: %e, rho_0: %e\n", Settings.pMass, Settings.rho_0);
 #else
-		Settings.dmMass  = HALO[0].dm.M/HALO[0].dm.N;
-		Settings.gasMass = HALO[0].gas.M/HALO[0].gas.N; 
+		Settings.dmMass  = HALO[1].dm.M/(double)HALO[1].dm.N;
+		Settings.gasMass = HALO[1].gas.M/(double)HALO[1].gas.N; 
+
 		Settings.rho_dm = Settings.dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		Settings.rho_b = Settings.gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
@@ -151,9 +152,7 @@ void set_additional_halo_properties(int n)
 		HALO[n].dm.N = HALO[n].n_part - HALO[n].gas.N;
 		HALO[n].dm.M = HALO[n].Mvir - HALO[n].gas.M;
 		HALO[n].gas_only.b_fraction = HALO[n].gas.M/HALO[n].Mvir;
-#ifndef EXTRA_GAS
-		HALO[n].gas_only.T = 0.0; 
-#else
+#ifdef EXTRA_GAS
 		HALO[n].gas_only.T = convert_u_to_T(HALO[n].gas_only.Cum_u);
 		
 		for(i=0; i<3; i++)
@@ -161,7 +160,8 @@ void set_additional_halo_properties(int n)
 			HALO[n].dm.X[i] = (HALO[n].Mvir*HALO[n].X[i] - HALO[n].gas.X[i])/HALO[n].dm.M;
 			HALO[n].dm.V[i] = (HALO[n].Mvir*HALO[n].V[i] - HALO[n].gas.V[i])/HALO[n].dm.M;
 		}
-
+#else
+		HALO[n].gas_only.T = 0.0; 
 #endif // EXTRA_GAS
 #endif // GAS
 }

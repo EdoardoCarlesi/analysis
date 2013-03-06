@@ -172,8 +172,6 @@ double* generate_average_from_random_set(double* all_r)
 	free(subset);
 	free(all_r);
 	free(all_r_new);
-
-	fprintf(stdout, "\n");
 }
 
 
@@ -186,7 +184,7 @@ void n_r_subhalo_subset()
 	subDim=Settings.n_sub_min; 
 	nBins=Settings.n_bins;
 
-	fprintf(stdout, "\nSubhalo subset N(<R)\n");
+	INFO_MSG("Subhalo subset N(<R)");
 
 	Settings.tick=0;
 	R = (double*) calloc(nBins, sizeof(double));
@@ -392,6 +390,7 @@ void sort_eccentricity()
 
 	fprintf(stdout, "\n");
 }
+
 
 
 void compute_subhalo_properties()

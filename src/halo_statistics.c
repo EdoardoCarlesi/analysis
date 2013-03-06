@@ -53,6 +53,9 @@ int main(int argc, char **argv)
 	if(ThisTask==0)
 	{
 #endif
+	
+		omp_set_num_threads(OMP_THREADS);	
+	
 		HALO_INDEX=0;
 		MF_INDEX=0;
 		PK_INDEX=0;
@@ -61,10 +64,11 @@ int main(int argc, char **argv)
 
 		find_substructure();
 
-		//compute_halo_properties();
+		compute_halo_properties();
+
 		compute_subhalo_properties();
 
-	//	print_all_halo_properties_to_one_file();
+		print_all_halo_properties_to_one_file();
 
 	//	free_halo_properties();
 	

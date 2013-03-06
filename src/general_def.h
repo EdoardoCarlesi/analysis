@@ -2,10 +2,12 @@
 
 #define WARNING(str1, str2) fprintf(stderr, "\n\t\tWARNING! %s: %s.\n", str1, str2)
 #define ERROR(str1, str2) fprintf(stderr, "\n\t\tERROR! %s: %s.\n", str1, str2)
-#define INFO_MSG(str) fprintf(stdout, "\n\t%s.\n", str)
+#define INFO_MSG(str) fprintf(stdout, "\n%s.\n", str)
+#define F_PRINT(str, num) fprintf(stdout, "\n%s %e.\n", str, num)
+#define D_PRINT(str, num) fprintf(stdout, "\n%s %d.\n", str, num)
 
 #ifdef WITH_MPI
-#define TASK_INFO_MSG(task, str) fprintf(stdout, "\n\tTask=%d, %s.\n", task, str)
+#define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
 #else 
 #define ThisTask 0
 #define NTask 1
@@ -265,7 +267,7 @@ extern struct halo
 	struct
 	{
 		int N;
-		int M;
+		double M;
 #ifdef EXTRA_GAS
 		double X[3];
 		double V[3];
@@ -355,46 +357,59 @@ extern struct halo_properties
 	double avgSub;
 	double z;
 
-	double c_0;
-	double c_02;
-	double c_sig;
-	double c_sig2;
-
-	double *mass; // The masses stored here are in different in principle, since include the mass/npart threshold
-
-	double *c;
-	double *c_c0;
-	double *c_avg;
-	double *p_c;
-	double *err_p_c;
-
-	double l_0;
-	double l_sig;
-	double *l;
-	double *p_l;
-	double *err_p_l;
-
-	int *N_pairs;
+	// Axis alignment
 	double *R;
 	double *Th_c;
 	double *Th_p;
+	int *N_pairs;
 
-	int *n_shape;
-	double s0;
+	// The masses stored here are in different than massfunc, since include the mass/npart threshold
+	double *mass; 
+
+	// Parameters that correlate with the mass
+	double *vel;
 	double *shape;
-	double *p_shape;
-	
-	double *radVel;
-	double *err_radVel;
-
-	int *n_triax;
-	double t0;
+	double *conc;
 	double *triax;
-	double *p_triax;
+	double *lambda;
+
+	struct
+	{
+		double *chi;	
+		double *per;	
+		double *gof;
+		double *p_chi;	
+		double *p_gof;	
+		double *p_per;	
+	} fit_nfw, fit_king, p_fit_nfw;
+
+	// Distributions
+	double *c;
+	double *p_c;
+	double *l;
+	double *p_l;
+	double *s;
+	double *p_s;
+	double *t;
+	double *p_t;
+
+	// Best fit parameters
+	double l_0;
+	double l_sig;
+	double c_0;
+	double c_beta;
+	
+	// Average parameters
+	double s0;
+	double t0;
 
 	int *n_r_sub;
 	int *cum_n_r_sub;
 	double *r_sub;
+
+	// Subhalo stuff
+	double avgMass;
+	double *mass_sub;
 
 	int *n_r_sub_subset;
 	int *cum_n_r_sub_subset;
@@ -413,9 +428,6 @@ extern struct halo_properties
 	double *vel_sub;
 	double *p_vel_sub;
 	double vel_0;
-
-	double avgMass;
-	double *mass_sub;
 	
 	double *ecc;
 

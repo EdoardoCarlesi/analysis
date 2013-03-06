@@ -138,7 +138,7 @@ double* best_fit_lognorm
 	l_0 = mean(array_values, nHaloes);
 	sig = log_sigma(array_values, nHaloes);
 
-		fprintf(stdout, "\nbest_fit_lognorm(). First guess parameters: l_0=%lf sigma=%lf\n", l_0, sig);
+	fprintf(stdout, "\nFinding best fit values using nlls fit, guess values l0:%e, sig:%e.\n", l_0, sig);
 
 		dat.n = (size_t) nBins;
 		dat.x = array_bins;
@@ -168,8 +168,7 @@ double* best_fit_lognorm
 		l_0 = gsl_vector_get(par.fitted_p,0);
 		sig = gsl_vector_get(par.fitted_p,1);
 
-		fprintf(stdout, "The best fit parameters for this distribution are: \n");
-		fprintf(stdout, "l_0: %lf sigma: %lf \n", l_0, sig);
+		fprintf(stdout, "The best fit parameters for this distribution are l0:%e, sig:%e.\n", l_0, sig);
 
 		/* Return the best fit parameters*/
 		params = (double*) calloc(2, sizeof(double));

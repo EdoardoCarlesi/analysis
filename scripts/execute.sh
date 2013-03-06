@@ -22,7 +22,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde099'
 model2='ude'
 box_size=75
 particle_number=256
@@ -33,7 +33,7 @@ catalogue_z=0
 catalogue_number=28
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=20
+n_bins=18
 n_bins_th=200
 r_bins=7
 
@@ -49,26 +49,26 @@ m_min=1.e+10
 m_max=0.8e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
-n_min=200
-m_th=1.e+10
+n_min=20
+m_th=1.e+12
 virial=2.5
 spin=0.15
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
-use_n_min=1
+use_n_min=0
 
 # use_n_haloes = 0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=1
+use_criterion=5
 
 #Computer settings
 swap=0
 
 # Radius for the halo alignement
 r_min=1
-r_max=50
+r_max=100
 
 # Cosmological parameters
 h=0.7

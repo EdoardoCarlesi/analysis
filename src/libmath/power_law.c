@@ -101,8 +101,7 @@ double* best_fit_power_law(double *x, double *y, double *err, int tot, double *g
 	a = guess[0];
 	b = guess[1]; 
 
-	fprintf(stdout, "Finding best fit values using a non linear least square fit.\n");
-	fprintf(stdout, "Initial values are, a:%lf, b:%lf.\n", a, b);
+	fprintf(stdout, "\nFinding best fit values using nlls fit, guess values a:%e, b:%e.\n", a, b);
 
 	dat.n = (size_t) tot;
 	dat.x = x;
@@ -130,8 +129,7 @@ double* best_fit_power_law(double *x, double *y, double *err, int tot, double *g
 			/* Set the correctly fitted parameters */
 			a = gsl_vector_get(par.fitted_p,0);
 			b = gsl_vector_get(par.fitted_p,1);
-			fprintf(stdout, "The best fit parameters for this distribution are: \n");
-			fprintf(stdout, "alpha: %lf b:%lf \n", a, b);
+			fprintf(stdout, "The best fit parameters for this distribution are alpha: %e b:%e \n", a, b);
 
 		vec = (double*) calloc(2,sizeof(double));
 		vec[0] = a;
