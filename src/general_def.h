@@ -268,7 +268,12 @@ extern struct halo
 	{
 		int N;
 		double M;
+		double vir;
+		double Ekin;
+		double Epot;
 #ifdef EXTRA_GAS
+		double a[3];
+		double Ea[3];
 		double X[3];
 		double V[3];
 #endif
@@ -276,16 +281,24 @@ extern struct halo
 
 	struct
 	{
-		double a[3];
-		double Ea[3];
-
 		double lambda;
 		double lambdaE;
-		double Ekin;
-		double Epot;
 		double b_fraction;
 		double Cum_u;
 		double T;
+		double shape;
+		double triax;
+		
+		// Alignment angle of the cluster/gas major axis
+		double gas_dm_costh;
+
+		struct
+		{
+			double cm;
+			double shape;
+			double triax;
+			double lambda;
+		} diff;
 
 		double *m;
 		double *u;
@@ -368,10 +381,27 @@ extern struct halo_properties
 
 	// Parameters that correlate with the mass
 	double *vel;
-	double *shape;
 	double *conc;
-	double *triax;
-	double *lambda;
+
+	struct
+	{
+		double s0;
+		double t0;
+
+		double *shape;
+		double *triax;
+		double *lambda;
+		double *virial;
+		double *ekin;
+
+		double *s;
+		double *p_s;
+		double *t;
+		double *p_t;
+		double *l;
+		double *p_l;
+
+	} halo, dm, gas, diff;
 
 	struct
 	{
@@ -381,33 +411,30 @@ extern struct halo_properties
 		double *p_chi;	
 		double *p_gof;	
 		double *p_per;	
+
 	} fit_nfw, fit_king, p_fit_nfw;
 
 	// Distributions
 	double *c;
 	double *p_c;
-	double *l;
-	double *p_l;
-	double *s;
-	double *p_s;
-	double *t;
-	double *p_t;
+
+	// Gas displacement and alignment
+	double *cm;
+	double *p_cm;
+	double *gas_dm_cth;
+	double *p_gas_dm_cth;
 
 	// Best fit parameters
 	double l_0;
 	double l_sig;
 	double c_0;
 	double c_beta;
-	
-	// Average parameters
-	double s0;
-	double t0;
-
-	int *n_r_sub;
-	int *cum_n_r_sub;
-	double *r_sub;
 
 	// Subhalo stuff
+	int *n_r_sub;
+	int *cum_n_r_sub;
+
+	double *r_sub;
 	double avgMass;
 	double *mass_sub;
 
@@ -435,12 +462,14 @@ extern struct halo_properties
 	int *cum_n_sub;
 	int *n_ecc;
 
-#ifdef GAS
+	// Best fit parameters for the M-T relation
 	double ln_M0;
 	double T_alpha;
 
 	double *gas_T;
 	double *gas_u;
 	double *gas_fraction;
-#endif
+	double *gas_dm_costh;
+	double *gas_diff_cm;
+
 } *HaloProperties, *SubHaloProperties;

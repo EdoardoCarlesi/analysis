@@ -126,7 +126,7 @@ void set_box(int i)
 void set_additional_halo_properties(int n)
 {
 	int i=0;
-	double c = 0.0; 
+	double c=0., diff_cm=0., ab=0.; 
 	struct halo *HALO;
 
 #ifdef WITH_MPI
@@ -151,15 +151,40 @@ void set_additional_halo_properties(int n)
 #ifdef GAS
 		HALO[n].dm.N = HALO[n].n_part - HALO[n].gas.N;
 		HALO[n].dm.M = HALO[n].Mvir - HALO[n].gas.M;
+		HALO[n].dm.Ekin = HALO[n].Ekin - HALO[n].gas.Ekin;
+		HALO[n].dm.Epot = HALO[n].Epot - HALO[n].gas.Epot;
+		HALO[n].dm.vir=sqrt(pow2(2*HALO[n].dm.Ekin/HALO[n].dm.Epot));	
+		HALO[n].gas.vir=sqrt(pow2(2*HALO[n].gas.Ekin/HALO[n].gas.Epot));	
 		HALO[n].gas_only.b_fraction = HALO[n].gas.M/HALO[n].Mvir;
+
+	if(HALO[n].gas.N > 10)
+	{
+		HALO[n].gas_only.shape = HALO[n].gas.a[2]/HALO[n].gas.a[0];
+		HALO[n].gas_only.triax = (pow2(HALO[n].gas.a[0]) - pow2(HALO[n].gas.a[1]))
+				/ (pow2(HALO[n].gas.a[0]) - pow2(HALO[n].gas.a[2]));
+		HALO[n].gas_only.diff.shape = sqrt(pow2(HALO[n].shape - HALO[n].gas_only.shape));
+		HALO[n].gas_only.diff.triax = sqrt(pow2(HALO[n].triax - HALO[n].gas_only.triax));
+		HALO[n].gas_only.diff.lambda = sqrt(pow2(HALO[n].lambda - HALO[n].gas_only.lambda));
+	}
+
 #ifdef EXTRA_GAS
+
 		HALO[n].gas_only.T = convert_u_to_T(HALO[n].gas_only.Cum_u);
-		
+
 		for(i=0; i<3; i++)
 		{
 			HALO[n].dm.X[i] = (HALO[n].Mvir*HALO[n].X[i] - HALO[n].gas.X[i])/HALO[n].dm.M;
 			HALO[n].dm.V[i] = (HALO[n].Mvir*HALO[n].V[i] - HALO[n].gas.V[i])/HALO[n].dm.M;
+			HALO[n].dm.Ea[i] = (HALO[n].Mvir*HALO[n].Ea[i] - HALO[n].gas.Ea[i])/HALO[n].dm.M;
+			HALO[n].dm.a[i] = (HALO[n].Mvir*HALO[n].a[i] - HALO[n].gas.a[i])/HALO[n].dm.M;
+
+			diff_cm += pow2(HALO[n].X[i] - HALO[n].gas.X[i]);
+			ab += HALO[n].dm.Ea[i] * HALO[i].gas.Ea[i];
 		}
+
+			HALO[n].gas_only.diff.cm = sqrt(diff_cm);
+			HALO[n].gas_only.gas_dm_costh = ab; 
+
 #else
 		HALO[n].gas_only.T = 0.0; 
 #endif // EXTRA_GAS
@@ -290,6 +315,7 @@ void read_halo_file()
 {
 	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
 	double a=0; // Dummy variable to read useless columns
+	double b, c, d;
 	char dummyline[LINE_SIZE]; 
 	FILE *h_file;
 
@@ -369,7 +395,7 @@ void read_halo_file()
 	 %d  %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	", 
-#else	// Use extra gas columns
+#else // Use extra gas columns
 	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
@@ -377,9 +403,9 @@ void read_halo_file()
 	 %lf %lf %lf \
 	 %d  %lf %lf %lf %lf %lf %lf %lf %lf %lf \
 	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf \
+	 %lf %lf %lf %lf %lf %lf %lf\
 	", 
-#endif	// Extra Gas
+#endif // Extra Gas
 #endif // GAS
 	&HALO[n].id,		&HALO[n].host,		&HALO[n].n_satellites,	
 	&HALO[n].Mvir, 		&HALO[n].n_part,	&HALO[n].X[0], 	
@@ -398,12 +424,12 @@ void read_halo_file()
 	&a, 			&a,			&HALO[n].c_nfw
 #ifdef GAS
 	, &HALO[n].gas.N, 	&HALO[n].gas.M, 	&HALO[n].gas_only.lambda, 		
-	&HALO[n].gas_only.lambdaE, 	&a,			&a, 			
-	&a, 			&HALO[n].gas_only.a[1], 
-	&HALO[n].gas_only.a[2], 	&HALO[n].gas_only.Ea[0],&HALO[n].gas_only.Ea[1], 		
-	&HALO[n].gas_only.Ea[2], 	&a,			&a, 			
+	&HALO[n].gas_only.lambdaE,&a,			&a, 			
+	&a, 			&HALO[n].gas.a[1], 
+	&HALO[n].gas.a[2], &HALO[n].gas.Ea[0],&HALO[n].gas.Ea[1], 		
+	&HALO[n].gas.Ea[2],&a,			&a, 			
 	&a,			&a,			&a, 			
-	&a, 			&HALO[n].gas_only.Ekin, 	&HALO[n].gas_only.Epot
+	&a, 			&HALO[n].gas.Ekin,	&HALO[n].gas.Epot
 #ifdef EXTRA_GAS
 	, &HALO[n].gas.X[0],	&HALO[n].gas.X[1], 	&HALO[n].gas.X[2], 		
 	&HALO[n].gas.V[0], 	&HALO[n].gas.V[1], 	&HALO[n].gas.V[2],	
@@ -419,6 +445,9 @@ void read_halo_file()
 #endif
 	// In the new catalogues haloes' major axis is normalized to one
 	HALO[n].a[0] = 1.0; 
+#ifdef GAS
+	HALO[n].gas.a[0] = 1.0; 
+#endif
 
 	set_additional_halo_properties(n);
 

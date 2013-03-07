@@ -28,7 +28,8 @@ void sort_nfw_parameters(void);
 void sort_mass_relations(void);
 
 #ifdef GAS
-void sort_mass_temperature_and_gas_fraction(void);
+void sort_gas_relations(void);
+void sort_alignment_and_displacement(void);
 #endif
 
 
@@ -210,6 +211,15 @@ void sort_shape_and_triaxiality()
 	int *array_shape_bin_y, *array_triax_bin_y;
 	double *array_shape, *array_triax, *array_shape_bin, *array_triax_bin; 
 	double half_t, half_s, sMax, sMin, tMax, tMin, p_s, p_t;
+
+#ifdef GAS
+	int *array_gas_shape_bin_y, *array_gas_triax_bin_y;
+	double *array_gas_shape, *array_gas_triax, *array_gas_shape_bin, *array_gas_triax_bin; 
+	int *array_diff_shape_bin_y, *array_diff_triax_bin_y;
+	double *array_diff_shape, *array_diff_triax, *array_diff_shape_bin, *array_diff_triax_bin; 
+	double half_gt, half_gs, gsMax, gsMin, gtMax, gtMin, p_gs, p_gt;
+	double half_dt, half_ds, dsMax, dsMin, dtMax, dtMin, p_ds, p_dt;
+#endif
 	struct halo_properties *HALOPROPERTIES;
 
 	INFO_MSG("Sorting shape and triaxiality");
@@ -239,25 +249,61 @@ void sort_shape_and_triaxiality()
 	array_triax_bin = (double*) calloc(nBins, sizeof(double));	
 	array_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
 	array_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+#ifdef GAS
+	array_diff_shape = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_diff_triax = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_diff_shape_bin = (double*) calloc(nBins, sizeof(double));	
+	array_diff_triax_bin = (double*) calloc(nBins, sizeof(double));	
+	array_diff_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+	array_diff_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
 
+	array_gas_shape = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_gas_triax = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_gas_shape_bin = (double*) calloc(nBins, sizeof(double));	
+	array_gas_triax_bin = (double*) calloc(nBins, sizeof(double));	
+	array_gas_shape_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+	array_gas_triax_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+#endif
 		for(i=0; i<nHaloes; i++)
 		{
 			if(halo_condition(i) == 1)
 			{
 				array_shape[m] = Haloes[i].shape;
 				array_triax[m] = Haloes[i].triax;
+#ifdef GAS
+				array_gas_shape[m] = Haloes[i].gas_only.shape;
+				array_gas_triax[m] = Haloes[i].gas_only.triax;
+				array_diff_shape[m] = Haloes[i].gas_only.diff.shape;
+				array_diff_triax[m] = Haloes[i].gas_only.diff.triax;
+#endif
 				m++;
 			}
 		}
 
-			HALOPROPERTIES[HALO_INDEX].s0 = average(array_shape, nHaloesCut);
-			HALOPROPERTIES[HALO_INDEX].t0 = average(array_triax, nHaloesCut);
+			HALOPROPERTIES[HALO_INDEX].halo.s0 = average(array_shape, nHaloesCut);
+			HALOPROPERTIES[HALO_INDEX].halo.t0 = average(array_triax, nHaloesCut);
+#ifdef GAS
+			HALOPROPERTIES[HALO_INDEX].diff.s0 = average(array_diff_shape, nHaloesCut);
+			HALOPROPERTIES[HALO_INDEX].diff.t0 = average(array_diff_triax, nHaloesCut);
 
+			HALOPROPERTIES[HALO_INDEX].gas.s0 = average(array_gas_shape, nHaloesCut);
+			HALOPROPERTIES[HALO_INDEX].gas.t0 = average(array_gas_triax, nHaloesCut);
+#endif
 			sMax = maximum(array_shape, nHaloesCut); 
 			sMin = minimum(array_shape, nHaloesCut);
 			tMax = maximum(array_triax, nHaloesCut); 
 			tMin = minimum(array_triax, nHaloesCut);
-
+#ifdef GAS
+			dsMax = maximum(array_diff_shape, nHaloesCut); 
+			dsMin = minimum(array_diff_shape, nHaloesCut);
+			dtMax = maximum(array_diff_triax, nHaloesCut); 
+			dtMin = minimum(array_diff_triax, nHaloesCut);
+	
+			gsMax = maximum(array_gas_shape, nHaloesCut); 
+			gsMin = minimum(array_gas_shape, nHaloesCut);
+			gtMax = maximum(array_gas_triax, nHaloesCut); 
+			gtMin = minimum(array_gas_triax, nHaloesCut);
+#endif
 			array_shape_bin = lin_stepper(sMin, sMax, nBins);
 			lin_bin(array_shape, array_shape_bin, nBins, nHaloesCut, array_shape_bin_y);	
 
@@ -267,14 +313,49 @@ void sort_shape_and_triaxiality()
 			half_s = 0.5*(array_shape_bin[1]-array_shape_bin[0]);
 			half_t = 0.5*(array_triax_bin[1]-array_triax_bin[0]);
 
+#ifdef GAS
+			array_gas_shape_bin = lin_stepper(gsMin, gsMax, nBins);
+			lin_bin(array_gas_shape, array_gas_shape_bin, nBins, nHaloesCut, array_gas_shape_bin_y);	
+
+			array_gas_triax_bin = lin_stepper(gtMin, gtMax, nBins);
+			lin_bin(array_gas_triax, array_gas_triax_bin, nBins, nHaloesCut, array_gas_triax_bin_y);	
+
+			array_diff_shape_bin = lin_stepper(dsMin, dsMax, nBins);
+			lin_bin(array_diff_shape, array_diff_shape_bin, nBins, nHaloesCut, array_diff_shape_bin_y);	
+
+			array_diff_triax_bin = lin_stepper(dtMin, dtMax, nBins);
+			lin_bin(array_diff_triax, array_diff_triax_bin, nBins, nHaloesCut, array_diff_triax_bin_y);	
+
+			half_ds = 0.5*(array_diff_shape_bin[1]-array_diff_shape_bin[0]);
+			half_dt = 0.5*(array_diff_triax_bin[1]-array_diff_triax_bin[0]);
+
+			half_gs = 0.5*(array_gas_shape_bin[1]-array_gas_shape_bin[0]);
+			half_gt = 0.5*(array_gas_triax_bin[1]-array_gas_triax_bin[0]);
+#endif
+
 			for(i=0; i<nBins-1; i++)	
 			{
 				p_s = (double) array_shape_bin_y[i]/nHaloesCut;
 				p_t = (double) array_triax_bin_y[i]/nHaloesCut;
-				HALOPROPERTIES[HALO_INDEX].s[i]=array_shape_bin[i]+half_s;
-				HALOPROPERTIES[HALO_INDEX].t[i]=array_triax_bin[i]+half_t;
-				HALOPROPERTIES[HALO_INDEX].p_s[i]=p_s;
-				HALOPROPERTIES[HALO_INDEX].p_t[i]=p_t;
+				HALOPROPERTIES[HALO_INDEX].halo.s[i]=array_shape_bin[i]+half_s;
+				HALOPROPERTIES[HALO_INDEX].halo.t[i]=array_triax_bin[i]+half_t;
+				HALOPROPERTIES[HALO_INDEX].halo.p_s[i]=p_s;
+				HALOPROPERTIES[HALO_INDEX].halo.p_t[i]=p_t;
+#ifdef GAS
+				p_ds = (double) array_diff_shape_bin_y[i]/nHaloesCut;
+				p_dt = (double) array_diff_triax_bin_y[i]/nHaloesCut;
+				HALOPROPERTIES[HALO_INDEX].diff.s[i]=array_diff_shape_bin[i]+half_ds;
+				HALOPROPERTIES[HALO_INDEX].diff.t[i]=array_diff_triax_bin[i]+half_dt;
+				HALOPROPERTIES[HALO_INDEX].diff.p_s[i]=p_ds;
+				HALOPROPERTIES[HALO_INDEX].diff.p_t[i]=p_dt;
+
+				p_gs = (double) array_gas_shape_bin_y[i]/nHaloesCut;
+				p_gt = (double) array_gas_triax_bin_y[i]/nHaloesCut;
+				HALOPROPERTIES[HALO_INDEX].gas.s[i]=array_gas_shape_bin[i]+half_gs;
+				HALOPROPERTIES[HALO_INDEX].gas.t[i]=array_gas_triax_bin[i]+half_gt;
+				HALOPROPERTIES[HALO_INDEX].gas.p_s[i]=p_gs;
+				HALOPROPERTIES[HALO_INDEX].gas.p_t[i]=p_gt;
+#endif
 			}
 
 	free(array_shape); 
@@ -283,7 +364,21 @@ void sort_shape_and_triaxiality()
 	free(array_triax_bin);
 	free(array_shape_bin_y); 
 	free(array_triax_bin_y);
-	fprintf(stdout, "\n");
+#ifdef GAS
+	free(array_gas_shape); 
+	free(array_gas_triax);
+	free(array_gas_shape_bin); 
+	free(array_gas_triax_bin);
+	free(array_gas_shape_bin_y); 
+	free(array_gas_triax_bin_y);
+
+	free(array_diff_shape); 
+	free(array_diff_triax);
+	free(array_diff_shape_bin); 
+	free(array_diff_triax_bin);
+	free(array_diff_shape_bin_y); 
+	free(array_diff_triax_bin_y);
+#endif
 }
 
 
@@ -296,7 +391,13 @@ void sort_lambda_and_concentration()
 	double l_0, sig, l_halfstep, lMax, lMin, delta_l, l_norm, l_value;
 	int *conc_int_y; 
 	double *c_bin_x, *conc, *conc_bin_x, *conc_err_y, *conc_double_y;
-	double c_halfstep, cMax, cMin, delta_c, c_norm, c_value;
+	double c_halfstep, cMax, cMin, c_norm, c_value;
+#ifdef GAS
+	// TODO add gas lambda only
+	//int *lambda_int_y; 
+	//double *l_bin_x, *params, *lambda, *lambda_bin_x, *lambda_err_y, *lambda_double_y;
+	//double l_0, sig, l_halfstep, lMax, lMin, delta_l, l_norm, l_value;
+#endif
 	struct halo_properties *HALOPROPERTIES;
 
 	INFO_MSG("Sorting spin parameter"); 
@@ -358,8 +459,7 @@ void sort_lambda_and_concentration()
 
 			cMax = 1.01*maximum(conc, nHaloesCut);  
 			cMin = 0.99*minimum(conc, nHaloesCut);
-			delta_c = (cMax-cMin)/nBins; 
-			c_norm = 1./(delta_c*nHaloesCut);
+			c_norm = 1./(nHaloesCut);
 
 			l_bin_x = lin_stepper(lMin, lMax, nBins);
 			lin_bin(lambda, l_bin_x, nBins, nHaloesCut, lambda_int_y);	
@@ -373,7 +473,7 @@ void sort_lambda_and_concentration()
 			{	
 				l_value = (double) lambda_int_y[i];
 				lambda_bin_x[i]=l_bin_x[i]+l_halfstep;
-				lambda_err_y[i]=sqrt(l_value)*l_norm; 
+				lambda_err_y[i]=sqrt(l_value)*(l_norm); 
 				lambda_double_y[i]=l_norm*l_value; 
 
 				c_value = (double) conc_int_y[i];
@@ -384,12 +484,13 @@ void sort_lambda_and_concentration()
 
 		for(i=0; i<nBins-1; i++)
 		{		
-			HALOPROPERTIES[HALO_INDEX].l[i]=lambda_bin_x[i];
-			HALOPROPERTIES[HALO_INDEX].p_l[i]=lambda_double_y[i];
+			HALOPROPERTIES[HALO_INDEX].halo.l[i]=lambda_bin_x[i];
+			HALOPROPERTIES[HALO_INDEX].halo.p_l[i]=lambda_double_y[i];
 			HALOPROPERTIES[HALO_INDEX].c[i]=conc_bin_x[i];
 			HALOPROPERTIES[HALO_INDEX].p_c[i]=conc_double_y[i];
 		}
 	
+			INFO_MSG("Fitting spin parameter distribution to a lognorm");
 			params = best_fit_lognorm(lambda, nHaloesCut, nBins-1, 
 				lambda_bin_x, lambda_double_y, lambda_err_y);
 
@@ -562,6 +663,7 @@ void sort_mass_relations()
 	int i=0, m=0, nBins, nHaloesCut, nHaloes; 
 	double mMax, mMin;
 	double *vel_bin, *vel_err, *mass, *vel, *mass_bin; 
+	double *vir_bin, *vir_err, *vir; 
 	double *conc_bin, *conc_err, *conc;
 	double *lambda_bin, *lambda_err, *lambda;
 	double *shape_bin, *shape_err, *shape;
@@ -600,6 +702,7 @@ void sort_mass_relations()
 		shape = (double*) calloc(nHaloesCut, sizeof(double));	
 		lambda = (double*) calloc(nHaloesCut, sizeof(double));	
 		vel = (double*) calloc(nHaloesCut, sizeof(double));	
+		vir = (double*) calloc(nHaloesCut, sizeof(double));	
 		gof = (double*) calloc(nHaloesCut, sizeof(double));	
 		per = (double*) calloc(nHaloesCut, sizeof(double));	
 		chi = (double*) calloc(nHaloesCut, sizeof(double));	
@@ -607,6 +710,8 @@ void sort_mass_relations()
 		mass_bin = (double*) calloc(nBins, sizeof(double));	
 		vel_bin = (double*) calloc(nBins-1, sizeof(double));	
 		vel_err = (double*) calloc(nBins-1, sizeof(double));	
+		vir_bin = (double*) calloc(nBins-1, sizeof(double));	
+		vir_err = (double*) calloc(nBins-1, sizeof(double));	
 		conc_bin = (double*) calloc(nBins-1, sizeof(double));	
 		conc_err = (double*) calloc(nBins-1, sizeof(double));	
 		lambda_bin = (double*) calloc(nBins-1, sizeof(double));	
@@ -630,6 +735,7 @@ void sort_mass_relations()
 			if(halo_condition(i) == 1)
 			{
 				vel[m] = Haloes[i].Vmax;
+				vir[m] = Haloes[i].abs_th_vir;
 				chi[m] = Haloes[i].fit.chi_nfw;
 				gof[m] = Haloes[i].fit.gof_nfw;
 				per[m] = Haloes[i].fit.per_nfw;
@@ -652,6 +758,7 @@ void sort_mass_relations()
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
 			average_bin(mass, vel, mass_bin, vel_bin, vel_err, nBins, nHaloesCut);
+			average_bin(mass, vir, mass_bin, vir_bin, vir_err, nBins, nHaloesCut);
 			average_bin(mass, conc, mass_bin, conc_bin, conc_err, nBins, nHaloesCut);
 			average_bin(mass, triax, mass_bin, triax_bin, triax_err, nBins, nHaloesCut);
 			average_bin(mass, shape, mass_bin, shape_bin, shape_err, nBins, nHaloesCut);
@@ -664,23 +771,24 @@ void sort_mass_relations()
 			{
 				HALOPROPERTIES[HALO_INDEX].mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
 				HALOPROPERTIES[HALO_INDEX].vel[i]=vel_bin[i];
+				HALOPROPERTIES[HALO_INDEX].halo.virial[i]=vir_bin[i];
 				HALOPROPERTIES[HALO_INDEX].conc[i]=conc_bin[i];
-				HALOPROPERTIES[HALO_INDEX].lambda[i]=lambda_bin[i];
-				HALOPROPERTIES[HALO_INDEX].shape[i]=shape_bin[i];
-				HALOPROPERTIES[HALO_INDEX].triax[i]=triax_bin[i];
+				HALOPROPERTIES[HALO_INDEX].halo.lambda[i]=lambda_bin[i];
+				HALOPROPERTIES[HALO_INDEX].halo.shape[i]=shape_bin[i];
+				HALOPROPERTIES[HALO_INDEX].halo.triax[i]=triax_bin[i];
 				HALOPROPERTIES[HALO_INDEX].fit_nfw.chi[i]=chi_bin[i];
 				HALOPROPERTIES[HALO_INDEX].fit_nfw.per[i]=per_bin[i];
 				HALOPROPERTIES[HALO_INDEX].fit_nfw.gof[i]=gof_bin[i];
 			}
 	
-			INFO_MSG("Mass-Concentration relation");
+			INFO_MSG("Fitting Mass-Concentration relation to a power law");
 			param_conc[0] = 0.1; 
 			param_conc[1] = pow(1.e-14, param_conc[0]);
 			param_conc = best_fit_power_law(mass_bin, conc_bin, conc_err, nBins-1, param_conc);
 			HALOPROPERTIES[HALO_INDEX].c_0 = param_conc[1] * pow(1.e14, param_conc[0]);
 			//F_PRINT("c_0=", c_0);
 	
-			INFO_MSG("Mass-Radial velocity relation");
+			INFO_MSG("Fitting Mass-Radial velocity relation to a power law");
 			param_vel[0] = 0.5; 
 			param_vel[1] = pow(1.e-14, param_vel[0]);
 			param_vel = best_fit_power_law(mass_bin, vel_bin, vel_err, nBins-1, param_vel);
@@ -702,15 +810,28 @@ void sort_mass_relations()
 	free(vel_err); 
 	free(vel_bin); 
 	free(vel); 
+	free(vir_err); 
+	free(vir_bin); 
+	free(vir); 
 }
 
 
 #ifdef GAS
-void sort_mass_temperature_and_gas_fraction()
+void sort_gas_relations()
 {
- 	int nBins, nHaloes, nHaloesCut, i=0, m=0, *n_per_mass_bin;
-	double *a, *temperature, *temperature_bin, *temperature_error, *mass_bin, *mass;
-	double *gas_fraction, *gas_fraction_bin, *gas_fraction_error;
+ 	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, m=0, n=0;
+	double *params, *temperature, *temperature_bin, *temperature_err, *mass_bin, *mass;
+	double *gas_fraction, *gas_fraction_bin, *gas_fraction_err;
+	double *diff_cm, *diff_cm_bin, *diff_cm_err;
+	double *lambda, *lambda_bin, *lambda_err;
+	double *costh, *costh_bin, *costh_err;
+	double *shape, *shape_bin, *shape_err;
+	double *triax, *triax_bin, *triax_err;
+	double *gas_ekin, *gas_ekin_bin, *gas_ekin_err;
+	double *gas_virial, *gas_virial_bin, *gas_virial_err;
+	double *dm_ekin, *dm_ekin_bin, *dm_ekin_err;
+	double *dm_virial, *dm_virial_bin, *dm_virial_err;
+
 	double M_0, mMax, mMin;
 	struct halo_properties *HALOPROPERTIES;
 	
@@ -736,15 +857,43 @@ void sort_mass_temperature_and_gas_fraction()
 #endif
 	
 	Settings.tick=0;
-	a = (double*) calloc(2,sizeof(double));
+	params = (double*) calloc(2,sizeof(double));
+
 	mass = (double*) calloc(nHaloesCut, sizeof(double));	
 	mass_bin = (double*) calloc(nBins, sizeof(double));	
 	temperature = (double*) calloc(nHaloesCut, sizeof(double));	
 	temperature_bin = (double*) calloc(nBins-1, sizeof(double));	
-	temperature_error = (double*) calloc(nBins-1, sizeof(double));	
+	temperature_err = (double*) calloc(nBins-1, sizeof(double));	
 	gas_fraction = (double*) calloc(nHaloesCut, sizeof(double));	
 	gas_fraction_bin = (double*) calloc(nBins-1, sizeof(double));	
-	gas_fraction_error = (double*) calloc(nBins-1, sizeof(double));	
+	gas_fraction_err = (double*) calloc(nBins-1, sizeof(double));	
+	diff_cm = (double*) calloc(nHaloesCut, sizeof(double));	
+	diff_cm_bin = (double*) calloc(nBins-1, sizeof(double));	
+	diff_cm_err = (double*) calloc(nBins-1, sizeof(double));	
+	lambda = (double*) calloc(nHaloesCut, sizeof(double));	
+	lambda_bin = (double*) calloc(nBins-1, sizeof(double));	
+	lambda_err = (double*) calloc(nBins-1, sizeof(double));	
+	triax = (double*) calloc(nHaloesCut, sizeof(double));	
+	triax_bin = (double*) calloc(nBins-1, sizeof(double));	
+	triax_err = (double*) calloc(nBins-1, sizeof(double));	
+	shape = (double*) calloc(nHaloesCut, sizeof(double));	
+	shape_bin = (double*) calloc(nBins-1, sizeof(double));	
+	shape_err = (double*) calloc(nBins-1, sizeof(double));	
+	costh = (double*) calloc(nHaloesCut, sizeof(double));	
+	costh_bin = (double*) calloc(nBins-1, sizeof(double));	
+	costh_err = (double*) calloc(nBins-1, sizeof(double));	
+	gas_ekin = (double*) calloc(nHaloesCut, sizeof(double));	
+	gas_ekin_bin = (double*) calloc(nBins-1, sizeof(double));	
+	gas_ekin_err = (double*) calloc(nBins-1, sizeof(double));	
+	gas_virial = (double*) calloc(nHaloesCut, sizeof(double));	
+	gas_virial_bin = (double*) calloc(nBins-1, sizeof(double));	
+	gas_virial_err = (double*) calloc(nBins-1, sizeof(double));	
+	dm_ekin = (double*) calloc(nHaloesCut, sizeof(double));	
+	dm_ekin_bin = (double*) calloc(nBins-1, sizeof(double));	
+	dm_ekin_err = (double*) calloc(nBins-1, sizeof(double));	
+	dm_virial = (double*) calloc(nHaloesCut, sizeof(double));	
+	dm_virial_bin = (double*) calloc(nBins-1, sizeof(double));	
+	dm_virial_err = (double*) calloc(nBins-1, sizeof(double));	
 
 		for(i=0; i<nHaloes; i++)
 		{
@@ -753,6 +902,21 @@ void sort_mass_temperature_and_gas_fraction()
 				mass[m] = Haloes[i].Mvir;
 				temperature[m] = Haloes[i].gas_only.T;
 				gas_fraction[m] = Haloes[i].gas_only.b_fraction;
+				lambda[m] = Haloes[i].gas_only.lambda;
+				costh[m] = Haloes[i].gas_only.gas_dm_costh;
+
+				if(Haloes[i].gas.N > 0)
+				{
+					gas_ekin[n] = Haloes[i].gas.Ekin;
+					gas_virial[n] = Haloes[i].gas.vir;
+					n++;
+				}
+
+				dm_ekin[m] = Haloes[i].dm.Ekin;
+				dm_virial[m] = Haloes[i].dm.vir;
+				shape[m] = Haloes[i].gas_only.shape;
+				triax[m] = Haloes[i].gas_only.triax;
+				diff_cm[m] = Haloes[i].gas_only.diff.cm;
 				m++;
 			}
 		}
@@ -762,36 +926,131 @@ void sort_mass_temperature_and_gas_fraction()
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
-			average_bin(mass, temperature, mass_bin, temperature_bin,
-					temperature_error, nBins, nHaloesCut);
-
-			average_bin(mass, gas_fraction, mass_bin, gas_fraction_bin,  
-					gas_fraction_error, nBins, nHaloesCut);
+			average_bin(mass, temperature, mass_bin, temperature_bin, temperature_err, nBins, nHaloesCut);
+			average_bin(mass, gas_fraction, mass_bin, gas_fraction_bin, gas_fraction_err, nBins, nHaloesCut);
+			average_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
+			average_bin(mass, triax, mass_bin, triax_bin, triax_err, nBins, nHaloesCut);
+			average_bin(mass, shape, mass_bin, shape_bin, shape_err, nBins, nHaloesCut);
+			average_bin(mass, gas_ekin, mass_bin, gas_ekin_bin, gas_ekin_err, nBins, n);
+			average_bin(mass, gas_virial, mass_bin, gas_virial_bin, gas_virial_err, nBins, n);
+			average_bin(mass, dm_ekin, mass_bin, dm_ekin_bin, dm_ekin_err, nBins, nHaloesCut);
+			average_bin(mass, dm_virial, mass_bin, dm_virial_bin, dm_virial_err, nBins, nHaloesCut);
+			average_bin(mass, diff_cm, mass_bin, diff_cm_bin, diff_cm_err, nBins, nHaloesCut);
+			average_bin(mass, costh, mass_bin, costh_bin, costh_err, nBins, nHaloesCut);
 
 			for(i=0; i<nBins-1; i++)
 			{
 				HALOPROPERTIES[HALO_INDEX].mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
 				HALOPROPERTIES[HALO_INDEX].gas_T[i]=temperature_bin[i];
 				HALOPROPERTIES[HALO_INDEX].gas_fraction[i]=gas_fraction_bin[i];
+				HALOPROPERTIES[HALO_INDEX].gas_dm_costh[i]=costh_bin[i];
+				HALOPROPERTIES[HALO_INDEX].gas_diff_cm[i]=diff_cm[i];
+				HALOPROPERTIES[HALO_INDEX].gas.ekin[i]=gas_ekin_bin[i];
+				HALOPROPERTIES[HALO_INDEX].gas.virial[i]=gas_virial_bin[i];
+				HALOPROPERTIES[HALO_INDEX].dm.ekin[i]=dm_ekin_bin[i];
+				HALOPROPERTIES[HALO_INDEX].dm.virial[i]=dm_virial_bin[i];
+				HALOPROPERTIES[HALO_INDEX].gas.lambda[i]=lambda_bin[i];
+				HALOPROPERTIES[HALO_INDEX].gas.triax[i]=triax_bin[i];
+				HALOPROPERTIES[HALO_INDEX].gas.shape[i]=shape_bin[i];
 			}
 	
-			a[0] = 1.5; 
-			a[1] = pow(1.e-15, a[0]);
+			params[0] = 1.5; 
+			params[1] = pow(1.e-15, params[0]);
 			
-			INFO_MSG("Mass-Temperature relation");
+			INFO_MSG("Fitting Mass-Temperature relation to a power law");
 				
-			a = best_fit_power_law(mass_bin, temperature_bin, temperature_error, nBins-1, a);
+			params = best_fit_power_law(mass_bin, temperature_bin, temperature_err, nBins-1, params);
 
 //		M_0 = -log(a[1])/a[0];
 
 //		fprintf(stdout, "M-Tx    a:%lf   M_0 10e+%f SM\n",a[0],M_0/log(10));
 
-	free(a);
+	free(params);
 	free(mass);
 	free(mass_bin);
 	free(temperature); 
 	free(temperature_bin); 
-	free(temperature_error); 
+	free(temperature_err); 
+}
+
+
+
+void sort_alignment_and_displacement()
+{
+	int i=0, m=0, nBins, nHaloesCut, nHaloes;
+	int *array_costh_bin_y, *array_diff_cm_bin_y;
+	double *array_costh, *array_diff_cm, *array_costh_bin, *array_diff_cm_bin; 
+	double half_t, half_s, sMax, sMin, tMax, tMin, p_s, p_t;
+	struct halo_properties *HALOPROPERTIES;
+
+	INFO_MSG("Sorting gas displacement and alignment");
+
+	nBins = Settings.n_bins;
+	nHaloesCut = n_haloes_per_criterion();
+
+	if(Settings.use_sub == 1)
+	{
+		HALOPROPERTIES = SubHaloProperties;	
+	} 
+		else 
+	{
+		HALOPROPERTIES = HaloProperties;
+	}
+
+#ifdef WITH_MPI
+		nHaloes = Settings.n_haloes; 
+#else
+		nHaloes = Settings.n_threshold; 
+#endif
+
+	Settings.tick=0;
+	array_costh = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_diff_cm = (double*) calloc(nHaloesCut, sizeof(double));	
+	array_costh_bin = (double*) calloc(nBins, sizeof(double));	
+	array_diff_cm_bin = (double*) calloc(nBins, sizeof(double));	
+	array_costh_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+	array_diff_cm_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+
+		for(i=0; i<nHaloes; i++)
+		{
+			if(halo_condition(i) == 1)
+			{
+				array_costh[m] = Haloes[i].gas_only.gas_dm_costh;
+				array_diff_cm[m] = Haloes[i].gas_only.diff.cm;
+				m++;
+			}
+		}
+
+			sMax = maximum(array_costh, nHaloesCut); 
+			sMin = minimum(array_costh, nHaloesCut);
+			tMax = maximum(array_diff_cm, nHaloesCut); 
+			tMin = minimum(array_diff_cm, nHaloesCut);
+
+			array_costh_bin = lin_stepper(sMin, sMax, nBins);
+			lin_bin(array_costh, array_costh_bin, nBins, nHaloesCut, array_costh_bin_y);	
+
+			array_diff_cm_bin = log_stepper(tMin, tMax, nBins);
+			lin_bin(array_diff_cm, array_diff_cm_bin, nBins, nHaloesCut, array_diff_cm_bin_y);	
+
+			half_s = 0.5*(array_costh_bin[1]-array_costh_bin[0]);
+			half_t = 0.5*(array_diff_cm_bin[1]-array_diff_cm_bin[0]);
+
+			for(i=0; i<nBins-1; i++)	
+			{
+				p_s = (double) array_costh_bin_y[i]/nHaloesCut;
+				p_t = (double) array_diff_cm_bin_y[i]/nHaloesCut;
+				HALOPROPERTIES[HALO_INDEX].gas_dm_cth[i]=array_costh_bin[i]+half_s;
+				HALOPROPERTIES[HALO_INDEX].cm[i]=array_diff_cm_bin[i]+half_t;
+				HALOPROPERTIES[HALO_INDEX].p_gas_dm_cth[i]=p_s;
+				HALOPROPERTIES[HALO_INDEX].p_cm[i]=p_t;
+			}
+
+	free(array_costh); 
+	free(array_diff_cm);
+	free(array_costh_bin); 
+	free(array_diff_cm_bin);
+	free(array_costh_bin_y); 
+	free(array_diff_cm_bin_y);
 }
 #endif // Gas
 
@@ -810,6 +1069,7 @@ void compute_halo_properties()
 	//		sort_axis_alignement();
 
 #ifdef GAS
-		sort_mass_temperature_and_gas_fraction();
+		sort_gas_relations();
+		sort_alignment_and_displacement();
 #endif
 }

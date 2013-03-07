@@ -33,7 +33,7 @@ catalogue_z=0
 catalogue_number=28
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=18
+n_bins=15
 n_bins_th=200
 r_bins=7
 
@@ -50,7 +50,7 @@ m_max=0.8e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=1.e+12
+m_th=5.e+11
 virial=2.5
 spin=0.15
 

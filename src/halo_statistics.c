@@ -66,7 +66,7 @@ int main(int argc, char **argv)
 
 		compute_halo_properties();
 
-		compute_subhalo_properties();
+	//	compute_subhalo_properties();
 
 		print_all_halo_properties_to_one_file();
 
