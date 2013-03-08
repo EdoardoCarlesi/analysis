@@ -23,7 +23,6 @@
 /*
  *  Function declaration
  */
-double nfw(double, double, double);
 double nfw_drs(double, double, double);
 double nfw_drho0(double, double, double);
 
@@ -64,18 +63,31 @@ void fit_and_store_nfw_parameters()
 void fit_halo_profile(struct halo *HALO)
 {
 	double c=0, r=0, rho0, rs, chi, gof, per; 
-	double *y_th; 
-	int bins, skip, j=0;
+	double *x, *y, *e, *y_th; 
+	int bins, skip, N, j=0;
 
 		r = HALO->Rvir;
 		c = HALO->c; 
 		bins = HALO->n_bins;
 		skip = HALO->neg_r_bins;
 
+		N = bins - skip;
+
 		rho0 = HALO->rho0;
 		rs = HALO->r2;
 
-			best_fit_nfw(rho0, rs, bins, HALO->radius, HALO->rho, HALO->err);
+		x = (double*) calloc(N, sizeof(double));
+		y = (double*) calloc(N, sizeof(double));
+		e = (double*) calloc(N, sizeof(double));
+		
+		for(j=0; j<N; j++)
+		{
+			x[j] = HALO->radius[j+skip];
+			y[j] = HALO->rho[j+skip];
+			e[j] = HALO->err[j+skip];
+		}
+
+			best_fit_nfw(rho0, rs, N, x, y, e);
 
 			HALO->fit.rho0_nfw = rho0;
 			HALO->fit.rs_nfw = rs;

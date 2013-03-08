@@ -40,6 +40,14 @@ void determine_simulation_settings()
 	SETTINGS = &Settings;
 #endif
 
+	if(NTask > 1)
+	{
+		SETTINGS->dmMass  = HALO[1].dm.M/(double)HALO[1].dm.N;
+		SETTINGS->gasMass = HALO[1].gas.M/(double)HALO[1].gas.N; 
+		SETTINGS->rho_dm = SETTINGS->dmMass*pow3(SETTINGS->n_part_1D)*(1./pow3(SETTINGS->box_size));
+		SETTINGS->rho_b = SETTINGS->gasMass*pow3(SETTINGS->n_part_1D)*(1./pow3(SETTINGS->box_size));
+	}
+
 	if(ThisTask==0)
 	{
 #ifndef GAS
@@ -175,29 +183,17 @@ void set_additional_halo_properties(int n)
 		{
 			HALO[n].dm.X[i] = (HALO[n].Mvir*HALO[n].X[i] - HALO[n].gas.X[i])/HALO[n].dm.M;
 			HALO[n].dm.V[i] = (HALO[n].Mvir*HALO[n].V[i] - HALO[n].gas.V[i])/HALO[n].dm.M;
+			// FIXME check dm.Ea is normalized to one
 			HALO[n].dm.Ea[i] = (HALO[n].Mvir*HALO[n].Ea[i] - HALO[n].gas.Ea[i])/HALO[n].dm.M;
 			HALO[n].dm.a[i] = (HALO[n].Mvir*HALO[n].a[i] - HALO[n].gas.a[i])/HALO[n].dm.M;
 
 			diff_cm += pow2(HALO[n].X[i] - HALO[n].gas.X[i]);
-			//ab += HALO[n].dm.Ea[i] * HALO[n].gas.Ea[i];
 			ab += HALO[n].Ea[i] * HALO[n].gas.Ea[i];
 		}
 
 			HALO[n].gas_only.diff.cm = sqrt(diff_cm);
 			HALO[n].gas_only.gas_dm_costh = ab; 
 
-/*
-			if(ab < -1)
-			{	
-				D_PRINT("n", n);
-				F_PRINT("HALO.gas.Ea[0]", HALO[n].gas.Ea[0]);
-				F_PRINT("HALO.dm.Ea[0]", HALO[n].dm.Ea[0]);
-				F_PRINT("HALO.gas.Ea[1]", HALO[n].gas.Ea[1]);
-				F_PRINT("HALO.dm.Ea[1]", HALO[n].dm.Ea[1]);
-				F_PRINT("HALO.gas.Ea[2]", HALO[n].gas.Ea[2]);
-				F_PRINT("HALO.dm.Ea[2]", HALO[n].dm.Ea[2]);
-			}
-*/
 #else
 		HALO[n].gas_only.T = 0.0; 
 #endif // EXTRA_GAS

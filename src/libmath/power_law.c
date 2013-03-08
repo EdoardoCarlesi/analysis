@@ -37,15 +37,16 @@ int power_law_f(const gsl_vector *x, void *data, gsl_vector *f)
 	      b = gsl_vector_get(x,1);
 
 		for(i=1; i<n; i++)
-			{
+		{
 	     		t = vx[i];
 	     		Yi = b*pow(t,a);
 	      		fset =  (Yi - vy[i])/err[i];
 	
-				if(fset!=fset) fset=0;
+			if(fset!=fset) 
+				fset=0;
 
 			gsl_vector_set(f, i, fset);
-			}
+		}
 
 	return GSL_SUCCESS;
 }

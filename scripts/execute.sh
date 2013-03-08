@@ -33,7 +33,7 @@ catalogue_z=0
 catalogue_number=28
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=15
+n_bins=13
 n_bins_th=200
 r_bins=7
 
