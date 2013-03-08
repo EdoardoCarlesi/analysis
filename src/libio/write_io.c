@@ -350,7 +350,7 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].diff.s[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].diff.p_s[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].cm[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_cm[i]);
+				fprintf(out_file, "\t%e", HaloProperties[HALO_INDEX].p_cm[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_dm_cth[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_gas_dm_cth[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.lambda[i]);
