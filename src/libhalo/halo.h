@@ -4,6 +4,7 @@ void fit_and_store_nfw_parameters(void);
 double nfw(double, double, double);
 
 #ifdef GAS
+void average_gas_fraction_profile(void);
 	// Polytropic (Adiabatic) Temperature profile
 void fit_and_store_polytropic_T_parameters(void);
 double polytropic_T(double, double, double);

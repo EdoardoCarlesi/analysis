@@ -18,6 +18,7 @@ void print_theoretical_mass_function(void);
 void print_numerical_mass_function(void);
 
 void print_correlation_function(void);
+void print_average_profiles(void);
 
 void print_evolution_to_file(void);
 void print_number_densities(void);

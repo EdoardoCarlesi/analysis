@@ -6,6 +6,8 @@
 #define F_PRINT(str, num) fprintf(stdout, "\n%s %e.\n", str, num)
 #define D_PRINT(str, num) fprintf(stdout, "\n%s %d.\n", str, num)
 
+#define BIN_PROFILE 9
+
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
 #else 
@@ -251,15 +253,23 @@ extern struct halo
 	
 	struct
 	{
-		double c_nfw;
-		double rho0_nfw;
-		double rs_nfw;
-		double chi_nfw;
-		double gof_nfw;
-		double per_nfw;
-	} fit;
+		double c; // NFW only
+		double rs;
+		double rho0;
+		double chi;
+		double gof;
+		double per;
+	} fit_nfw, fit_poly, fit_king;
 
+	struct
+	{
+		double x[BIN_PROFILE];
+		double y[BIN_PROFILE];
+	} f_gas;
+
+	int *npart;
 	double *radius;
+	double *mass_r;
 	double *rho;
 	double *err;
 
@@ -413,6 +423,13 @@ extern struct halo_properties
 		double *p_per;	
 
 	} fit_nfw, fit_king, p_fit_nfw;
+
+	struct
+	{
+		double x[BIN_PROFILE];
+		double y[BIN_PROFILE];
+
+	} f_gas;
 
 	// Distributions
 	double *c;

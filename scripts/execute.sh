@@ -22,7 +22,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde099'
+model1='lcdm'
 model2='ude'
 box_size=75
 particle_number=256

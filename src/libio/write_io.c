@@ -142,6 +142,34 @@ void print_theoretical_mass_function()
 
 
 
+void print_average_profiles()
+{
+	count = 1;
+	nTot = BIN_PROFILE;
+	z = GrowthFac.z[Settings.use_cat];
+	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_avg_profiles.dat");
+	out_file = fopen(out_url,"w");
+
+	DUMP_MSG("average profiles", out_url);
+
+		fprintf(out_file,"#");
+		FILE_HEADER(out_file, "R/Rvir", count);
+		FILE_HEADER(out_file, "f_gas", count);
+		fprintf(out_file, "\n");
+	
+			for(i=0; i<nTot; i++) 
+			{
+				fprintf(out_file, "%lf", HaloProperties[HALO_INDEX].f_gas.x[i]); 
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].f_gas.y[i]); 
+				fprintf(out_file, "\n");
+			}
+
+	fclose(out_file);
+
+}
+
+
+
 void print_correlation_function()
 {
 	count = 1;

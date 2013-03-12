@@ -167,43 +167,43 @@ void print_state (size_t iter, gsl_multifit_fdfsolver * s)
 
 
 
-double chi_square(double *y_th, double *y_ex, double *err, int size, int skip)
+double chi_square(double *y_th, double *y_ex, double *err, int size)
 {
 	int i=0;
 	double chi=0; 
 		
-		for(i=skip; i<size; i++) 
-			chi+=pow2(y_th[i-skip]-y_ex[i])/pow2(err[i]);  
+		for(i=0; i<size; i++) 
+			chi+=pow2(y_th[i]-y_ex[i])/pow2(err[i]);  
 
 	return chi; 
 }
 
 
 
-double goodness_of_fit(double *y_th, double *y_ex, int size, int skip)
+double goodness_of_fit(double *y_th, double *y_ex, int size)
 {
 	int i=0;
 	double gof=0; 
 		
-		for(i=skip; i<size; i++) 
-			gof+=pow2(log(y_th[i-skip])-log(y_ex[i]));
+		for(i=0; i<size; i++) 
+			gof+=pow2(log(y_th[i])-log(y_ex[i]));
 
-	gof /= (double) (size-skip);
+	gof /= (double) size;
 	
 	return gof; 
 }
 
 
 
-double percentage_error(double *y_th, double *y_ex, int size, int skip)
+double percentage_error(double *y_th, double *y_ex, int size)
 {
 	int i=0;
 	double per=0; 
 		
-		for(i=skip; i<size; i++) 
-			per+=sqrt(pow2(y_th[i-skip]-y_ex[i]))/y_ex[i];
+		for(i=0; i<size; i++) 
+			per+=sqrt(pow2(y_th[i]-y_ex[i]))/y_ex[i];
 
-	per /= (double) (size-skip);
+	per /= (double) size;
 	
 	return per; 
 }

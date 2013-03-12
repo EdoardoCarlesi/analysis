@@ -60,9 +60,9 @@ double get_interpolated_value(double*, double*, int, double);
 double solid_angle(double, void*);
 double integrate_solid_angle(double,double,double,double);
 
-double chi_square(double*, double*, double*, int, int);
-double goodness_of_fit(double*, double*, int, int);
-double percentage_error(double*, double*, int, int);
+double chi_square(double*, double*, double*, int);
+double goodness_of_fit(double*, double*, int);
+double percentage_error(double*, double*, int);
 
 gsl_vector* least_square_nl_fit(struct data, struct parameters, gsl_multifit_function_fdf);
 

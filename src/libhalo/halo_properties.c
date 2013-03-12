@@ -578,9 +578,9 @@ void sort_nfw_parameters()
 		{
 			if(halo_condition(i) == 1)
 			{
-				nfw_gof[m] = Haloes[i].fit.gof_nfw;
-				nfw_per[m] = Haloes[i].fit.per_nfw;
-				nfw_chi[m] = Haloes[i].fit.chi_nfw;
+				nfw_gof[m] = Haloes[i].fit_nfw.gof;
+				nfw_per[m] = Haloes[i].fit_nfw.per;
+				nfw_chi[m] = Haloes[i].fit_nfw.chi;
 				m++;
 			}
 		}
@@ -736,9 +736,9 @@ void sort_mass_relations()
 			{
 				vel[m] = Haloes[i].Vmax;
 				vir[m] = Haloes[i].abs_th_vir;
-				chi[m] = Haloes[i].fit.chi_nfw;
-				gof[m] = Haloes[i].fit.gof_nfw;
-				per[m] = Haloes[i].fit.per_nfw;
+				chi[m] = Haloes[i].fit_nfw.chi;
+				gof[m] = Haloes[i].fit_nfw.gof;
+				per[m] = Haloes[i].fit_nfw.per;
 				mass[m] = Haloes[i].Mvir; 
 				conc[m] = Haloes[i].c_nfw;
 				lambda[m] = Haloes[i].lambda;

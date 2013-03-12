@@ -89,29 +89,33 @@ void fit_halo_profile(struct halo *HALO)
 
 			best_fit_nfw(rho0, rs, N, x, y, e);
 
-			HALO->fit.rho0_nfw = rho0;
-			HALO->fit.rs_nfw = rs;
-			HALO->fit.c_nfw = HALO->Rvir/rs;
+			HALO->fit_nfw.rho0 = rho0;
+			HALO->fit_nfw.rs = rs;
+			HALO->fit_nfw.c = HALO->Rvir/rs;
 
 			y_th = (double*) calloc(bins-skip,sizeof(double));
 
 		for(j=skip; j<HALO->n_bins; j++)
 		{
-			y_th[j-skip] = nfw(HALO->radius[j], HALO->fit.rs_nfw, HALO->fit.rho0_nfw);
+			y_th[j-skip] = nfw(HALO->radius[j], HALO->fit_nfw.rs, HALO->fit_nfw.rho0);
 			//fprintf(stderr, "%d) %f  %f  %f\n", j, HALO->radius[j], HALO->rho[j], y_th[j-skip]);
 		}
 
 	// Various estimators for the goodness of fit
-	chi = chi_square(y_th,HALO->rho,HALO->err,bins,skip);
-	gof = goodness_of_fit(y_th,HALO->rho,bins,skip);
-	per = percentage_error(y_th,HALO->rho,bins,skip);
+	chi = chi_square(y_th, y, e, N);
+	gof = goodness_of_fit(y_th, y, N);
+	per = percentage_error(y_th, y, N);
 	
 	chi /= (double) (bins-skip);
 
-	HALO->fit.chi_nfw = chi;
-	HALO->fit.gof_nfw = gof;
-	HALO->fit.per_nfw = per;
+	HALO->fit_nfw.chi = chi;
+	HALO->fit_nfw.gof = gof;
+	HALO->fit_nfw.per = per;
 
+	free(x);
+	free(y);
+	free(y_th);
+	free(e);
 //	fprintf(stderr, "ThisTask=%d, skip=%d, bins=%d, rho=%f, rs=%f, ChiSquare=%lf, Red=%lf\n", 
 //		ThisTask, skip, bins, rho0, rs, chi_sq, chi_sq/(bins-skip));
 }

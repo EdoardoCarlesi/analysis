@@ -44,8 +44,8 @@ void determine_simulation_settings()
 	{
 		SETTINGS->dmMass  = HALO[1].dm.M/(double)HALO[1].dm.N;
 		SETTINGS->gasMass = HALO[1].gas.M/(double)HALO[1].gas.N; 
-		SETTINGS->rho_dm = SETTINGS->dmMass*pow3(SETTINGS->n_part_1D)*(1./pow3(SETTINGS->box_size));
-		SETTINGS->rho_b = SETTINGS->gasMass*pow3(SETTINGS->n_part_1D)*(1./pow3(SETTINGS->box_size));
+		SETTINGS->rho_dm = SETTINGS->dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
+		SETTINGS->rho_b = SETTINGS->gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 	}
 
 	if(ThisTask==0)
@@ -563,7 +563,7 @@ void read_profiles_file()
 	int npart=0, halo_bins=0, counter=0;
 	int neg_r=0, npart_old=0;
 
-	double radius, overd, dens, v_circ, a;
+	double radius, overd, dens, mass_r, v_circ, a;
 	double overd_old, radius_old;
 
 #ifdef GAS
@@ -615,16 +615,16 @@ void read_profiles_file()
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf", 
-		&radius, &npart, &a, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&radius, &npart, &mass_r, &overd, &dens, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a	// 24
 #else
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf", 
-		&radius, &npart, &a, &overd, &dens, &v_circ, &a, &a, &a, &a, 
-		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
-		&a, 	 &a,     &a, &a,     &m_gas,&a,	     &u_gas  // 27
+		&radius, &npart, &mass_r, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&a,      &a, 	 &a, &a,  &a,    &a,     &a, &a, &a, &a, 
+		&a, 	 &a,     &a, &a,  &m_gas,&a,     &u_gas  // 27
 #endif
 		);
 				halo_bins = HALO[counter].n_bins;
@@ -634,6 +634,8 @@ void read_profiles_file()
 					HALO[counter].radius = (double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].rho = (double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].err = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].mass_r = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].npart = (int *) calloc(halo_bins,sizeof(int));
 #ifdef GAS
 					HALO[counter].gas_only.u = (double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].gas_only.m = (double *) calloc(halo_bins,sizeof(double));
@@ -642,6 +644,8 @@ void read_profiles_file()
 
 					HALO[counter].radius[i] = sqrt(pow2(radius));	
 					HALO[counter].rho[i] = dens;
+					HALO[counter].mass_r[i] = mass_r;
+					HALO[counter].npart[i] = npart;
 					HALO[counter].err[i] = dens/sqrt(npart-npart_old); 
 #ifdef GAS
 					HALO[counter].gas_only.u[i] = u_gas;

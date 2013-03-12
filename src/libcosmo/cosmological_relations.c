@@ -43,7 +43,7 @@ double convert_u_to_T(double u)
 {
 	double g, m_p, mu, k_b;
 
- 		g=5./3.;
+ 		g = 5./3.;
 		m_p = 1.672e-24; // cgs
  		mu = 0.588; 
  		k_b = 1.3806e-16; // cgs

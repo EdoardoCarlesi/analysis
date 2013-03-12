@@ -39,7 +39,9 @@ int main(int argc, char **argv)
 
 			read_profiles_file();
 	
-			fit_and_store_nfw_parameters();
+			//fit_and_store_nfw_parameters();
+
+			fit_and_store_polytropic_T_parameters();
 
 			free_halo_profiles();
 
@@ -64,11 +66,15 @@ int main(int argc, char **argv)
 
 		find_substructure();
 
-		compute_halo_properties();
+	//	compute_halo_properties();
 
 	//	compute_subhalo_properties();
 
+		average_gas_fraction_profile();
+
 		print_all_halo_properties_to_one_file();
+	
+		print_average_profiles();
 
 	//	free_halo_properties();
 	
