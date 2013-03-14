@@ -73,7 +73,7 @@ double polytropic_T(double T, double a, double A)
 
 void fit_polytropic_T(struct halo *HALO)
 {
-	double A=0, a=0, rho0, R, V, T0, V0, R0; 
+	double T=0, M=0, Mtot, MT, A=0, a=0, rho0, R, V, T0, V0, R0; 
 	double *x, *y, *e, *y_th, *params; 
 	double chi, per, gof;
 	int bins, skip, j=0, N=0;
@@ -99,6 +99,10 @@ void fit_polytropic_T(struct halo *HALO)
 		R0 = HALO->gas_only.m[skip] / V0;
 		rho0 = R0; ///SETTINGS->rho_b;
 		T0 = convert_u_to_T(HALO->gas_only.u[skip])/HALO->npart[skip]; // / V0;
+		M = 0;
+		T = 0;
+		MT = 0;
+		Mtot = 0;
 
 		params = (double*) calloc(2, sizeof(double));
 		x = (double*) calloc(N, sizeof(double));
@@ -112,8 +116,13 @@ void fit_polytropic_T(struct halo *HALO)
 			R *= 1.e-3;	
 #endif
 			V = 4./3. * M_PI * pow3(R);
-			x[j] = HALO->gas_only.m[j+skip]/V/rho0;
-			y[j] = convert_u_to_T(HALO->gas_only.u[j+skip])/HALO->npart[j+skip]/T0;
+			M = HALO->gas_only.m[j+skip];
+			T = convert_u_to_T(HALO->gas_only.u[j+skip]);
+			Mtot += M;
+			MT += M*T;
+
+			x[j] = M/V/rho0;
+			y[j] = MT/Mtot/T0;
 
 	//		y[j] = HALO->gas_only.u[j+skip]; ///T0;
 			e[j] = y[j]/sqrt(HALO->npart[j+skip]);
