@@ -31,8 +31,6 @@ void sort_f_gas_profile(struct halo *HALO);
 
 
 
-
-
 /*
  *  Function implementations
  */
@@ -116,13 +114,15 @@ void fit_polytropic_T(struct halo *HALO)
 			R *= 1.e-3;	
 #endif
 			V = 4./3. * M_PI * pow3(R);
-			M = HALO->gas_only.m[j+skip];
+
+			if(j>0)
+				M = HALO->gas_only.m[j+skip-1];
+
 			T = convert_u_to_T(HALO->gas_only.u[j+skip]);
-			Mtot += M;
-			MT += M*T;
+			MT += (HALO->gas_only.m[j+skip-1]-M)*T;
 
 			x[j] = M/V/rho0;
-			y[j] = MT/Mtot/T0;
+			y[j] = MT/M/T0;
 
 	//		y[j] = HALO->gas_only.u[j+skip]; ///T0;
 			e[j] = y[j]/sqrt(HALO->npart[j+skip]);
