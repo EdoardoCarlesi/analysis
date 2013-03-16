@@ -17,6 +17,9 @@
 #include "../libparallel/general.h"
 #endif
 
+#define F_MAX 1.0000
+#define F_MIN 0.9999
+
 
 /*
  * Declare functions
@@ -170,8 +173,8 @@ void sort_numerical_mass_function(void)
 			}
 		}
 
-		mMin = minimum(mass, nHaloesCut)*0.999;
-		mMax = maximum(mass, nHaloesCut)*1.001;
+		mMin = F_MIN*minimum(mass, nHaloesCut);
+		mMax = F_MAX*maximum(mass, nHaloesCut);
 		mass_bin = log_stepper(mMin, mMax, nBins);
 	
 		lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
@@ -289,20 +292,20 @@ void sort_shape_and_triaxiality()
 			HALOPROPERTIES[HALO_INDEX].gas.s0 = average(array_gas_shape, nHaloesCut);
 			HALOPROPERTIES[HALO_INDEX].gas.t0 = average(array_gas_triax, nHaloesCut);
 #endif
-			sMax = maximum(array_shape, nHaloesCut); 
-			sMin = minimum(array_shape, nHaloesCut);
-			tMax = maximum(array_triax, nHaloesCut); 
-			tMin = minimum(array_triax, nHaloesCut);
+			sMax = F_MAX*maximum(array_shape, nHaloesCut); 
+			sMin = F_MIN*minimum(array_shape, nHaloesCut);
+			tMax = F_MAX*maximum(array_triax, nHaloesCut); 
+			tMin = F_MIN*minimum(array_triax, nHaloesCut);
 #ifdef GAS
-			dsMax = maximum(array_diff_shape, nHaloesCut); 
-			dsMin = minimum(array_diff_shape, nHaloesCut);
-			dtMax = maximum(array_diff_triax, nHaloesCut); 
-			dtMin = minimum(array_diff_triax, nHaloesCut);
+			dsMax = F_MAX*maximum(array_diff_shape, nHaloesCut); 
+			dsMin = F_MIN*minimum(array_diff_shape, nHaloesCut);
+			dtMax = F_MAX*maximum(array_diff_triax, nHaloesCut); 
+			dtMin = F_MIN*minimum(array_diff_triax, nHaloesCut);
 	
-			gsMax = maximum(array_gas_shape, nHaloesCut); 
-			gsMin = minimum(array_gas_shape, nHaloesCut);
-			gtMax = maximum(array_gas_triax, nHaloesCut); 
-			gtMin = minimum(array_gas_triax, nHaloesCut);
+			gsMax = F_MAX*maximum(array_gas_shape, nHaloesCut); 
+			gsMin = F_MIN*minimum(array_gas_shape, nHaloesCut);
+			gtMax = F_MAX*maximum(array_gas_triax, nHaloesCut); 
+			gtMin = F_MIN*minimum(array_gas_triax, nHaloesCut);
 #endif
 			array_shape_bin = lin_stepper(sMin, sMax, nBins);
 			lin_bin(array_shape, array_shape_bin, nBins, nHaloesCut, array_shape_bin_y);	
@@ -452,13 +455,13 @@ void sort_lambda_and_concentration()
 			}
 		}
 
-			lMax = 1.01*maximum(lambda, nHaloesCut);  
-			lMin = 0.99*minimum(lambda, nHaloesCut);
+			lMax = F_MAX*maximum(lambda, nHaloesCut);  
+			lMin = F_MIN*minimum(lambda, nHaloesCut);
 			delta_l = (lMax-lMin)/nBins; 
 			l_norm = 1./(delta_l*nHaloesCut);
 
-			cMax = 1.01*maximum(conc, nHaloesCut);  
-			cMin = 0.99*minimum(conc, nHaloesCut);
+			cMax = F_MAX*maximum(conc, nHaloesCut);  
+			cMin = F_MIN*minimum(conc, nHaloesCut);
 			c_norm = 1./(nHaloesCut);
 
 			l_bin_x = lin_stepper(lMin, lMax, nBins);
@@ -520,17 +523,17 @@ void sort_nfw_parameters()
 {
 	int nBins, nHaloesCut, nHaloes, i=0, m=0; 
 	int *nfw_gof_int_y; 
-	int *nfw_chi_int_y; 
+//	int *nfw_chi_int_y; 
 	int *nfw_per_int_y; 
 	double *gbin_x,*nfw_gof, *nfw_gof_bin_x, *nfw_gof_err_y, *nfw_gof_double_y;
-	double *cbin_x,*nfw_chi, *nfw_chi_bin_x, *nfw_chi_err_y, *nfw_chi_double_y;
+//	double *cbin_x,*nfw_chi, *nfw_chi_bin_x, *nfw_chi_err_y, *nfw_chi_double_y;
 	double *pbin_x,*nfw_per, *nfw_per_bin_x, *nfw_per_err_y, *nfw_per_double_y;
 	double ghalfstep, gMax, gMin, delta_g, gnorm, gvalue;
 	double phalfstep, pMax, pMin, delta_p, pnorm, pvalue;
-	double chalfstep, cMax, cMin, delta_c, cnorm, cvalue;
+//	double chalfstep, cMax, cMin, delta_c, cnorm, cvalue;
 	struct halo_properties *HALOPROPERTIES;
 
-	INFO_MSG("Sorting spin parameter"); 
+	INFO_MSG("Sorting NFW parameters"); 
 
 	nBins = Settings.n_bins;
 	nHaloesCut = n_haloes_per_criterion();
@@ -552,7 +555,7 @@ void sort_nfw_parameters()
 #endif
 
 	gbin_x = (double*) calloc(nBins, sizeof(double));	
-	cbin_x = (double*) calloc(nBins, sizeof(double));	
+//	cbin_x = (double*) calloc(nBins, sizeof(double));	
 	pbin_x = (double*) calloc(nBins, sizeof(double));	
 
 	nfw_gof_int_y = (int*) calloc(nBins-1, sizeof(int));	
@@ -564,15 +567,15 @@ void sort_nfw_parameters()
 	nfw_per_bin_x = (double*) calloc(nBins-1, sizeof(double));	
 	nfw_per_double_y = (double*) calloc(nBins-1, sizeof(double));	
 	nfw_per_err_y = (double*) calloc(nBins-1, sizeof(double));	
-
+/*
 	nfw_chi_int_y = (int*) calloc(nBins-1, sizeof(int));	
 	nfw_chi_bin_x = (double*) calloc(nBins-1, sizeof(double));	
 	nfw_chi_double_y = (double*) calloc(nBins-1, sizeof(double));	
 	nfw_chi_err_y = (double*) calloc(nBins-1, sizeof(double));	
-
+*/
 	nfw_gof = (double*) calloc(nHaloesCut, sizeof(double));	
 	nfw_per = (double*) calloc(nHaloesCut, sizeof(double));	
-	nfw_chi = (double*) calloc(nHaloesCut, sizeof(double));	
+//	nfw_chi = (double*) calloc(nHaloesCut, sizeof(double));	
 
 		for(i=0; i<nHaloes; i++)
 		{
@@ -580,37 +583,37 @@ void sort_nfw_parameters()
 			{
 				nfw_gof[m] = Haloes[i].fit_nfw.gof;
 				nfw_per[m] = Haloes[i].fit_nfw.per;
-				nfw_chi[m] = Haloes[i].fit_nfw.chi;
+				//nfw_chi[m] = Haloes[i].fit_nfw.chi;
 				m++;
 			}
 		}
 
-			gMax = 1.01*maximum(nfw_gof, nHaloesCut);  
-			gMin = minimum(nfw_gof, nHaloesCut);
+			gMax = F_MAX*maximum(nfw_gof, nHaloesCut);  
+			gMin = F_MIN*minimum(nfw_gof, nHaloesCut);
 			delta_g = (gMax-gMin)/nBins; 
 			gnorm = 1./(delta_g*nHaloesCut);
 
-			pMax = 1.01*maximum(nfw_per, nHaloesCut);  
-			pMin = minimum(nfw_per, nHaloesCut);
+			pMax = F_MAX*maximum(nfw_per, nHaloesCut);  
+			pMin = F_MIN*minimum(nfw_per, nHaloesCut);
 			delta_p = (pMax-pMin)/nBins; 
 			pnorm = 1./(delta_p*nHaloesCut);
-
+/*
 			cMax = 1.01*maximum(nfw_chi, nHaloesCut);  
 			cMin = minimum(nfw_chi, nHaloesCut);
 			delta_c = (cMax-cMin)/nBins; 
 			cnorm = 1./(delta_c*nHaloesCut);
-
+*/
 			gbin_x = lin_stepper(gMin, gMax, nBins);
 			lin_bin(nfw_gof, gbin_x, nBins, nHaloesCut, nfw_gof_int_y);	
 
 			pbin_x = lin_stepper(pMin, pMax, nBins);
 			lin_bin(nfw_per, pbin_x, nBins, nHaloesCut, nfw_per_int_y);	
 
-			cbin_x = lin_stepper(cMin, cMax, nBins);
-			lin_bin(nfw_chi, cbin_x, nBins, nHaloesCut, nfw_chi_int_y);	
+//			cbin_x = lin_stepper(cMin, cMax, nBins);
+//			lin_bin(nfw_chi, cbin_x, nBins, nHaloesCut, nfw_chi_int_y);	
 
 			ghalfstep=(gbin_x[1]-gbin_x[0])*0.5;
-			chalfstep=(cbin_x[1]-cbin_x[0])*0.5;
+//			chalfstep=(cbin_x[1]-cbin_x[0])*0.5;
 			phalfstep=(pbin_x[1]-pbin_x[0])*0.5;
 
 			for(i=0; i<nBins-1; i++)
@@ -618,9 +621,9 @@ void sort_nfw_parameters()
 				gvalue = (double) nfw_gof_int_y[i];
 				nfw_gof_bin_x[i]=gbin_x[i]+ghalfstep;
 				nfw_gof_double_y[i]=gnorm*gvalue; 
-				cvalue = (double) nfw_chi_int_y[i];
-				nfw_chi_bin_x[i]=cbin_x[i]+chalfstep;
-				nfw_chi_double_y[i]=cnorm*cvalue; 
+//				cvalue = (double) nfw_chi_int_y[i];
+//				nfw_chi_bin_x[i]=cbin_x[i]+chalfstep;
+//				nfw_chi_double_y[i]=cnorm*cvalue; 
 				pvalue = (double) nfw_per_int_y[i];
 				nfw_per_bin_x[i]=pbin_x[i]+phalfstep;
 				nfw_per_double_y[i]=pnorm*pvalue; 
@@ -630,8 +633,8 @@ void sort_nfw_parameters()
 		{		
 			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.gof[i]=nfw_gof_bin_x[i];
 			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.p_gof[i]=nfw_gof_double_y[i];
-			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.chi[i]=nfw_chi_bin_x[i];
-			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.p_chi[i]=nfw_chi_double_y[i];
+//			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.chi[i]=nfw_chi_bin_x[i];
+//			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.p_chi[i]=nfw_chi_double_y[i];
 			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.per[i]=nfw_per_bin_x[i];
 			HALOPROPERTIES[HALO_INDEX].p_fit_nfw.p_per[i]=nfw_per_double_y[i];
 		}	
@@ -642,12 +645,12 @@ void sort_nfw_parameters()
 	free(nfw_gof_bin_x);
 	free(nfw_gof);
 	free(gbin_x);
-	free(nfw_chi_double_y);
-	free(nfw_chi_int_y);
-	free(nfw_chi_err_y);
-	free(nfw_chi_bin_x);
-	free(nfw_chi);
-	free(cbin_x);
+//	free(nfw_chi_double_y);
+//	free(nfw_chi_int_y);
+//	free(nfw_chi_err_y);
+//	free(nfw_chi_bin_x);
+//	free(nfw_chi);
+//	free(cbin_x);
 	free(nfw_per_double_y);
 	free(nfw_per_int_y);
 	free(nfw_per_err_y);
@@ -752,8 +755,8 @@ void sort_mass_relations()
 			}
 		}
 
-			mMin = minimum(mass, nHaloesCut)*0.999;
-			mMax = maximum(mass, nHaloesCut)*1.001;
+			mMin = F_MIN*minimum(mass, nHaloesCut);
+			mMax = F_MAX*maximum(mass, nHaloesCut);
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
@@ -895,6 +898,8 @@ void sort_gas_relations()
 	dm_virial_bin = (double*) calloc(nBins-1, sizeof(double));	
 	dm_virial_err = (double*) calloc(nBins-1, sizeof(double));	
 
+	INFO_MSG("Memory allocated");
+
 		for(i=0; i<nHaloes; i++)
 		{
 			if(halo_condition(i) == 1)
@@ -921,8 +926,8 @@ void sort_gas_relations()
 			}
 		}
 
-			mMin = minimum(mass, nHaloesCut)*0.999;
-			mMax = maximum(mass, nHaloesCut)*1.001;
+			mMin = F_MIN*minimum(mass, nHaloesCut);
+			mMax = F_MAX*maximum(mass, nHaloesCut);
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
@@ -1021,10 +1026,10 @@ void sort_alignment_and_displacement()
 			}
 		}
 
-			sMax = maximum(array_costh, nHaloesCut); 
-			sMin = minimum(array_costh, nHaloesCut);
-			tMax = maximum(array_diff_cm, nHaloesCut); 
-			tMin = minimum(array_diff_cm, nHaloesCut);
+			sMax = F_MAX*maximum(array_costh, nHaloesCut); 
+			sMin = F_MIN*minimum(array_costh, nHaloesCut);
+			tMax = F_MAX*maximum(array_diff_cm, nHaloesCut); 
+			tMin = F_MIN*minimum(array_diff_cm, nHaloesCut);
 
 			array_costh_bin = lin_stepper(sMin, sMax, nBins);
 			lin_bin(array_costh, array_costh_bin, nBins, nHaloesCut, array_costh_bin_y);	

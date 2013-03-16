@@ -40,6 +40,7 @@ void determine_simulation_settings()
 	SETTINGS = &Settings;
 #endif
 
+#ifdef GAS
 	if(NTask > 1)
 	{
 		SETTINGS->dmMass  = HALO[1].dm.M/(double)HALO[1].dm.N;
@@ -47,6 +48,7 @@ void determine_simulation_settings()
 		SETTINGS->rho_dm = SETTINGS->dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		SETTINGS->rho_b = SETTINGS->gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 	}
+#endif
 
 	if(ThisTask==0)
 	{
