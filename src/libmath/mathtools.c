@@ -37,8 +37,9 @@ double get_interpolated_value(double x_array[], double y_array[], int npts, doub
 
 double* lin_stepper(double min, double max, int bins)
 {
+#ifdef PRINT_INFO
 	fprintf(stdout, "\nReturning %d linear steps between %e and %e...\n", bins, min, max);
-
+#endif
 	int i=0;
 	double s, *steps;
 
@@ -56,8 +57,9 @@ double* lin_stepper(double min, double max, int bins)
 
 double* log_stepper(double a_0, double a_1, int num)
 {
+#ifdef PRINT_INFO
 	fprintf(stdout, "\nReturning %d logarithmic steps between %e and %e...\n", num, a_0,a_1);
-	
+#endif
 	int i=0;
 	double a=a_0, step, *steps;
 
@@ -190,19 +192,20 @@ int *generate_random_subset(int Nmax, int Nmin, int *subset)
 		fprintf(stdout, "\nTrying to generate a subset %d larger than the dataset %d.\n",Nmin,Nmax);
 
 		} else {
+
 			srand ((int)time(NULL));
 
 			while (i <= Nmin)
 			{
 				num = rand()%Nmax;
 
-					if(check_array(num,subset,i)==0)
-					{
-						subset[i]=num;
-						i++;
-					}
-				}	
-			}
+				if(check_array(num,subset,i)==0)
+				{
+					subset[i]=num;
+					i++;
+				}
+			}	
+		}
 
 	return subset;
 }
@@ -226,9 +229,9 @@ int int_maximum(int *array, int size)
 void lin_bin(double* array, double* bins, int bin_size, int array_size, int* binned_array)
 {
 	int i=0, j=0;
-
+#ifdef PRINT_INFO
 	fprintf(stdout, "\nBinning into %d bins an array of size:%d...", bin_size, array_size);
-
+#endif
 	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);
 	gsl_histogram_set_ranges (h, bins, bin_size);
 		
@@ -246,7 +249,9 @@ void lin_bin(double* array, double* bins, int bin_size, int array_size, int* bin
 		/* Average entry per array bin */
 void average_bin (double* array_x, double* array_y, double* bins, double* binned_array, double *error_array, int bin_size, int array_size)
 {
+#ifdef PRINT_INFO
 	fprintf(stdout, "\nBinning and averaging into %d bins an array of size:%d...", bin_size, array_size);
+#endif
 	int i=0, j=0; 
 
 	gsl_histogram *h = gsl_histogram_alloc (bin_size-1);

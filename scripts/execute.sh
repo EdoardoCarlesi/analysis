@@ -22,20 +22,20 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde000'
 model2='ude'
-box_size=75
-particle_number=256
-tot_snaps=28
+box_size=250
+particle_number=1024
+tot_snaps=57
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=28
+catalogue_number=57
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=13
+n_bins=10
 n_bins_th=200
-r_bins=7
+r_bins=10
 
 # Scale of P(k) for growth factor calculation
 k=0.13
@@ -45,8 +45,8 @@ pk_skip=11
 mf_skip=1
 
 #Minimum and maximum mass for the mass function computation
-m_min=1.e+10
-m_max=0.8e+15
+m_min=1.e+9
+m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
@@ -139,7 +139,8 @@ zzzz='.z'
 cat_zero='00'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='0000.z'
+#zzzz='0000.z'
+zzzz='0000'
 fi
 
 if [ $catalogue_number -gt 9 ] ; then
@@ -197,7 +198,7 @@ $base_analysis/scripts/mpi_check.sh $base_analysis $2
 
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
-execute='mpiexec -n '$n_procs' '$base_analysis
+execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
 fi
 
 
