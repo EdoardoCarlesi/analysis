@@ -95,7 +95,8 @@ int fd_power_law_f(const gsl_vector *x, void *data, gsl_vector * f, gsl_matrix *
 
 double* best_fit_power_law(double *x, double *y, double *err, int tot, double *guess)
 {
-	double a, b, *vec;
+	int i=0, n_eff=0;
+	double a, b, *vec, *x_eff, *y_eff, *e_eff;
 	struct data dat;
 	struct parameters par;
 
@@ -103,11 +104,30 @@ double* best_fit_power_law(double *x, double *y, double *err, int tot, double *g
 	b = guess[1]; 
 
 	fprintf(stdout, "\nFinding best fit values using nlls fit, guess values a:%e, b:%e.\n", a, b);
+	
+	x_eff = (double*) calloc(1, sizeof(double));
+	y_eff = (double*) calloc(1, sizeof(double));
+	e_eff = (double*) calloc(1, sizeof(double));
 
-	dat.n = (size_t) tot;
-	dat.x = x;
-	dat.y = y;
-	dat.err = err; 
+	for(i=0; i<tot; i++)
+	{
+		if(x[i] != 0.)
+		{
+			n_eff++;
+			x_eff = realloc(x_eff, n_eff*sieof(double));
+			y_eff = realloc(y_eff, n_eff*sieof(double));
+			e_eff = realloc(e_eff, n_eff*sieof(double));
+			x_eff[n_eff] = x[i];
+			y_eff[n_eff] = y[i];
+			e_eff[n_eff] = err[i];
+		}
+	}
+
+
+	dat.n = (size_t) n_eff;
+	dat.x = x_eff;
+	dat.y = y_eff;
+	dat.err = e_eff; 
 
 		par.n = 2;
 		par.guess_p = (double *) calloc(par.n, sizeof(double));
