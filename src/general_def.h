@@ -256,16 +256,18 @@ extern struct halo
 		double c; // NFW only
 		double rs;
 		double rho0;
+		double ix0; // X-ray surface brightness parameter
+		double beta; // X-ray surface brightness parameter / beta model
 		double chi;
 		double gof;
 		double per;
-	} fit_nfw, fit_poly, fit_king;
+	} fit_nfw, fit_poly, fit_beta, fit_IX;
 
 	struct
 	{
 		double x[BIN_PROFILE];
 		double y[BIN_PROFILE];
-	} f_gas;
+	} f_gas, nfw, rho_gas, i_x;
 
 	int *npart;
 	double *radius;
@@ -295,7 +297,8 @@ extern struct halo
 		double lambdaE;
 		double b_fraction;
 		double Cum_u;
-		double T;
+		double T_mw; // Mass-weighted temperature
+		double I_X0; // X ray thermal emission
 		double shape;
 		double triax;
 		
@@ -401,6 +404,7 @@ extern struct halo_properties
 		double *shape;
 		double *triax;
 		double *lambda;
+		double *beta;
 		double *virial;
 		double *ekin;
 
@@ -410,7 +414,8 @@ extern struct halo_properties
 		double *p_t;
 		double *l;
 		double *p_l;
-
+		double *b;
+		double *p_b;
 	} halo, dm, gas, diff;
 
 	struct
@@ -428,8 +433,7 @@ extern struct halo_properties
 	{
 		double x[BIN_PROFILE];
 		double y[BIN_PROFILE];
-
-	} f_gas;
+	} f_gas, nfw, rho_gas, i_x;
 
 	// Distributions
 	double *c;

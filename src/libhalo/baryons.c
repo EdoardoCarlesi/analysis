@@ -28,13 +28,13 @@
  */
 void fit_polytropic_T(struct halo *HALO);
 void sort_f_gas_profile(struct halo *HALO);
-
+void fit_I_X(struct halo *HALO);
 
 
 /*
  *  Function implementations
  */
-void fit_and_store_polytropic_T_parameters(void)
+void fit_and_store_gas_parameters(void)
 {	
 	int k=0; 
 	int nHaloes;
@@ -44,18 +44,300 @@ void fit_and_store_polytropic_T_parameters(void)
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
 	nHaloes = pSettings[ThisTask].n_threshold;
-	TASK_INFO_MSG(ThisTask, "fitting halo T profiles");
+	TASK_INFO_MSG(ThisTask, "Fitting gas profiles");
 #else 
 	HALO = Haloes;
 	nHaloes = Settings.n_threshold;
-	INFO_MSG("Fitting halo T profiles");
+	INFO_MSG("Fitting gas profiles");
 #endif
 
 		for(k=0; k<nHaloes; k++)
 		{		
-			//fit_polytropic_T(&HALO[k]);			
-			sort_f_gas_profile(&HALO[k]);
+			//if(halo_condition(k) == 1)
+			{	
+				sort_f_gas_profile(&HALO[k]);
+				fit_I_X(&HALO[k]);
+			}
 		}
+}
+
+
+
+void sort_f_gas_profile(struct halo *HALO)
+{
+	double h, R, rMax, rMin; 
+	double *x, *y, *x_bin, *y_bin, *e_bin; 
+	double chi, per, gof;
+	int N, bins, skip, j=0;
+	struct general_settings *SETTINGS;
+
+#ifdef WITH_MPI
+	SETTINGS = &pSettings[ThisTask];
+#else
+	SETTINGS = &Settings;
+#endif
+
+		bins = HALO->n_bins;
+		skip = HALO->neg_r_bins;
+		N = bins - skip;
+
+		x = (double*) calloc(N, sizeof(double));
+		y = (double*) calloc(N, sizeof(double));
+
+		for(j=0; j<N; j++)
+		{
+			R = HALO->radius[j+skip];
+#ifdef USE_UNIT_MPC
+			R *= 1.e-3;	
+#endif
+			x[j] = R/HALO->Rvir;
+			y[j] = HALO->gas_only.m[j+skip]/HALO->mass_r[j+skip];
+		}
+	
+		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
+		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+
+			rMin = 0.1;
+			rMax = 1.;
+			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
+
+		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
+
+		h = 0.5 * (x_bin[1] - x_bin[0]); 
+
+	for(j=0; j<BIN_PROFILE; j++)
+	{
+		HALO->f_gas.x[j] = x_bin[j+1];// - h;
+		HALO->f_gas.y[j] = y_bin[j];
+		//fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
+	}
+}
+
+
+
+void average_gas_profiles(void)
+{
+	int k=0, i=0, m=0; 
+	int nHaloes, nHaloesCut;
+	int f_bin, rho_bin, ix_bin;
+	double f, f_tot;
+	double rho, rho_tot;
+	double ix, ix_tot;
+
+	struct halo_properties *HALOPROPERTIES;
+
+	INFO_MSG("Sorting halo radial velocities and concentrations");
+
+	nHaloesCut=n_haloes_per_criterion();
+	
+	if(Settings.use_sub == 1)
+	{
+		HALOPROPERTIES = SubHaloProperties;	
+	} 
+		else 
+	{
+		HALOPROPERTIES = HaloProperties;
+	}
+
+#ifdef WITH_MPI
+		nHaloes=Settings.n_haloes; 
+#else
+		nHaloes=Settings.n_threshold; 
+#endif
+
+		for(i=0; i<BIN_PROFILE; i++)
+		{
+			f_tot = 0;
+			f_bin = 0;
+	
+			rho_tot = 0;
+			rho_bin = 0;
+	
+			ix_tot = 0;
+			ix_bin = 0;
+			
+			m = 0;
+
+			for(k=0; k<nHaloes; k++)
+			{
+				if(halo_condition(k) == 1)
+				{
+					f = Haloes[m].f_gas.y[i];
+					rho = Haloes[m].rho_gas.y[i];
+					ix = Haloes[m].i_x.y[i];
+
+						if(isnan(f) == 0 && f>0)
+						{
+							f_tot += f;
+							f_bin++;
+						}
+
+						if(isnan(rho) == 0 && rho>0 && rho < 1./0.)
+						{
+							rho_tot += rho;
+							rho_bin++;
+						}
+	
+						if(isnan(ix) == 0 && ix>0 && ix < 1./0.)
+						{
+							ix_tot += ix;
+							ix_bin++;
+						}
+		
+					m++;
+				}
+		
+			}
+
+			HALOPROPERTIES[HALO_INDEX].f_gas.x[i] = Haloes[0].f_gas.x[i];
+			HALOPROPERTIES[HALO_INDEX].f_gas.y[i] = f_tot/f_bin;
+			HALOPROPERTIES[HALO_INDEX].rho_gas.x[i] = Haloes[0].rho_gas.x[i];
+			HALOPROPERTIES[HALO_INDEX].rho_gas.y[i] = rho_tot/rho_bin;
+			HALOPROPERTIES[HALO_INDEX].i_x.x[i] = Haloes[0].i_x.x[i];
+			HALOPROPERTIES[HALO_INDEX].i_x.y[i] = ix_tot/ix_bin;
+
+			if(Haloes[0].rho_gas.x[i]==0)
+			{
+				HALOPROPERTIES[HALO_INDEX].rho_gas.y[i] = 0; 
+				HALOPROPERTIES[HALO_INDEX].i_x.y[i] = 0; 
+			}
+		}
+}
+
+
+
+double rhoBeta(double r, double rc, double beta, double rho0)
+{
+	return rho0 * pow(1 + pow2(r/rc), -3. * beta);
+}
+
+
+
+double I_X(double r, double rc, double beta, double rho0)
+{
+		// This is I_x / I_x0
+	return (1./rho0) * rhoBeta(r, rc, beta, rho0) * pow(1 + pow2(r/rc), 0.5);
+}
+
+
+	// Fits X-ray surface and beta gas density profile
+void fit_I_X(struct halo *HALO)
+{
+	double r_frac, rc, A=0, a=0, rho0, ix0; 
+	double *r, *x, *y, *e, *y_th, *params; 
+	double rMax, rMin, *x_bin, *y_bin, *e_bin;
+	double beta, chi, per, gof, R, V;
+
+	int bins, skip, bin_loc, j=0, N=0, M=0;
+	struct general_settings *SETTINGS;
+
+#ifdef WITH_MPI
+	SETTINGS = &pSettings[ThisTask];
+#else
+	SETTINGS = &Settings;
+#endif
+
+		A = 1.;
+		a = -1.;
+
+		bins = HALO->n_bins;
+		skip = HALO->neg_r_bins;
+		N=1;
+		r_frac = 0.3; // Take radii only larger than this Rvir fraction
+		R = HALO->radius[skip];
+#ifdef USE_UNIT_MPC
+		R *= 1.e-3;	
+#endif
+		rho0 = (HALO->gas_only.m[skip]) / (4./3. * M_PI * pow3(R));
+
+		params = (double*) calloc(2, sizeof(double));
+		x = (double*) calloc(1, sizeof(double));
+		y = (double*) calloc(1, sizeof(double));
+		e = (double*) calloc(1, sizeof(double));
+		r = (double*) calloc(1, sizeof(double));
+		rc = 0.5 * HALO->r2; // The core radius is half the scale radius
+
+		for(j=0; j<bins; j++)
+		{
+			R = HALO->radius[j];
+#ifdef USE_UNIT_MPC
+			R *= 1.e-3;
+#endif
+			V = 4./3. * M_PI * pow3(R);
+
+			if(R > r_frac*HALO->Rvir)
+			{
+				N++;
+				x = (double*) realloc(x, N * sizeof(double));
+				y = (double*) realloc(y, N * sizeof(double));
+				e = (double*) realloc(e, N * sizeof(double));
+				r = (double*) realloc(r, N * sizeof(double));
+
+				r[N-1] = R/HALO->Rvir;
+				x[N-1] = 1 + R*R/(rc*rc);
+				y[N-1] = (HALO->gas_only.m[j])/ (4./3. * M_PI * pow3(R)) / rho0;
+				e[N-1] = y[N-1]/sqrt(HALO->npart[j]);
+			}
+
+		}
+			
+			params[0] = a;
+			params[1] = A;
+			
+			params = best_fit_power_law(x, y, e, N, params);
+	
+			a = params[0];
+			A = params[1];
+			beta = -2./3. * a;	
+
+			y_th = (double*) calloc(N, sizeof(double));
+
+			for(j=0; j<N; j++)
+			{
+				y_th[j] = A * pow(x[j], a);
+			}
+			
+			bin_loc = (int) BIN_PROFILE * (1-r_frac);
+
+			x_bin = (double*) calloc(bin_loc+1, sizeof(double));
+			y_bin = (double*) calloc(bin_loc, sizeof(double));
+			e_bin = (double*) calloc(bin_loc, sizeof(double));
+
+			rMin = r_frac; //*HALO->Rvir;
+			rMax = 1.001*R / HALO->Rvir;
+			x_bin = log_stepper(rMin, rMax, bin_loc+1);
+
+		average_bin(r, y, x_bin, y_bin, e_bin, bin_loc+1, N);
+
+		// Normalize to 1 in the central region	
+		ix0 = 1./sqrt(1 + pow2(r_frac * HALO->Rvir / rc));
+
+	for(j=0; j<bin_loc; j++)
+	{
+		HALO->rho_gas.x[j] = x_bin[j+1];
+		HALO->rho_gas.y[j] = y_bin[j];
+		HALO->i_x.x[j] = x_bin[j+1];
+		HALO->i_x.y[j] = ix0 * y_bin[j] * sqrt(1 + pow2(x_bin[j] * HALO->Rvir / rc));
+		//fprintf(stderr, "%d  %f  %f\n", j, x_bin[j+1], y_bin[j]);
+	}
+
+	// Various estimators for the goodness of fit
+	chi = chi_square(y_th, y, e, N);
+	gof = goodness_of_fit(y_th, y, N);
+	per = percentage_error(y_th, y, N);
+	
+	chi /= (double) N;
+
+	HALO->fit_beta.rho0 = rho0;
+	HALO->fit_beta.beta = beta;
+	HALO->fit_IX.ix0 = ix0;
+	HALO->fit_IX.beta = beta;
+	HALO->fit_IX.chi = chi;
+	HALO->fit_IX.gof = gof;
+	HALO->fit_IX.per = per;
+/*
+*/
 }
 
 
@@ -76,7 +358,8 @@ void fit_polytropic_T(struct halo *HALO)
 	double chi, per, gof;
 	int bins, skip, j=0, N=0;
 	struct general_settings *SETTINGS;
-
+		// FIXME
+/*
 #ifdef WITH_MPI
 	SETTINGS = &pSettings[ThisTask];
 #else
@@ -159,113 +442,6 @@ void fit_polytropic_T(struct halo *HALO)
 	HALO->fit_poly.chi = chi;
 	HALO->fit_poly.gof = gof;
 	HALO->fit_poly.per = per;
-}
-
-
-
-void sort_f_gas_profile(struct halo *HALO)
-{
-	double h, R, rMax, rMin; 
-	double *x, *y, *x_bin, *y_bin, *e_bin; 
-	double chi, per, gof;
-	int N, bins, skip, j=0;
-	struct general_settings *SETTINGS;
-
-#ifdef WITH_MPI
-	SETTINGS = &pSettings[ThisTask];
-#else
-	SETTINGS = &Settings;
-#endif
-
-		bins = HALO->n_bins;
-		skip = HALO->neg_r_bins;
-		N = bins - skip;
-
-		x = (double*) calloc(N, sizeof(double));
-		y = (double*) calloc(N, sizeof(double));
-
-		for(j=0; j<N; j++)
-		{
-			R = HALO->radius[j+skip];
-#ifdef USE_UNIT_MPC
-			R *= 1.e-3;	
-#endif
-			x[j] = R/HALO->Rvir;
-			y[j] = HALO->gas_only.m[j+skip]/HALO->mass_r[j+skip];
-		}
-	
-		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
-		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
-		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
-
-			rMin = 0.1;
-			rMax = 1.;
-			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
-
-		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
-
-		h = 0.5 * (x_bin[1] - x_bin[0]); 
-
-	for(j=0; j<BIN_PROFILE; j++)
-	{
-		HALO->f_gas.x[j] = x_bin[j+1];// - h;
-		HALO->f_gas.y[j] = y_bin[j];
-		//fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
-	}
-}
-
-
-
-void average_gas_fraction_profile(void)
-{
-	int k=0, i=0, m=0, n_bin=0; 
-	int nHaloes, nHaloesCut;
-	double f, f_tot, *m_bin;
-	struct halo_properties *HALOPROPERTIES;
-
-	INFO_MSG("Sorting halo radial velocities and concentrations");
-
-	nHaloesCut=n_haloes_per_criterion();
-	
-	if(Settings.use_sub == 1)
-	{
-		HALOPROPERTIES = SubHaloProperties;	
-	} 
-		else 
-	{
-		HALOPROPERTIES = HaloProperties;
-	}
-
-#ifdef WITH_MPI
-		nHaloes=Settings.n_haloes; 
-#else
-		nHaloes=Settings.n_threshold; 
-#endif
-
-		for(i=0; i<BIN_PROFILE; i++)
-		{
-			f_tot = 0;
-			n_bin = 0;
-			m = 0;
-
-			for(k=0; k<nHaloes; k++)
-			{
-				if(halo_condition(k) == 1)
-				{
-					f = Haloes[m].f_gas.y[i];
-					//F_PRINT("y", f);
-						if(isnan(f) == 0 && f>0)
-						{
-							f_tot += f;
-							n_bin++;
-						}
-					m++;
-				}
-		
-			}
-			
-			HALOPROPERTIES[HALO_INDEX].f_gas.x[i] = Haloes[0].f_gas.x[i];
-			HALOPROPERTIES[HALO_INDEX].f_gas.y[i] = f_tot/n_bin;
-		}
+*/
 }
 #endif

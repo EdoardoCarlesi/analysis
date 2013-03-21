@@ -10,6 +10,8 @@
 #include <gsl/gsl_multifit.h>
 #include <gsl/gsl_multifit_nlin.h>
 
+#include "../general_def.h"
+
 #include "math.h"
 
 /*
@@ -103,31 +105,38 @@ double* best_fit_power_law(double *x, double *y, double *err, int tot, double *g
 	a = guess[0];
 	b = guess[1]; 
 
+#ifdef PRINT_INFO
 	fprintf(stdout, "\nFinding best fit values using nlls fit, guess values a:%e, b:%e.\n", a, b);
-	
+#endif
+
 	x_eff = (double*) calloc(1, sizeof(double));
 	y_eff = (double*) calloc(1, sizeof(double));
 	e_eff = (double*) calloc(1, sizeof(double));
 
 	for(i=0; i<tot; i++)
 	{
-		if(x[i] != 0.)
+
+	//F_PRINT("y=", y[i]);
+
+		if(y[i] != 0. && isnan(y[i]) == 0)
 		{
 			n_eff++;
-			x_eff = realloc(x_eff, n_eff*sieof(double));
-			y_eff = realloc(y_eff, n_eff*sieof(double));
-			e_eff = realloc(e_eff, n_eff*sieof(double));
-			x_eff[n_eff] = x[i];
-			y_eff[n_eff] = y[i];
-			e_eff[n_eff] = err[i];
+			x_eff = realloc(x_eff, n_eff*sizeof(double));
+			y_eff = realloc(y_eff, n_eff*sizeof(double));
+			e_eff = realloc(e_eff, n_eff*sizeof(double));
+			x_eff[n_eff-1] = x[i];
+			y_eff[n_eff-1] = y[i];
+			e_eff[n_eff-1] = err[i];
+		//	F_PRINT("y_eff=", y_eff[i]);
 		}
 	}
 
-
-	dat.n = (size_t) n_eff;
-	dat.x = x_eff;
-	dat.y = y_eff;
-	dat.err = e_eff; 
+	if(n_eff > 2)
+	{
+		dat.n = (size_t) n_eff;
+		dat.x = x_eff;
+		dat.y = y_eff;
+		dat.err = e_eff; 
 
 		par.n = 2;
 		par.guess_p = (double *) calloc(par.n, sizeof(double));
@@ -150,7 +159,10 @@ double* best_fit_power_law(double *x, double *y, double *err, int tot, double *g
 			/* Set the correctly fitted parameters */
 			a = gsl_vector_get(par.fitted_p,0);
 			b = gsl_vector_get(par.fitted_p,1);
+#ifdef PRINT_INFO
 			fprintf(stdout, "The best fit parameters for this distribution are alpha: %e b:%e \n", a, b);
+#endif
+	}
 
 		vec = (double*) calloc(2,sizeof(double));
 		vec[0] = a;

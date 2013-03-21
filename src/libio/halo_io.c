@@ -178,8 +178,8 @@ void set_additional_halo_properties(int n)
 	}
 
 #ifdef EXTRA_GAS
-
-		HALO[n].gas_only.T = convert_u_to_T(HALO[n].gas_only.Cum_u);
+		// Mass-weighter Temperature
+		HALO[n].gas_only.T_mw = convert_u_to_T(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
 
 		for(i=0; i<3; i++)
 		{
@@ -464,6 +464,9 @@ void read_halo_file()
 
 #ifdef USE_UNIT_MPC
 	HALO[n].Rvir *= 1.e-3;
+	HALO[n].r2 *= 1.e-3;
+
+//	F_PRINT("Halo.r2=", HALO[n].r2);
 
 	for(i=0; i<3; i++)
 	{

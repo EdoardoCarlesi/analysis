@@ -231,6 +231,9 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].gas.shape = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas.triax = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas.lambda = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].gas.beta = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].gas.b = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].gas.p_b = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas.l = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas.p_l = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas.s = (double*) calloc(nBins, sizeof(double));

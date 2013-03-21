@@ -229,14 +229,20 @@ void print_average_profiles()
 	DUMP_MSG("average profiles", out_url);
 
 		fprintf(out_file,"#");
-		FILE_HEADER(out_file, "R/Rvir", count);
-		FILE_HEADER(out_file, "f_gas", count);
+		FILE_HEADER(out_file, "R/Rv_f  ", count);
+		FILE_HEADER(out_file, "f_gas   ", count);
+		FILE_HEADER(out_file, "R/Rv_rho", count);
+		FILE_HEADER(out_file, "rho_gas ", count);
+		FILE_HEADER(out_file, "Ix/Ix0  ", count);
 		fprintf(out_file, "\n");
 	
 			for(i=0; i<nTot; i++) 
 			{
-				fprintf(out_file, "%lf", HaloProperties[HALO_INDEX].f_gas.x[i]); 
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].f_gas.y[i]); 
+				fprintf(out_file, "%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.y[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.x[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
 				fprintf(out_file, "\n");
 			}
 
@@ -369,15 +375,9 @@ void print_all_halo_properties_to_one_file()
 		FILE_HEADER(out_file, "lambda", count);
 		FILE_HEADER(out_file, "shape ", count);
 		FILE_HEADER(out_file, "triax ", count);
-		//FILE_HEADER(out_file, "chinfw", count);
-		FILE_HEADER(out_file, "pernfw", count);
 		FILE_HEADER(out_file, "gofnfw", count);
-		//FILE_HEADER(out_file, "c_nfw ", count);
-		//FILE_HEADER(out_file, "pc_nfw", count);
 		FILE_HEADER(out_file, "g_nfw ", count);
 		FILE_HEADER(out_file, "pg_nfw", count);
-		FILE_HEADER(out_file, "p_nfw ", count);
-		FILE_HEADER(out_file, "pp_nfw", count);
 		FILE_HEADER(out_file, "c     ", count);
 		FILE_HEADER(out_file, "P(c)  ", count);
 		FILE_HEADER(out_file, "l     ", count);
@@ -403,6 +403,7 @@ void print_all_halo_properties_to_one_file()
 		FILE_HEADER(out_file, "g_shap", count);
 		FILE_HEADER(out_file, "g_tria", count);
 		FILE_HEADER(out_file, "g_temp", count);
+		FILE_HEADER(out_file, "g_beta", count);
 		FILE_HEADER(out_file, "g_frac", count);
 		FILE_HEADER(out_file, "g_ekin", count);
 		FILE_HEADER(out_file, "g_vir ", count);
@@ -423,13 +424,7 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.lambda[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.shape[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.triax[i]);
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].fit_nfw.chi[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].fit_nfw.per[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].fit_nfw.gof[i]);
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.chi[i]);
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.p_chi[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.per[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.p_per[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.gof[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.p_gof[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].c[i]);
@@ -441,10 +436,6 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.s[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.p_s[i]);
 #ifdef GAS
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].diff.l[i]);
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].diff.p_l[i]);
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.l[i]);
-				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.p_l[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.t[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.p_t[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.s[i]);
@@ -461,7 +452,8 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.shape[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.triax[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_T[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_fraction[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].gas.beta[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].gas_fraction[i]);
 				fprintf(out_file, "\t%e", HaloProperties[HALO_INDEX].gas.ekin[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas.virial[i]);
 				fprintf(out_file, "\t%e", HaloProperties[HALO_INDEX].dm.ekin[i]);

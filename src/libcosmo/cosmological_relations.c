@@ -48,8 +48,9 @@ double convert_u_to_T(double u)
  		mu = 0.588; 
  		k_b = 1.3806e-16; // cgs
 
-		// Kelvin to eV factor = 8.6173e-8
-	return u*(g-1)*m_p*mu*(1./k_b); // Kelvin
+		// eV to Kelvin factor = 8.6173e-8
+	//return u*(g-1)*m_p*mu*(1./k_b); // Kelvin
+	return u*(g-1)*m_p*mu*(1./k_b)/(8.6173e-5); // KeV
 }
 
 

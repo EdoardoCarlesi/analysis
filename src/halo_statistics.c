@@ -27,6 +27,8 @@ int main(int argc, char **argv)
 
 	init_comm_structures();
 	init_cpu_struct();	
+
+	MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
 		
 	generate_url_for_tasks();	
 #endif	
@@ -42,7 +44,7 @@ int main(int argc, char **argv)
 			fit_and_store_nfw_parameters();
 
 #ifdef GAS
-			fit_and_store_polytropic_T_parameters();
+			fit_and_store_gas_parameters();
 #endif
 
 			free_halo_profiles();
@@ -70,15 +72,21 @@ int main(int argc, char **argv)
 
 		compute_halo_properties();
 
-		compute_subhalo_properties();
+	//	compute_subhalo_properties();
 
 #ifdef GAS
-		average_gas_fraction_profile();
+		average_gas_profiles();
 #endif
 
 		print_all_halo_properties_to_one_file();
+
+	//	print_all_subhalo_properties_to_one_file();
+
+		print_numerical_mass_function();
 	
 		print_average_profiles();
+
+		print_axis_alignment();
 
 		free_halo_properties();
 	
