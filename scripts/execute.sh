@@ -22,8 +22,8 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
-model2='ude'
+model1='cde000'
+model2='cde000'
 box_size=250
 particle_number=1024
 tot_snaps=57
@@ -94,7 +94,7 @@ base_temp=$base_analysis/temp/
 
 dir_ahf=ahf
 dir_snaps=snaps
-dir_halo=catalogues
+dir_halo=catalogues_cat
 
 # General file prefixes 
 prefix=$base_out$model1'-'$box_size'-'$particle_number'-'
