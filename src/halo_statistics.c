@@ -32,7 +32,6 @@ int main(int argc, char **argv)
 		
 	generate_url_for_tasks();	
 #endif	
-
 			get_halo_files_urls();
 			
 			set_halo_url();
@@ -46,15 +45,15 @@ int main(int argc, char **argv)
 #ifdef GAS
 			fit_and_store_gas_parameters();
 #endif
-
 			free_halo_profiles();
 
 #ifdef WITH_MPI
+
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		gather_halo_structures();
 
-		free_comm_structures();
+	//	free_comm_structures();
 	
 	if(ThisTask==0)
 	{
