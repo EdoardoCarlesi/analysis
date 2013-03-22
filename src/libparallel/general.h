@@ -3,7 +3,7 @@ extern int NTask;
 
 extern struct Cpu
 {
-  char name[4];
+  char name[5];
 
 } *cpu;
 

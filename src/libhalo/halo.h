@@ -29,6 +29,8 @@ void initialize_halo_properties_structure(void);
 
 void find_substructure(void);
 
+void free_halo_profiles(void);
+
 void free_subhalo_properties(void);
 void free_halo_properties(void);
 void free_halo_profiles(void);

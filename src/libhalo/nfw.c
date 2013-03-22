@@ -319,9 +319,11 @@ void best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, doubl
        	f.p = par.n;
        	f.params = &dat;
 
+	if(dat.n > 3)
+	{
 		/* Do the fit */
 		par.fitted_p = least_square_nl_fit(dat, par, f);
-
+	}
 		/* Set the correctly fitted parameters */
 		rs = gsl_vector_get(par.fitted_p,0);
 		rho0 = gsl_vector_get(par.fitted_p,1);

@@ -348,6 +348,8 @@ void free_halo_profiles()
 	struct halo *HALO;
 	struct general_settings *SETTINGS;	
 
+	INFO_MSG("Freeing halo profiles");
+
 #ifdef WITH_MPI
 		HALO = pHaloes[ThisTask];
 		SETTINGS = &pSettings[ThisTask];
@@ -360,9 +362,11 @@ void free_halo_profiles()
 			free(HALO[i].radius);
 			free(HALO[i].rho);
 			free(HALO[i].err);
-#ifdef WITH_GAS
-			free(HALO[i].m_gas);
-			free(HALO[i].u_gas);
+			free(HALO[i].mass_r);
+			free(HALO[i].npart);
+#ifdef GAS
+			free(HALO[i].gas_only.u);
+			free(HALO[i].gas_only.m);
 #endif
 		}
 }
