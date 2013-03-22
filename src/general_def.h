@@ -6,7 +6,13 @@
 #define F_PRINT(str, num) fprintf(stdout, "\n%s %e.\n", str, num)
 #define D_PRINT(str, num) fprintf(stdout, "\n%s %d.\n", str, num)
 
-#define BIN_PROFILE 9
+	// Factors that modify the binning
+#define F_MAX 1.0000
+#define F_MIN 0.9999
+
+#define BIN_PROFILE 17
+#define Rvir_frac_min 0.1 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
+			  // and gas fraction from 1
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)

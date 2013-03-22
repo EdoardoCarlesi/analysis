@@ -19,6 +19,7 @@ double I_X(double, double, double, double);
 double king(double, double, double);
 #endif
 
+void sort_axis_alignment(void);
 void compute_subhalo_properties(void);
 void compute_halo_properties(void);
 void compute_halo_and_subhalo_properties(void);

@@ -17,14 +17,9 @@
 #include "../libparallel/general.h"
 #endif
 
-#define F_MAX 1.0000
-#define F_MIN 0.9999
-
-
 /*
  * Declare functions
  */
-void sort_axis_alignement(void);
 void sort_lambda_and_concentration(void);
 void sort_shape_and_triaxiality(void);
 void sort_nfw_parameters(void);
@@ -39,7 +34,7 @@ void sort_alignment_and_displacement(void);
 /*
  * Initialize functions
  */ 
-void sort_axis_alignement()
+void sort_axis_alignment()
 {
 	int m=0, j=0, k=0, i=0, max_haloes, nBins, skip;
 	int *Nbins;
@@ -185,12 +180,11 @@ void sort_numerical_mass_function(void)
 
 		for(i=0; i<nBins-1; i++)
 		{
-			halfstep = 0.5*(mass_bin[i+1]-mass_bin[i]);
 			dn_norm = 2*halfstep/nHaloesCut;
 			dM = mass_bin[i+1]-mass_bin[i];
 
 			MASSFUNC[MF_INDEX].mass[i]=mass_bin[i];
-			MASSFUNC[MF_INDEX].mass_halfstep[i]=mass_bin[i]+halfstep;
+			MASSFUNC[MF_INDEX].mass_halfstep[i]=0.5 * (mass_bin[i]+mass_bin[i+1]);
 			MASSFUNC[MF_INDEX].dn[i]=n_mass[i]/(volume*dM);
 			MASSFUNC[MF_INDEX].n[i]=cum_n_mass[i]/volume;
 			MASSFUNC[MF_INDEX].err_dn[i]=sqrt(n_mass[i])/(volume*dM);
@@ -1020,9 +1014,6 @@ void compute_halo_properties()
 		sort_mass_relations();
 		sort_shape_and_triaxiality();
 		sort_nfw_parameters();
-
-		if(Settings.use_sub != 1)
-			sort_axis_alignement();
 
 #ifdef GAS
 		sort_gas_relations();

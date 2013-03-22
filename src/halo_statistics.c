@@ -71,23 +71,23 @@ int main(int argc, char **argv)
 		find_substructure();
 
 		compute_halo_properties();
-
-	//	compute_subhalo_properties();
+		print_numerical_mass_function();
+		print_all_halo_properties_to_one_file();
 
 #ifdef GAS
 		average_gas_profiles();
 #endif
-
-		print_all_halo_properties_to_one_file();
-
-	//	print_all_subhalo_properties_to_one_file();
-
-		print_numerical_mass_function();
-	
+		average_nfw_profile();
 		print_average_profiles();
 
+		sort_axis_alignment();
 		print_axis_alignment();
 
+	//	compute_subhalo_properties();
+	//	print_all_subhalo_properties_to_one_file();
+	// Redo all of the above for subhaloes
+
+		// FIXME
 		free_halo_properties();
 	
 #ifdef WITH_MPI
