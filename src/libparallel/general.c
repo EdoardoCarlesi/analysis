@@ -6,6 +6,7 @@
 #include <malloc.h>
 #include <mpi.h>
 
+#include "../libmath/math.h"
 #include "../general_def.h"
 
 #include "general.h"
@@ -134,7 +135,11 @@ void gather_halo_structures()
 
 			SizeDisplStructHalo[0] = 0;
 	
+			fprintf(stderr, "Need to allocate %d MB to gather halo structures...\n",
+					Settings.n_haloes * sizeof(struct halo) / pow2(1024));
+
 			Haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
+
 		}
 
 		MPI_Gather(&pSettings[ThisTask].n_haloes_size, 1, MPI_INT, 
