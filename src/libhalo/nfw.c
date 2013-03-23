@@ -62,8 +62,8 @@ void fit_and_store_nfw_parameters()
 
 void fit_halo_profile(struct halo *HALO)
 {
-	double c=0, r=0, rho0, rs, chi, gof, per; 
-	double *x, *y, *e, *y_th; 
+	double c=0, r=0, rho0, rho0_halo, rs, chi, gof, per; 
+	double *x, *y, *e, *R, *y_th, *x_bin, *y_bin, *e_bin, rMin, rMax; 
 	int bins, skip, N, j=0;
 
 		r = HALO->Rvir;
@@ -79,12 +79,14 @@ void fit_halo_profile(struct halo *HALO)
 		x = (double*) calloc(N, sizeof(double));
 		y = (double*) calloc(N, sizeof(double));
 		e = (double*) calloc(N, sizeof(double));
+		R = (double*) calloc(N, sizeof(double));
 		
 		for(j=0; j<N; j++)
 		{
 			x[j] = HALO->radius[j+skip];
 			y[j] = HALO->rho[j+skip];
 			e[j] = HALO->err[j+skip];
+			R[j] = HALO->radius[j+skip]/r;
 		}
 
 			best_fit_nfw(rho0, rs, N, x, y, e);
@@ -95,10 +97,10 @@ void fit_halo_profile(struct halo *HALO)
 
 			y_th = (double*) calloc(bins-skip,sizeof(double));
 
-		for(j=skip; j<HALO->n_bins; j++)
+		for(j=skip; j<bins; j++)
 		{
 			y_th[j-skip] = nfw(HALO->radius[j], HALO->fit_nfw.rs, HALO->fit_nfw.rho0);
-			//fprintf(stderr, "%d) %f  %f  %f\n", j, HALO->radius[j], HALO->rho[j], y_th[j-skip]);
+			//fprintf(stderr, "%d) R=%e, %e %e  %e\n", j, R[j-skip], rho0, Y[j-skip], y_th[j-skip]);
 		}
 
 	// Various estimators for the goodness of fit
@@ -112,12 +114,89 @@ void fit_halo_profile(struct halo *HALO)
 	HALO->fit_nfw.gof = gof;
 	HALO->fit_nfw.per = per;
 
+		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
+		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+
+		rMin = 2 * Rvir_frac_min;
+		rMax = 1.0001;
+		x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
+
+		average_bin(R, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
+
+	for(j=0; j<BIN_PROFILE; j++)
+	{
+		HALO->nfw.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
+		HALO->nfw.y[j] = y_bin[j];
+	//	fprintf(stderr, "%d  %e  %e\n", j, x_bin[j+1], y_bin[j]);
+	}
+
 	free(x);
 	free(y);
+	free(R);
 	free(y_th);
 	free(e);
 //	fprintf(stderr, "ThisTask=%d, skip=%d, bins=%d, rho=%f, rs=%f, ChiSquare=%lf, Red=%lf\n", 
 //		ThisTask, skip, bins, rho0, rs, chi_sq, chi_sq/(bins-skip));
+}
+
+
+
+void average_nfw_profile(void)
+{
+	int k=0, i=0, m=0; 
+	int nHaloes, nHaloesCut;
+	int nfw_bin;
+	double nfw, nfw_tot;
+
+	struct halo_properties *HALOPROPERTIES;
+
+	INFO_MSG("Sorting halo radial velocities and concentrations");
+
+	nHaloesCut=n_haloes_per_criterion();
+	
+	if(Settings.use_sub == 1)
+	{
+		HALOPROPERTIES = SubHaloProperties;	
+	} 
+		else 
+	{
+		HALOPROPERTIES = HaloProperties;
+	}
+
+#ifdef WITH_MPI
+		nHaloes=Settings.n_haloes; 
+#else
+		nHaloes=Settings.n_threshold; 
+#endif
+
+		for(i=0; i<BIN_PROFILE; i++)
+		{
+			nfw_tot = 0;
+			nfw_bin = 0;
+			
+			m = 0;
+
+			for(k=0; k<nHaloes; k++)
+			{
+				if(halo_condition(k) == 1)
+				{
+					nfw = Haloes[m].nfw.y[i];
+
+						if(isnan(nfw) == 0 && nfw>0 && nfw < 1./0.)
+						{
+							nfw_tot += nfw;
+							nfw_bin++;
+						}
+		
+					m++;
+				}
+		
+			}
+
+			HALOPROPERTIES[HALO_INDEX].nfw.x[i] = Haloes[0].nfw.x[i];
+			HALOPROPERTIES[HALO_INDEX].nfw.y[i] = nfw_tot/nfw_bin;
+		}
 }
 
 
@@ -240,9 +319,11 @@ void best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, doubl
        	f.p = par.n;
        	f.params = &dat;
 
+	if(dat.n > 3)
+	{
 		/* Do the fit */
 		par.fitted_p = least_square_nl_fit(dat, par, f);
-
+	}
 		/* Set the correctly fitted parameters */
 		rs = gsl_vector_get(par.fitted_p,0);
 		rho0 = gsl_vector_get(par.fitted_p,1);

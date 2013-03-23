@@ -59,7 +59,7 @@ void print_all_subhalo_properties_to_one_file()
 	count = 1;
 	nTot = SubHaloProperties[HALO_INDEX].n_bins;
 	z = GrowthFac.z[Settings.use_cat];
- 	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_all_sub_statistics.dat");
+ 	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_all_sub_statistics.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("subhalo properties", out_url);
@@ -223,27 +223,46 @@ void print_average_profiles()
 	count = 1;
 	nTot = BIN_PROFILE;
 	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_avg_profiles.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_avg_profiles.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("average profiles", out_url);
 
 		fprintf(out_file,"#");
-		FILE_HEADER(out_file, "R/Rv_f  ", count);
-		FILE_HEADER(out_file, "f_gas   ", count);
-		FILE_HEADER(out_file, "R/Rv_rho", count);
+		FILE_HEADER(out_file, "R/Rv    ", count);
+		FILE_HEADER(out_file, "rho/rho0", count);
+#ifdef GAS
 		FILE_HEADER(out_file, "rho_gas ", count);
 		FILE_HEADER(out_file, "Ix/Ix0  ", count);
+		FILE_HEADER(out_file, "R/Rv_fra", count);
+		FILE_HEADER(out_file, "frac_gas", count);
+#endif
 		fprintf(out_file, "\n");
 	
 			for(i=0; i<nTot; i++) 
 			{
-				fprintf(out_file, "%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
+				if(HaloProperties[HALO_INDEX].nfw.x[i]==0)
+				{
+					double nan = 0./0.;
+					fprintf(out_file, "\t"); 
+					fprintf(out_file, "\t\t");
+#ifdef GAS
+					fprintf(out_file, "\t\t");
+					fprintf(out_file, "\t\t");
+#endif
+				} else {
+					fprintf(out_file, "%f", HaloProperties[HALO_INDEX].nfw.x[i]); 
+					fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].nfw.y[i]); 
+#ifdef GAS
+					fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
+					fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
+#endif
+				}
+#ifdef GAS
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.y[i]); 
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.x[i]); 
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
 				fprintf(out_file, "\n");
+#endif
 			}
 
 	fclose(out_file);
@@ -257,7 +276,7 @@ void print_correlation_function()
 	count = 1;
 	nTot = Xi.npts;
 	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_correlation_function.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_correlation_function.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("correlation function", out_url);
@@ -362,7 +381,7 @@ void print_all_halo_properties_to_one_file()
 	count = 1;
 	nTot = HaloProperties[HALO_INDEX].n_bins-1;
 	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_all_halo_statistical_properties.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_all_halo_statistical_properties.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("halo properties", out_url);
@@ -541,7 +560,7 @@ void print_axis_alignment()
 	count = 1;
 	nTot = HaloProperties[HALO_INDEX].r_bins-1;
 	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_axis_alignement.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_axis_alignement.dat");
 	out_file = fopen(out_url, "w");
 
 	DUMP_MSG("axis alignment", out_url);
@@ -573,17 +592,17 @@ void print_numerical_mass_function()
 {
 	count = 1;
 	nTot = MassFunc[MF_INDEX].bins-1;
-	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
 	out_file = fopen(out_url, "w");
 
 	DUMP_MSG("numerical mass function", out_url);
 
 		fprintf(out_file,"#");
 		FILE_HEADER(out_file, "M    ", count);
+		FILE_HEADER(out_file, "M_step", count);
 		FILE_HEADER(out_file, "n    ", count);
 		FILE_HEADER(out_file, "n_tot", count);
 		FILE_HEADER(out_file, "n_err", count);
-		FILE_HEADER(out_file, "M_step", count);
 		FILE_HEADER(out_file, "dn   ", count);
 		FILE_HEADER(out_file, "n_bin", count);
 		FILE_HEADER(out_file, "dn_err", count);
@@ -592,10 +611,10 @@ void print_numerical_mass_function()
 			for(i=0; i<nTot; i++) 
 			{
 				fprintf(out_file, "%e", MassFunc[MF_INDEX].mass[i]);
+				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].mass_halfstep[i]);
 				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].n[i]);
 				fprintf(out_file, "\t%d\t", MassFunc[MF_INDEX].n_tot[i]);
 				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].err[i]);
-				fprintf(out_file, "%e", MassFunc[MF_INDEX].mass_halfstep[i]);
 				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].dn[i]);
 				fprintf(out_file, "\t%d\t", MassFunc[MF_INDEX].n_bin[i]);
 				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].err_dn[i]);

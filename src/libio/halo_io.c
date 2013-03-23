@@ -253,7 +253,7 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc);
-			URLS->urls[n] = (char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls[n] = (char*) calloc(strlen(dummyline)+1, sizeof(char));
 			strcpy(URLS->urls[n], dummyline);
 			URLS->urls[n][strlen(dummyline)-1]='\0';
 		}
@@ -269,7 +269,7 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_sub);
-			URLS->urls_satellites[n] = (char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls_satellites[n] = (char*) calloc(strlen(dummyline)+1, sizeof(char));
 			strcpy(URLS->urls_satellites[n], dummyline);
 			URLS->urls_satellites[n][strlen(dummyline)-1]='\0';
 		}
@@ -285,7 +285,7 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_pro);
-			URLS->urls_profiles[n] = (char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls_profiles[n] = (char*) calloc(strlen(dummyline)+1, sizeof(char));
 			strcpy(URLS->urls_profiles[n], dummyline);
 			URLS->urls_profiles[n][strlen(dummyline)-1]='\0';
 		}
@@ -620,14 +620,14 @@ void read_profiles_file()
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf", 
-		&radius, &npart, &mass_r, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&radius, &npart, &mass_r, &dens, &overd, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a	// 24
 #else
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf", 
-		&radius, &npart, &mass_r, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&radius, &npart, &mass_r, &dens, &overd, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,  &a,    &a,     &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a,  &m_gas,&a,     &u_gas  // 27
 #endif
@@ -655,6 +655,10 @@ void read_profiles_file()
 #ifdef GAS
 					HALO[counter].gas_only.u[i] = u_gas;
 					HALO[counter].gas_only.m[i] = m_gas;
+#endif
+
+#ifdef USE_UNIT_MPC
+					HALO[counter].radius[i] *= 1e-3;	
 #endif
 			//fprintf(stderr,dummyline);
 			//fprintf(stderr, "\nHaloR  [%d][%d]=%e ", counter, i, HALO[counter].radius[i]);
