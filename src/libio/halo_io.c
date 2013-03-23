@@ -325,8 +325,8 @@ void set_halo_url()
 void read_halo_file()
 {
 	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
-	double a=0; // Dummy variable to read useless columns
-	double b, c, d;
+	float a=0; // Dummy variable to read useless columns
+	float b, c, d;
 	char dummyline[LINE_SIZE]; 
 	FILE *h_file;
 
@@ -390,31 +390,31 @@ void read_halo_file()
 			{
 				sscanf(dummyline,
 #ifndef GAS
-	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
-	 %lf %lf %lf \
+	"%llu %llu %d  %f %d  %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %d  %f %f %f \
+	 %f %f %f \
 	",
 #else // There is a gas component
 #ifndef EXTRA_GAS
-	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
-	 %lf %lf %lf \
-	 %d  %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
+	"%llu %llu %d  %f %d  %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %d  %f %f %f \
+	 %f %f %f \
+	 %d  %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
 	", 
 #else // Use extra gas columns
-	"%llu %llu %d  %lf %d  %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %d  %lf %lf %lf \
-	 %lf %lf %lf \
-	 %d  %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf %lf %lf %lf \
-	 %lf %lf %lf %lf %lf %lf %lf\
+	"%llu %llu %d  %f %d  %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %d  %f %f %f \
+	 %f %f %f \
+	 %d  %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %f %f %f %f \
+	 %f %f %f %f %f %f %f\
 	", 
 #endif // Extra Gas
 #endif // GAS

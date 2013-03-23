@@ -225,54 +225,54 @@ extern struct halo
 	int mass; 
 	int all;
 
-	double X[3];
-	double V[3];
-	double L[3];
-	double Ea[3]; 
-	double a[3];
+	float X[3];
+	float V[3];
+	float L[3];
+	float Ea[3]; 
+	float a[3];
 
-	double Mvir;
-	double Rvir;
-	double Rmax;
-	double Vmax;
-	double Ekin;
-	double Epot;
-	double th_vir;
-	double abs_th_vir;
-	double AngMom;
-	double Jcirc;
-	double ecc;
-	double lambda;
-	double lambdaE;
+	float Mvir;
+	float Rvir;
+	float Rmax;
+	float Vmax;
+	float Ekin;
+	float Epot;
+	float th_vir;
+	float abs_th_vir;
+	float AngMom;
+	float Jcirc;
+	float ecc;
+	float lambda;
+	float lambdaE;
 
-	double shape;
-	double triax;
-	double z_form;
+	float shape;
+	float triax;
+	float z_form;
 
 	// NFW parameters
-	double c;
-	double rho0;
-	double r2;
-	double c_nfw;
-	double rho0_nfw;
-	double rs_nfw;
+	float c;
+	float rho0;
+	float r2;
+	float c_nfw;
+	float rho0_nfw;
+	float rs_nfw;
 	
 	struct
 	{
-		double c; // NFW only
-		double rs;
-		double rho0;
-		double ix0; // X-ray surface brightness parameter
-		double beta; // X-ray surface brightness parameter / beta model
-		double chi;
-		double gof;
-		double per;
+		float c; // NFW only
+		float rs;
+		float rho0;
+		float ix0; // X-ray surface brightness parameter
+		float beta; // X-ray surface brightness parameter / beta model
+		float chi;
+		float gof;
+		float per;
 	} fit_nfw, fit_poly, fit_beta, fit_IX;
 
 	struct
 	{
-		double x[BIN_PROFILE];
-		double y[BIN_PROFILE];
+		float x[BIN_PROFILE];
+		float y[BIN_PROFILE];
 	} f_gas, nfw, rho_gas, i_x;
 
 	int *npart;
@@ -285,38 +285,38 @@ extern struct halo
 	struct
 	{
 		int N;
-		double M;
-		double vir;
-		double Ekin;
-		double Epot;
+		float M;
+		float vir;
+		float Ekin;
+		float Epot;
 #ifdef EXTRA_GAS
-		double a[3];
-		double Ea[3];
-		double X[3];
-		double V[3];
+		float a[3];
+		float Ea[3];
+		float X[3];
+		float V[3];
 #endif
 	} gas, dm;
 
 	struct
 	{
-		double lambda;
-		double lambdaE;
-		double b_fraction;
-		double Cum_u;
-		double T_mw; // Mass-weighted temperature
-		double I_X0; // X ray thermal emission
-		double shape;
-		double triax;
+		float lambda;
+		float lambdaE;
+		float b_fraction;
+		float Cum_u;
+		float T_mw; // Mass-weighted temperature
+		float I_X0; // X ray thermal emission
+		float shape;
+		float triax;
 		
 		// Alignment angle of the cluster/gas major axis
-		double gas_dm_costh;
+		float gas_dm_costh;
 
 		struct
 		{
-			double cm;
-			double shape;
-			double triax;
-			double lambda;
+			float cm;
+			float shape;
+			float triax;
+			float lambda;
 		} diff;
 
 		double *m;
