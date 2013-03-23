@@ -151,16 +151,14 @@ void average_gas_profiles(void)
 	
 			ix_tot = 0;
 			ix_bin = 0;
-			
-			m = 0;
 
 			for(k=0; k<nHaloes; k++)
 			{
 				if(halo_condition(k) == 1)
 				{
-					f = Haloes[m].f_gas.y[i];
-					rho = Haloes[m].rho_gas.y[i];
-					ix = Haloes[m].i_x.y[i];
+					f = Haloes[k].f_gas.y[i];
+					rho = Haloes[k].rho_gas.y[i];
+					ix = Haloes[k].i_x.y[i];
 
 						if(isnan(f) == 0 && f>0)
 						{
@@ -179,8 +177,6 @@ void average_gas_profiles(void)
 							ix_tot += ix;
 							ix_bin++;
 						}
-		
-					m++;
 				}
 		
 			}

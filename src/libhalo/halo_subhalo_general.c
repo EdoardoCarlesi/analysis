@@ -342,6 +342,22 @@ void free_halo_properties()
 
 
 
+void list_halo_sample(int *index)
+{
+	int i=0, m=0;
+
+	for(i=0; i<Settings.n_haloes; i++)
+	{
+		if(halo_condition(i) == 1)
+		{
+			index[m] = i;
+			m++;
+		}
+	}
+}
+
+
+
 void free_halo_profiles()
 {
 	int i=0;

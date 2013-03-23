@@ -26,16 +26,16 @@ model1='cde000'
 model2='cde000'
 box_size=250
 particle_number=1024
-tot_snaps=57
+tot_snaps=59
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=57
+catalogue_number=59
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=20
+n_bins=16
 n_bins_th=200
-r_bins=10
+r_bins=12
 
 # Scale of P(k) for growth factor calculation
 k=0.13
@@ -50,8 +50,8 @@ m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=3.e+11
-virial=2.5
+m_th=0.5e+13
+virial=1.5
 spin=0.15
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
@@ -61,7 +61,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=5
+use_criterion=1
 
 #Computer settings
 swap=0
@@ -94,7 +94,7 @@ base_temp=$base_analysis/temp/
 
 dir_ahf=ahf
 dir_snaps=snaps
-dir_halo=catalogues_cat
+dir_halo=catalogues
 
 # General file prefixes 
 prefix=$base_out$model1'-'$box_size'-'$particle_number'-'

@@ -174,14 +174,12 @@ void average_nfw_profile(void)
 		{
 			nfw_tot = 0;
 			nfw_bin = 0;
-			
-			m = 0;
 
 			for(k=0; k<nHaloes; k++)
 			{
 				if(halo_condition(k) == 1)
 				{
-					nfw = Haloes[m].nfw.y[i];
+					nfw = Haloes[k].nfw.y[i];
 
 						if(isnan(nfw) == 0 && nfw>0 && nfw < 1./0.)
 						{
@@ -189,7 +187,6 @@ void average_nfw_profile(void)
 							nfw_bin++;
 						}
 		
-					m++;
 				}
 		
 			}
