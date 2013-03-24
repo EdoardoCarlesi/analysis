@@ -22,7 +22,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde000'
+model1='cde099'
 model2='cde000'
 box_size=250
 particle_number=1024
@@ -30,7 +30,7 @@ tot_snaps=59
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=59
+catalogue_number=57
 
 # Number of bins for general distributions and for the radial alignment
 n_bins=16

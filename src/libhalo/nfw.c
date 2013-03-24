@@ -119,7 +119,7 @@ void fit_halo_profile(struct halo *HALO)
 		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 		rMin = 2 * Rvir_frac_min;
-		rMax = 1.0001;
+		rMax = HALO->radius[bins-1]/r;
 		x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
 		average_bin(R, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);

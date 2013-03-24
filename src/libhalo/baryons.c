@@ -287,7 +287,7 @@ void fit_I_X(struct halo *HALO)
 			e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 			rMin = 2 * Rvir_frac_min; 
-			rMax = 1.001 * R / HALO->Rvir;
+			rMax = R / HALO->Rvir;
 
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
