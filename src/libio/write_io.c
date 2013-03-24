@@ -596,9 +596,9 @@ void print_nfw()
 
 void print_halo_best_fit_results()
 {
-	out_file=fopen(out_url,"w");
-	sprintf(out_url, "%s%s", Urls.output_prefix,"halo_best_fit.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_halo_best_fit.dat");
 	DUMP_MSG("best fit", out_url);
+	out_file=fopen(out_url,"w");
 	
 		fprintf(out_file, "#Mass-concentration best fit values, c_0=%f, c_beta  :%f \n", 
 			HaloProperties[HALO_INDEX].c_0,HaloProperties[HALO_INDEX].c_beta );
@@ -611,7 +611,7 @@ void print_halo_best_fit_results()
 		fprintf(out_file, "\n");
 
 #ifdef GAS
-			fprintf(out_file, "#Mass-T best fit values, ln_M0: %lf, alpha :%lf  \n", 
+			fprintf(out_file, "#Mass-T best fit values, T0: %lf, alpha :%lf  \n", 
 				HaloProperties[HALO_INDEX].T0, HaloProperties[HALO_INDEX].alpha);
 			fprintf(out_file, "#Average beta:%lf\n", HaloProperties[HALO_INDEX].beta0);
 #endif
