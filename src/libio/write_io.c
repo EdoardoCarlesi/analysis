@@ -394,13 +394,13 @@ void print_all_halos()
 			if(halo_condition(i)==1)
 			{
 				fprintf(out_file, "%e",    HaloProperties[HALO_INDEX].mass[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].conc[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.virial[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.lambda[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.shape[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.triax[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].conc[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.virial[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.lambda[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.shape[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.triax[i]);
 #ifdef GAS
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_T[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].gas_T[i]);
 				fprintf(out_file, "\t%f",  HaloProperties[HALO_INDEX].gas_fraction[i]);
 #endif
 			}

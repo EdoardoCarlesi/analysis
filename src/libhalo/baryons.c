@@ -218,7 +218,7 @@ double I_X(double r, double rc, double beta, double rho0)
 	// Fits X-ray surface and beta gas density profile
 void fit_I_X(struct halo *HALO)
 {
-	double rc, A=0, a=0, rho0, ix0; 
+	double rc, u=0, A=0, a=0, rho0, ix0; 
 	double *r, *x, *y, *e, *y_th, *params; 
 	double rMax, rMin, *x_bin, *y_bin, *e_bin;
 	double beta, chi, per, gof, R, V;
@@ -252,6 +252,7 @@ void fit_I_X(struct halo *HALO)
 		{
 			R = HALO->radius[j];
 			V = 4./3. * M_PI * pow3(R);
+			u += HALO->gas_only.u[j];			
 
 			if(R > Rvir_frac_min)
 			{
@@ -271,7 +272,9 @@ void fit_I_X(struct halo *HALO)
 			
 			params[0] = a;
 			params[1] = A;
-			
+
+			HALO->gas_only.T_mw = convert_u_to_T(u) / HALO->gas.N;	
+		
 			params = best_fit_power_law(x, y, e, N, params);
 	
 			a = params[0];
