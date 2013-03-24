@@ -365,12 +365,12 @@ void print_evolution_to_file()
 
 
 
-void print_all_halos()
+void print_all_haloes()
 {
 	count = 1;
 	nTot = Settings.n_haloes;
 	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_all_haloes.dat");
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_tot_haloes.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("halo", out_url);
@@ -388,24 +388,25 @@ void print_all_halos()
 #endif
 		fprintf(out_file, "\n");
 
-			for(i=0; i<nTot; i++)	
-			{
+		for(i=0; i<nTot; i++)	
+		{
 
 			if(halo_condition(i)==1)
 			{
-				fprintf(out_file, "%e",    HaloProperties[HALO_INDEX].mass[i]);
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].conc[i]);
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.virial[i]);
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.lambda[i]);
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.shape[i]);
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].halo.triax[i]);
+				fprintf(out_file, "%e", Haloes[i].Mvir); 
+				fprintf(out_file, "\t%f", Haloes[i].c);
+				fprintf(out_file, "\t%f", Haloes[i].abs_th_vir);
+				fprintf(out_file, "\t%f", Haloes[i].lambda);
+				fprintf(out_file, "\t%f", Haloes[i].shape);
+				fprintf(out_file, "\t%f", Haloes[i].triax);
 #ifdef GAS
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].gas_T[i]);
-				fprintf(out_file, "\t%f",  HaloProperties[HALO_INDEX].gas_fraction[i]);
+				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_mw);
+				fprintf(out_file, "\t%f", Haloes[i].gas_only.b_fraction);
+				fprintf(out_file, "\n");
 #endif
 			}
-				fprintf(out_file, "\n");
-			}
+
+		}
 
 	fclose(out_file);
 }

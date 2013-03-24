@@ -273,7 +273,7 @@ void fit_I_X(struct halo *HALO)
 			params[0] = a;
 			params[1] = A;
 
-			HALO->gas_only.T_mw = convert_u_to_T(u) / HALO->gas.N;	
+			//HALO->gas_only.T_mw = convert_u_to_T(u) / HALO->gas.N;	
 		
 			params = best_fit_power_law(x, y, e, N, params);
 	

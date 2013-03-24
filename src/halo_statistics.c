@@ -72,6 +72,7 @@ int main(int argc, char **argv)
 		compute_halo_properties();
 		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
+		print_all_haloes();
 
 #ifdef GAS
 		average_gas_profiles();
