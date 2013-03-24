@@ -193,6 +193,7 @@ void average_nfw_profile(void)
 
 			HALOPROPERTIES[HALO_INDEX].nfw.x[i] = Haloes[0].nfw.x[i];
 			HALOPROPERTIES[HALO_INDEX].nfw.y[i] = nfw_tot/nfw_bin;
+			HALOPROPERTIES[HALO_INDEX].nfw.n[i] = nfw_bin;
 		}
 }
 

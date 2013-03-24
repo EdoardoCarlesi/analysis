@@ -440,6 +440,7 @@ extern struct halo_properties
 
 	struct
 	{
+		int n[BIN_PROFILE];
 		double x[BIN_PROFILE];
 		double y[BIN_PROFILE];
 	} f_gas, nfw, rho_gas, i_x;
@@ -455,10 +456,17 @@ extern struct halo_properties
 	double *p_gas_dm_cth;
 
 	// Best fit parameters
+	double beta0; // Gas density
 	double l_0;
 	double l_sig;
 	double c_0;
 	double c_beta;
+	double vel_0;
+	double vel_beta;
+
+	// Best fit parameters for the M-T relation
+	double T0;
+	double alpha;
 
 	// Subhalo stuff
 	int *n_r_sub;
@@ -484,17 +492,13 @@ extern struct halo_properties
 	int *n_vel_sub;
 	double *vel_sub;
 	double *p_vel_sub;
-	double vel_0;
+	double vel_0_sub;
 	
 	double *ecc;
 
 	int *n_sub;
 	int *cum_n_sub;
 	int *n_ecc;
-
-	// Best fit parameters for the M-T relation
-	double ln_M0;
-	double T_alpha;
 
 	double *gas_T;
 	double *gas_u;

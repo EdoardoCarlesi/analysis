@@ -773,12 +773,14 @@ void sort_mass_relations()
 			param_conc[1] = pow(1.e-14, param_conc[0]);
 			param_conc = best_fit_power_law(mass_bin, conc_bin, conc_err, nBins-1, param_conc);
 			HALOPROPERTIES[HALO_INDEX].c_0 = param_conc[1] * pow(1.e14, param_conc[0]);
-			//F_PRINT("c_0=", c_0);
+			HALOPROPERTIES[HALO_INDEX].c_beta = param_conc[0];
 	
 			INFO_MSG("Fitting Mass-Radial velocity relation to a power law");
 			param_vel[0] = 0.5; 
 			param_vel[1] = pow(1.e-14, param_vel[0]);
 			param_vel = best_fit_power_law(mass_bin, vel_bin, vel_err, nBins-1, param_vel);
+			HALOPROPERTIES[HALO_INDEX].vel_0 = param_vel[1] * pow(1.e14, param_vel[0]);
+			HALOPROPERTIES[HALO_INDEX].vel_beta = param_vel[0];
 
 	free(mass_bin);
 	free(mass);
@@ -957,7 +959,11 @@ void sort_gas_relations()
 				
 			params = best_fit_power_law(mass_bin, temperature_bin, temperature_err, nBins-1, params);
 
-//		M_0 = -log(a[1])/a[0];
+		M_0 = -log(params[1])/params[0]/log(10);
+
+		HALOPROPERTIES[HALO_INDEX].T0=M_0;
+		HALOPROPERTIES[HALO_INDEX].alpha=params[0];
+		HALOPROPERTIES[HALO_INDEX].beta0=average(beta,n);;
 
 //		fprintf(stdout, "M-Tx    a:%lf   M_0 10e+%f SM\n",a[0],M_0/log(10));
 		
