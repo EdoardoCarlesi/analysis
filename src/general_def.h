@@ -396,7 +396,10 @@ extern struct halo_properties
 	int *N_pairs;
 
 	// The masses stored here are in different than massfunc, since include the mass/npart threshold
-	double *mass; 
+	double *mass;
+	
+	// Number of entries per mass bin 
+	int *n_entry; 	
 
 	// Parameters that correlate with the mass
 	double *vel;
