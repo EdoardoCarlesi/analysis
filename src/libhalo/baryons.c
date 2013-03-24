@@ -183,10 +183,13 @@ void average_gas_profiles(void)
 
 			HALOPROPERTIES[HALO_INDEX].f_gas.x[i] = Haloes[0].f_gas.x[i];
 			HALOPROPERTIES[HALO_INDEX].f_gas.y[i] = f_tot/f_bin;
+			HALOPROPERTIES[HALO_INDEX].f_gas.n[i] = f_bin;
 			HALOPROPERTIES[HALO_INDEX].rho_gas.x[i] = Haloes[0].rho_gas.x[i];
 			HALOPROPERTIES[HALO_INDEX].rho_gas.y[i] = rho_tot/rho_bin;
+			HALOPROPERTIES[HALO_INDEX].rho_gas.n[i] = rho_bin;
 			HALOPROPERTIES[HALO_INDEX].i_x.x[i] = Haloes[0].i_x.x[i];
 			HALOPROPERTIES[HALO_INDEX].i_x.y[i] = ix_tot/ix_bin;
+			HALOPROPERTIES[HALO_INDEX].i_x.n[i] = ix_bin;
 
 			if(Haloes[0].rho_gas.x[i]==0)
 			{

@@ -79,6 +79,8 @@ int main(int argc, char **argv)
 		average_nfw_profile();
 		print_average_profiles();
 
+		print_halo_best_fit_results();
+
 		sort_axis_alignment();
 		print_axis_alignment();
 
