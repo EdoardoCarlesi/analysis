@@ -953,13 +953,13 @@ void sort_gas_relations()
 			}
 	
 			params[0] = 1.5; 
-			params[1] = pow(1.e-15, params[0]);
+			params[1] = pow(1.e-14, params[0]);
 			
 			INFO_MSG("Fitting Mass-Temperature relation to a power law");
 				
 			params = best_fit_power_law(mass_bin, temperature_bin, temperature_err, nBins-1, params);
 
-		M_0 = -log(params[1])/params[0]/log(10);
+		M_0 = -log(params[1])/params[0]/14;//log(10);
 
 		HALOPROPERTIES[HALO_INDEX].T0=M_0;
 		HALOPROPERTIES[HALO_INDEX].alpha=params[0];
