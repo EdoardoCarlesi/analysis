@@ -253,7 +253,7 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc);
-			URLS->urls[n] = (char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls[n] = (char*) calloc(strlen(dummyline)+1, sizeof(char));
 			strcpy(URLS->urls[n], dummyline);
 			URLS->urls[n][strlen(dummyline)-1]='\0';
 		}
@@ -269,7 +269,7 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_sub);
-			URLS->urls_satellites[n] = (char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls_satellites[n] = (char*) calloc(strlen(dummyline)+1, sizeof(char));
 			strcpy(URLS->urls_satellites[n], dummyline);
 			URLS->urls_satellites[n][strlen(dummyline)-1]='\0';
 		}
@@ -285,7 +285,7 @@ void get_halo_files_urls()
 		for(n=0; n<URLS->nCatalogueFiles; n++)
 		{
 			fgets(dummyline,200,fc_pro);
-			URLS->urls_profiles[n] = (char*) calloc(strlen(dummyline), sizeof(char));
+			URLS->urls_profiles[n] = (char*) calloc(strlen(dummyline)+1, sizeof(char));
 			strcpy(URLS->urls_profiles[n], dummyline);
 			URLS->urls_profiles[n][strlen(dummyline)-1]='\0';
 		}
