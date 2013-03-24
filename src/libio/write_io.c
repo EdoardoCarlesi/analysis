@@ -126,7 +126,7 @@ void print_all_subhalo_properties_to_one_file()
 			for(i=0; i<nTot; i++)	
 			{
 				fprintf(out_file, "%e",    SubHaloProperties[HALO_INDEX].mass[i]);
-				fprintf(out_file, "\t%d", SubHaloProperties[HALO_INDEX].n_entry[i]);
+				fprintf(out_file, "\t%d\t", SubHaloProperties[HALO_INDEX].n_entry[i]);
 				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].vel[i]);
 				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].conc[i]);
 				fprintf(out_file, "\t%lf", SubHaloProperties[HALO_INDEX].halo.virial[i]);
@@ -236,7 +236,7 @@ void print_average_profiles()
 #ifdef GAS
 		FILE_HEADER(out_file, "rho_gas ", count);
 		FILE_HEADER(out_file, "Ix/Ix0  ", count);
-		FILE_HEADER(out_file, "R/Rv_fra", count);
+		//FILE_HEADER(out_file, "R/Rv_fra", count);
 		FILE_HEADER(out_file, "frac_gas", count);
 #endif
 		fprintf(out_file, "\n");
@@ -248,7 +248,7 @@ void print_average_profiles()
 #ifdef GAS
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
+				//fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.y[i]); 
 				fprintf(out_file, "\n");
 #endif
@@ -368,7 +368,7 @@ void print_evolution_to_file()
 void print_all_halo_properties_to_one_file()
 {
 	count = 1;
-	nTot = HaloProperties[HALO_INDEX].n_bins-1;
+	nTot = HaloProperties[HALO_INDEX].n_bins;
 	z = GrowthFac.z[Settings.use_cat];
 	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_all_halo_statistical_properties.dat");
 	out_file = fopen(out_url,"w");

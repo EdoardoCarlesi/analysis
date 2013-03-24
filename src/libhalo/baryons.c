@@ -95,8 +95,8 @@ void sort_f_gas_profile(struct halo *HALO)
 		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
-			rMin = Rvir_frac_min;
-			rMax = F_MAX * R/HALO->Rvir;
+			rMin = 2 * Rvir_frac_min;
+			rMax = F_MAX * 1.01; //R/HALO->Rvir;
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
 		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
@@ -122,7 +122,7 @@ void average_gas_profiles(void)
 
 	struct halo_properties *HALOPROPERTIES;
 
-	INFO_MSG("Sorting halo radial velocities and concentrations");
+	INFO_MSG("Sorting halo gas profiles");
 
 	nHaloesCut=n_haloes_per_criterion();
 	

@@ -23,17 +23,17 @@ fi
 
 # Model and simulation ettings
 model1='cde099'
-model2='cde000'
+model2='cde099'
 box_size=250
 particle_number=1024
-tot_snaps=59
+tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=57
+catalogue_number=61
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=16
+n_bins=15
 n_bins_th=200
 r_bins=12
 
@@ -61,7 +61,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=1
+use_criterion=5
 
 #Computer settings
 swap=0

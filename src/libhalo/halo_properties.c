@@ -665,8 +665,11 @@ void sort_mass_relations()
 
 	INFO_MSG("Sorting halo radial velocities and concentrations");
 
-	nBins=Settings.n_bins;
-	nHaloesCut=n_haloes_per_criterion();
+	nBins = Settings.n_bins;
+
+//	D_PRINT("nbins=", nBins);
+
+	nHaloesCut = n_haloes_per_criterion();
 	
 	if(Settings.use_sub == 1)
 	{
@@ -695,7 +698,7 @@ void sort_mass_relations()
 		chi = (double*) calloc(nHaloesCut, sizeof(double));	
 
 		mass_bin = (double*) calloc(nBins, sizeof(double));	
-		n_mass = (int*) calloc(nBins, sizeof(int));	
+		n_mass = (int*) calloc(nBins-1, sizeof(int));	
 		vel_bin = (double*) calloc(nBins-1, sizeof(double));	
 		vel_err = (double*) calloc(nBins-1, sizeof(double));	
 		vir_bin = (double*) calloc(nBins-1, sizeof(double));	
@@ -739,9 +742,12 @@ void sort_mass_relations()
 				m++;
 			}
 		}
+			nHaloesCut=m;
 
-			mMin = F_MIN*minimum(mass, nHaloesCut);
-			mMax = F_MAX*maximum(mass, nHaloesCut);
+			mMin = F_MIN * minimum(mass, nHaloesCut);
+			mMax = F_MAX * maximum(mass, nHaloesCut);
+
+			F_PRINT("\nMMAX=",mMax);
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
