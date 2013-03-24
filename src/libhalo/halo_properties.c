@@ -647,7 +647,7 @@ void sort_nfw_parameters()
 
 void sort_mass_relations()
 {
-	int i=0, m=0, nBins, nHaloesCut, nHaloes; 
+	int i=0, m=0, *n_mass, nBins, nHaloesCut, nHaloes; 
 	double mMax, mMin;
 	double *vel_bin, *vel_err, *mass, *vel, *mass_bin; 
 	double *vir_bin, *vir_err, *vir; 
@@ -695,6 +695,7 @@ void sort_mass_relations()
 		chi = (double*) calloc(nHaloesCut, sizeof(double));	
 
 		mass_bin = (double*) calloc(nBins, sizeof(double));	
+		n_mass = (int*) calloc(nBins, sizeof(int));	
 		vel_bin = (double*) calloc(nBins-1, sizeof(double));	
 		vel_err = (double*) calloc(nBins-1, sizeof(double));	
 		vir_bin = (double*) calloc(nBins-1, sizeof(double));	
@@ -753,10 +754,12 @@ void sort_mass_relations()
 			average_bin(mass, per, mass_bin, per_bin, per_err, nBins, nHaloesCut);
 			average_bin(mass, gof, mass_bin, gof_bin, gof_err, nBins, nHaloesCut);
 			average_bin(mass, chi, mass_bin, chi_bin, chi_err, nBins, nHaloesCut);
+			lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
 
 			for(i=0; i<nBins-1; i++)	
 			{
 				HALOPROPERTIES[HALO_INDEX].mass[i]=0.5*(mass_bin[i]+mass_bin[i+1]);
+				HALOPROPERTIES[HALO_INDEX].n_entry[i]=n_mass[i];
 				HALOPROPERTIES[HALO_INDEX].vel[i]=vel_bin[i];
 				HALOPROPERTIES[HALO_INDEX].halo.virial[i]=vir_bin[i];
 				HALOPROPERTIES[HALO_INDEX].conc[i]=conc_bin[i];
