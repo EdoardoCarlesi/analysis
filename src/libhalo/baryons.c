@@ -96,7 +96,7 @@ void sort_f_gas_profile(struct halo *HALO)
 		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 			rMin = Rvir_frac_min;
-			rMax = 1.;
+			rMax = F_MAX * R/HALO->Rvir;
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
 		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
@@ -290,7 +290,7 @@ void fit_I_X(struct halo *HALO)
 			e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 			rMin = 2 * Rvir_frac_min; 
-			rMax = R / HALO->Rvir;
+			rMax = F_MAX * R / HALO->Rvir;
 
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 

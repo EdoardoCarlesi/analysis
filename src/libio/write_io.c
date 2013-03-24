@@ -243,24 +243,11 @@ void print_average_profiles()
 	
 			for(i=0; i<nTot; i++) 
 			{
-				if(HaloProperties[HALO_INDEX].nfw.x[i]==0)
-				{
-					double nan = 0./0.;
-					fprintf(out_file, "\t"); 
-					fprintf(out_file, "\t\t");
+				fprintf(out_file, "%f", HaloProperties[HALO_INDEX].nfw.x[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].nfw.y[i]); 
 #ifdef GAS
-					fprintf(out_file, "\t\t");
-					fprintf(out_file, "\t\t");
-#endif
-				} else {
-					fprintf(out_file, "%f", HaloProperties[HALO_INDEX].nfw.x[i]); 
-					fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].nfw.y[i]); 
-#ifdef GAS
-					fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
-					fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
-#endif
-				}
-#ifdef GAS
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.y[i]); 
 				fprintf(out_file, "\n");

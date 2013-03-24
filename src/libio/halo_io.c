@@ -620,14 +620,14 @@ void read_profiles_file()
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf", 
-		&radius, &npart, &mass_r, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&radius, &npart, &mass_r, &dens, &overd, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a	// 24
 #else
 		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
 		%lf  %lf  %lf  %lf  %lf  %lf  %lf", 
-		&radius, &npart, &mass_r, &overd, &dens, &v_circ, &a, &a, &a, &a, 
+		&radius, &npart, &mass_r, &dens, &overd, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,  &a,    &a,     &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a,  &m_gas,&a,     &u_gas  // 27
 #endif
@@ -655,6 +655,9 @@ void read_profiles_file()
 #ifdef GAS
 					HALO[counter].gas_only.u[i] = u_gas;
 					HALO[counter].gas_only.m[i] = m_gas;
+#endif
+#ifdef USE_UNIT_MPC
+					HALO[counter].radius[i] *= 1.e-3; 
 #endif
 			//fprintf(stderr,dummyline);
 			//fprintf(stderr, "\nHaloR  [%d][%d]=%e ", counter, i, HALO[counter].radius[i]);

@@ -959,7 +959,7 @@ void sort_gas_relations()
 				
 			params = best_fit_power_law(mass_bin, temperature_bin, temperature_err, nBins-1, params);
 
-		M_0 = -log(params[1])/params[0]/14;//log(10);
+		M_0 = -log(params[1])/params[0]/14/log(10);
 
 		HALOPROPERTIES[HALO_INDEX].T0=M_0;
 		HALOPROPERTIES[HALO_INDEX].alpha=params[0];

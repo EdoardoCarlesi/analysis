@@ -100,7 +100,7 @@ void fit_halo_profile(struct halo *HALO)
 		for(j=skip; j<bins; j++)
 		{
 			y_th[j-skip] = nfw(HALO->radius[j], HALO->fit_nfw.rs, HALO->fit_nfw.rho0);
-			//fprintf(stderr, "%d) R=%e, %e %e  %e\n", j, R[j-skip], rho0, Y[j-skip], y_th[j-skip]);
+			fprintf(stderr, "%d) R=%e, %e %e  %e\n", j, R[j-skip], rho0, y[j-skip], y_th[j-skip]);
 		}
 
 	// Various estimators for the goodness of fit
@@ -119,7 +119,7 @@ void fit_halo_profile(struct halo *HALO)
 		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 		rMin = 2 * Rvir_frac_min;
-		rMax = HALO->radius[bins-1]/r;
+		rMax = F_MAX * HALO->radius[bins-1]/r;
 		x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
 		average_bin(R, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
@@ -128,7 +128,7 @@ void fit_halo_profile(struct halo *HALO)
 	{
 		HALO->nfw.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
 		HALO->nfw.y[j] = y_bin[j];
-	//	fprintf(stderr, "%d  %e  %e\n", j, x_bin[j+1], y_bin[j]);
+		fprintf(stderr, "%d  %e  %e\n", j, x_bin[j+1], y_bin[j]);
 	}
 
 	free(x);
