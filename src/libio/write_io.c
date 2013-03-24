@@ -365,6 +365,54 @@ void print_evolution_to_file()
 
 
 
+void print_all_halos()
+{
+	count = 1;
+	nTot = Settings.n_haloes;
+	z = GrowthFac.z[Settings.use_cat];
+	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_all_haloes.dat");
+	out_file = fopen(out_url,"w");
+
+	DUMP_MSG("halo", out_url);
+
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "Mass  ", count);
+		FILE_HEADER(out_file, "conc  ", count);
+		FILE_HEADER(out_file, "virial", count);
+		FILE_HEADER(out_file, "lambda", count);
+		FILE_HEADER(out_file, "shape ", count);
+		FILE_HEADER(out_file, "triax ", count);
+#ifdef GAS
+		FILE_HEADER(out_file, "gas_T ", count);
+		FILE_HEADER(out_file, "gas_fr", count);
+#endif
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++)	
+			{
+
+			if(halo_condition(i)==1)
+			{
+				fprintf(out_file, "%e",    HaloProperties[HALO_INDEX].mass[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].conc[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.virial[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.lambda[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.shape[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.triax[i]);
+#ifdef GAS
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_T[i]);
+				fprintf(out_file, "\t%f",  HaloProperties[HALO_INDEX].gas_fraction[i]);
+#endif
+			}
+				fprintf(out_file, "\n");
+			}
+
+	fclose(out_file);
+}
+
+
+
+
 void print_all_halo_properties_to_one_file()
 {
 	count = 1;
@@ -427,7 +475,7 @@ void print_all_halo_properties_to_one_file()
 			{
 
 				fprintf(out_file, "%e",    HaloProperties[HALO_INDEX].mass[i]);
-				fprintf(out_file, "\t%d",  HaloProperties[HALO_INDEX].n_entry[i]);
+				fprintf(out_file, "\t%d\t",  HaloProperties[HALO_INDEX].n_entry[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].vel[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].conc[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.virial[i]);
