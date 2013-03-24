@@ -226,6 +226,8 @@ void initialize_halo_properties_structure()
 		SubHaloProperties[HALO_INDEX].cosphi = (double*) calloc(nBins, sizeof(double));
 		SubHaloProperties[HALO_INDEX].cosphi_count = (double*) calloc(nBins, sizeof(double));
 #ifdef GAS
+		HaloProperties[HALO_INDEX].T = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].n_T = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].cm = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].p_cm = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas_dm_cth = (double*) calloc(nBins, sizeof(double));

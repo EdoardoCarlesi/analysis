@@ -436,6 +436,8 @@ void print_all_halo_properties_to_one_file()
 		FILE_HEADER(out_file, "gofnfw", count);
 		FILE_HEADER(out_file, "g_nfw ", count);
 		FILE_HEADER(out_file, "pg_nfw", count);
+		FILE_HEADER(out_file, "T     ", count);
+		FILE_HEADER(out_file, "n(>T) ", count);
 		FILE_HEADER(out_file, "c     ", count);
 		FILE_HEADER(out_file, "P(c)  ", count);
 		FILE_HEADER(out_file, "l     ", count);
@@ -486,6 +488,8 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].fit_nfw.gof[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.gof[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.p_gof[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].T[i]);
+				fprintf(out_file, "\t%e", HaloProperties[HALO_INDEX].n_T[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].c[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_c[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.l[i]);

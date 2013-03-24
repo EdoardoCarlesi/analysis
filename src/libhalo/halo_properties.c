@@ -26,6 +26,7 @@ void sort_nfw_parameters(void);
 void sort_mass_relations(void);
 
 #ifdef GAS
+void sort_T_mass_function(void);
 void sort_gas_relations(void);
 void sort_alignment_and_displacement(void);
 #endif
@@ -815,6 +816,68 @@ void sort_mass_relations()
 
 
 #ifdef GAS
+void sort_T_mass_function()
+{
+	int nBins, nHaloesCut, nHaloes, i=0, m=0; 
+	int *temp_bin_y; 
+	double *temp, *temp_bin_x;
+	double tMax, tMin, volume;
+	struct halo_properties *HALOPROPERTIES;
+
+	INFO_MSG("Sorting X-ray temperature function"); 
+
+	nBins = Settings.n_bins;
+	nHaloesCut = n_haloes_per_criterion();
+
+	if(Settings.use_sub == 1)
+	{
+		HALOPROPERTIES = SubHaloProperties;	
+	} 	
+		else 
+	{
+		HALOPROPERTIES = HaloProperties;
+	}
+
+
+#ifdef WITH_MPI
+		nHaloes = Settings.n_haloes; 
+#else
+		nHaloes = Settings.n_threshold; 
+#endif
+
+	temp = (double*) calloc(nHaloes, sizeof(double));	
+	temp_bin_x = (double*) calloc(nBins, sizeof(double));	
+	temp_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+
+		for(i=0; i<nHaloes; i++)
+		{
+			if(halo_condition(i) == 1)
+			{
+				temp[m] = Haloes[i].gas_only.T_mw;
+				m++;
+			}
+		}
+
+			tMax = F_MAX*maximum(temp, nHaloesCut);  
+			tMin = F_MIN*minimum(temp, nHaloesCut);
+
+			temp_bin_x = lin_stepper(tMin, tMax, nBins);
+			lin_bin(temp, temp_bin_x, nBins, nHaloesCut, temp_bin_y);	
+
+		volume = pow3(Settings.box_size);
+
+		for(i=0; i<nBins-1; i++)
+		{		
+			HALOPROPERTIES[HALO_INDEX].T[i] = 0.5 * (temp_bin_x[i] + temp_bin_x[i+1]);
+			HALOPROPERTIES[HALO_INDEX].n_T[i] = temp_bin_y[i] / volume;
+		}
+
+	free(temp_bin_y);
+	free(temp_bin_x);
+	free(temp);
+}
+
+
 void sort_gas_relations()
 {
  	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, m=0, n=0;
@@ -1084,6 +1147,7 @@ void compute_halo_properties()
 		sort_nfw_parameters();
 
 #ifdef GAS
+		sort_T_mass_function();
 		sort_gas_relations();
 		sort_alignment_and_displacement();
 #endif

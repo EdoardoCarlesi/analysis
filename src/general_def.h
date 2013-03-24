@@ -468,6 +468,10 @@ extern struct halo_properties
 	double T0;
 	double alpha;
 
+	// n(T)
+	double *T;
+	double *n_T;
+
 	// Subhalo stuff
 	int *n_r_sub;
 	int *cum_n_r_sub;
