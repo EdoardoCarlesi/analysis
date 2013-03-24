@@ -28,6 +28,7 @@ void initialize_halo_storage(void);
 void initialize_halo_properties_structure(void);
 
 void find_substructure(void);
+void list_halo_sample(int*);
 
 void free_halo_profiles(void);
 

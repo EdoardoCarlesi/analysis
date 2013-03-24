@@ -36,14 +36,18 @@ void sort_alignment_and_displacement(void);
  */ 
 void sort_axis_alignment()
 {
-	int m=0, j=0, k=0, i=0, max_haloes, nBins, skip;
-	int *Nbins;
+	int m=0, i=0, j=0, k=0, p=0, n=0, max_haloes, nBins, skip;
+	int *Nbins, *index;
 	double *radius, *Rbins, *Abins, *Bbins; 
 	double Rmin, Rmax, R, A, B, sum;
 
 	INFO_MSG("Computing halo major axis alignement angles");
-	
+
+#ifdef USE_SAMPLE	
+		max_haloes = Settings.n_threshold; 
+#else
 		max_haloes = Settings.n_haloes;
+#endif
 		skip = Settings.halo_skip; 
 		nBins = Settings.r_bins; 
 
@@ -52,13 +56,61 @@ void sort_axis_alignment()
 		Abins = (double *) calloc(nBins-1, sizeof(double));
 		Bbins = (double *) calloc(nBins-1, sizeof(double));
 		Nbins = (int *) calloc(nBins-1, sizeof(int));
+		
+		index = (int *) calloc(max_haloes, sizeof(int));
 	
+		list_halo_sample(index);
+
 		Rmin = Settings.Rmin; Rmax = Settings.Rmax;
 		radius = log_stepper(Rmin,Rmax,nBins);
 
 			for(i=0; i<nBins-1; i++)
 				Rbins[i] = 0.5*(radius[i+1]+radius[i]);
 
+#ifdef USE_SAMPLE
+#		pragma omp parallel for			\
+		private(m, i, j, k, A, B, R, sum) shared(Haloes, Rmin, Rmax)
+			for(j=0; j<max_haloes; j++) 
+			{
+				p = index[j];
+				for(k=j; k<max_haloes; k++)
+				{
+					n = index[k];
+					A = 0; B = 0; R = 0; sum = 0;
+					for(m=0; m<3; m++)
+						sum += pow2(Haloes[p].X[m] - Haloes[n].X[m]);
+	
+					R = sqrt(sum);
+
+					if(R > Rmin && R < Rmax)
+					{
+						for(m=0; m<3; m++)
+							A += Haloes[p].Ea[m]*Haloes[n].Ea[m];
+
+						for(m=0; m<3; m++)
+							B += Haloes[p].Ea[m]*(Haloes[p].X[m] - Haloes[n].X[m]);
+
+							B /= R;
+
+				for(i=0; i<nBins-1; i++) 
+				{
+					if(R>radius[i] && R<radius[i+1])
+					{
+						Abins[i] += sqrt(A*A);
+						Bbins[i] += sqrt(B*B);
+						Nbins[i]++;
+					}
+
+					HaloProperties[HALO_INDEX].R[i]=Rbins[i]; 
+					HaloProperties[HALO_INDEX].Th_c[i]=Abins[i]; 
+					HaloProperties[HALO_INDEX].Th_p[i]=Bbins[i]; 
+					HaloProperties[HALO_INDEX].N_pairs[i]=Nbins[i]; 
+
+				}
+			}
+		}
+	}
+#else
 #		pragma omp parallel for			\
 		private(m, i, j, k, A, B, R, sum) shared(Haloes, Rmin, Rmax)
 			for(j=0; j<max_haloes; j++) 
@@ -103,6 +155,7 @@ void sort_axis_alignment()
 			} // End if mass cut
 		}
 	}
+#endif
 
 	free(radius);
 	free(Abins);

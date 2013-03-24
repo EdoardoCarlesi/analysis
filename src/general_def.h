@@ -7,10 +7,10 @@
 #define D_PRINT(str, num) fprintf(stdout, "\n%s %d.\n", str, num)
 
 	// Factors that modify the binning
-#define F_MAX 1.0000
+#define F_MAX 1.0001
 #define F_MIN 0.9999
 
-#define BIN_PROFILE 16
+#define BIN_PROFILE 11
 #define Rvir_frac_min 0.1 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
 			  // and gas fraction from 1
 
