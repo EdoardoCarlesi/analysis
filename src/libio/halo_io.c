@@ -64,8 +64,8 @@ void determine_simulation_settings()
 		Settings.rho_dm = Settings.dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		Settings.rho_b = Settings.gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		Settings.rho_0 = Settings.rho_b + Settings.rho_dm;
-		fprintf(stdout, "\nSetting gasMass: %e, rho_b: %e\n", Settings.dmMass, Settings.rho_dm);
-		fprintf(stdout, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.gasMass, Settings.rho_b);
+		fprintf(stdout, "\nSetting gasMass: %e, rho_b: %e\n", Settings.gasMass, Settings.rho_dm);
+		fprintf(stdout, "\nSetting dmMass: %e, rho_dm: %e\n", Settings.dmMass, Settings.rho_b);
 #endif
 		Settings.rho_c = (3*HALO[0].Mvir)/(4*3.14*pow3(HALO[0].Rvir)*200);
 	}

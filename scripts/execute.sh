@@ -22,7 +22,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde099'
 model2='lcdm'
 box_size=250
 particle_number=1024
@@ -30,10 +30,10 @@ tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=57
+catalogue_number=61
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=12
+n_bins=10
 n_bins_th=200
 r_bins=8
 
@@ -49,8 +49,8 @@ m_min=1.e+9
 m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
-n_min=20
-m_th=1.e+13
+n_min=11
+m_th=5.e+13
 virial=1.5
 spin=0.15
 
@@ -61,7 +61,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=1
+use_criterion=5
 
 #Computer settings
 swap=0
