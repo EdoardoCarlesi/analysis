@@ -877,7 +877,7 @@ void sort_T_mass_function()
 
 void sort_gas_relations()
 {
- 	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, m=0, n=0;
+ 	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, m=0;
 	double *params, *temperature, *temperature_bin, *temperature_err, *mass_bin, *mass;
 	double *gas_fraction, *gas_fraction_bin, *gas_fraction_err;
 	double *diff_cm, *diff_cm_bin, *diff_cm_err;
@@ -1028,7 +1028,7 @@ void sort_gas_relations()
 
 		HALOPROPERTIES[HALO_INDEX].T0=M_0;
 		HALOPROPERTIES[HALO_INDEX].alpha=params[0];
-		HALOPROPERTIES[HALO_INDEX].beta0=average(beta,n);;
+		HALOPROPERTIES[HALO_INDEX].beta0=average(beta,nHaloesCut);;
 
 //		fprintf(stdout, "M-Tx    a:%lf   M_0 10e+%f SM\n",a[0],M_0/log(10));
 		
