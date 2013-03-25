@@ -610,11 +610,10 @@ void print_numerical_mass_function()
 
 void print_halo_profile(int m)
 {
-	sprintf(out_url, "%s.%04d.%03d_%s", Urls.output_prefix, ThisTask, i, "profiles.dat");
+	count = 1;
+	sprintf(out_url, "%shalo.%04d.%03d_%s", Urls.output_prefix, ThisTask, m, "profile.dat");
 	out_file = fopen(out_url, "w");
-
 	struct halo * HALO;
-	nTot = HALO[m].n_bins - HALO[m].neg_r_bins;
 
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
@@ -622,34 +621,39 @@ void print_halo_profile(int m)
 	HALO = Haloes;
 #endif
 
-	if(ThisTask==0)
+	int skip = HALO[m].neg_r_bins;
+	nTot = HALO[m].n_bins - HALO[m].neg_r_bins;
 
 	DUMP_MSG("Dumping halo density profile", out_url);
 
 		fprintf(out_file, "#");
 		FILE_HEADER(out_file, "r      ", count);
+		FILE_HEADER(out_file, "r/Rv   ", count);
 		FILE_HEADER(out_file, "rho_DM ", count);
 #ifdef GAS
-		FILE_HEADER(out_file, "rho_gas", count);
 		FILE_HEADER(out_file, "gas_fra", count);
+		FILE_HEADER(out_file, "rho_gas", count);
 		FILE_HEADER(out_file, "I_X    ", count);
 #endif
 		fprintf(out_file, "\n");
 		fprintf(out_file, "#");
-		fprintf(out_file, "M=%e ", HALO[m].Mvir);
-		fprintf(out_file, "X=%f ", HALO[m].X[0]);
-		fprintf(out_file, "Y=%f ", HALO[m].X[1]);
-		fprintf(out_file, "Z=%f ", HALO[m].X[2]);
+		fprintf(out_file, "M=%e\t", HALO[m].Mvir);
+		fprintf(out_file, "R=%f\t", HALO[m].Rvir);
+		fprintf(out_file, "X=%f\t", HALO[m].X[0]);
+		fprintf(out_file, "Y=%f\t", HALO[m].X[1]);
+		fprintf(out_file, "Z=%f\t", HALO[m].X[2]);
+		fprintf(out_file, "\n");
 		fprintf(out_file, "\n");
 
 			for(i=0; i<nTot; i++)
 			{
-				fprintf(out_file, "%lf",   HALO[m].radius[i]);
-				fprintf(out_file, "\t%lf", HALO[m].rho[i]);
+				fprintf(out_file, "%f",   HALO[m].radius[i+skip]);
+				fprintf(out_file, "\t%f",   HALO[m].radius[i+skip]/HALO[m].Rvir);
+				fprintf(out_file, "\t%lf", HALO[m].rho[i+skip]);
 #ifdef GAS
-				fprintf(out_file, "\t%lf", HALO[m].gas_only.frac[i]);
-				fprintf(out_file, "\t%lf", HALO[m].gas_only.rho[i]);
-				fprintf(out_file, "\t%lf", HALO[m].gas_only.i_x[i]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.frac[i+skip]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.rho[i+skip]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.i_x[i+skip]);
 #endif
 				fprintf(out_file, "\n");
 			}

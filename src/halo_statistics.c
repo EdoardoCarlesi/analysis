@@ -77,8 +77,8 @@ int main(int argc, char **argv)
 #ifdef GAS
 		average_gas_profiles();
 #endif
-	//	average_nfw_profile();
-	//	print_average_profiles();
+		average_nfw_profile();
+		print_average_profiles();
 
 		print_halo_best_fit_results();
 

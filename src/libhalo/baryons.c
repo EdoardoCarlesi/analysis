@@ -13,7 +13,7 @@
 
 #include "../libmath/math.h"
 #include "../libcosmo/cosmo.h"
-#include "../libhalo/halo.h"
+#include "../libio/io.h"
 #include "../general_def.h"
 
 #include "halo.h"
@@ -53,13 +53,13 @@ void fit_and_store_gas_parameters(void)
 
 		for(k=0; k<nHaloes; k++)
 		{		
-			//if(halo_condition(k) == 1)
 			{	
 				sort_f_gas_profile(&HALO[k]);
 				fit_I_X(&HALO[k]);
-					
-				if(HALO[k].Mvir > 1e14)
+#if PRINT_HALO					
+				if(HALO[k].Mvir > 5.e14)
 					print_halo_profile(k);
+#endif
 
 			}
 		}
@@ -224,7 +224,7 @@ double I_X(double r, double rc, double beta, double rho0)
 	// Fits X-ray surface and beta gas density profile
 void fit_I_X(struct halo *HALO)
 {
-	double rc, u=0, A=0, a=0, rho0, ix0; 
+	double rc, u=0, A=0, a=0, rho, rho0, ix0; 
 	double *r, *x, *y, *e, *y_th, *params; 
 	double rMax, rMin, *x_bin, *y_bin, *e_bin;
 	double beta, chi, per, gof, R, V;
@@ -253,12 +253,20 @@ void fit_I_X(struct halo *HALO)
 		e = (double*) calloc(1, sizeof(double));
 		r = (double*) calloc(1, sizeof(double));
 		rc = 0.5 * HALO->r2; // The core radius is half the scale radius
+		ix0 = 1./sqrt(1 + pow2(HALO->radius[skip] / rc))/rho0;
 
 		for(j=0; j<bins; j++)
 		{
 			R = HALO->radius[j];
 			V = 4./3. * M_PI * pow3(R);
-			u += HALO->gas_only.u[j];			
+			rho = (HALO->gas_only.m[j]) / (4./3. * M_PI * pow3(R));
+
+			if(j >= skip)
+			{
+				HALO->gas_only.rho[j] = (float) rho / rho0;
+				HALO->gas_only.i_x[j] = (float) ix0 * rho * sqrt(1 + pow2(R / rc));
+				u += HALO->gas_only.u[j];			
+			}
 
 			if(R > Rvir_frac_min)
 			{
@@ -272,9 +280,6 @@ void fit_I_X(struct halo *HALO)
 				x[N-1] = 1 + R*R/(rc*rc);
 				y[N-1] = (HALO->gas_only.m[j])/ (4./3. * M_PI * pow3(R)) / rho0;
 				e[N-1] = y[N-1]/sqrt(HALO->npart[j]);
-
-				HALO->gas_only.rho[j+skip] = y[j];
-				HALO->gas_only.i_x[j+skip] = y[j] * sqrt(1 + pow2(r[j] * HALO->Rvir / rc));
 			}
 
 		}
@@ -282,7 +287,7 @@ void fit_I_X(struct halo *HALO)
 			params[0] = a;
 			params[1] = A;
 
-			//HALO->gas_only.T_mw = convert_u_to_T(u) / HALO->gas.N;	
+			HALO->gas_only.T_mw = convert_u_to_T(u) / HALO->gas.N;	
 		
 			params = best_fit_power_law(x, y, e, N, params);
 	
@@ -309,14 +314,15 @@ void fit_I_X(struct halo *HALO)
 		average_bin(r, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
 
 		// Normalize to 1 in the central region	
-		ix0 = 1./sqrt(1 + pow2(rMin * HALO->Rvir / rc));
+		R = 0.5*(x_bin[0]+x_bin[1]);
+		ix0 = 1./sqrt(1 + pow2(R * HALO->Rvir / rc))/y_bin[0];
 
 	for(j=0; j<BIN_PROFILE; j++)
-	{
-		HALO->rho_gas.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
-		HALO->rho_gas.y[j] = y_bin[j];
-		HALO->i_x.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
-		HALO->i_x.y[j] = ix0 * y_bin[j] * sqrt(1 + pow2(x_bin[j] * HALO->Rvir / rc));
+	{	R = 0.5 * (x_bin[j] + x_bin[j+1]);
+		HALO->rho_gas.x[j] = R;
+		HALO->rho_gas.y[j] = y_bin[j]/y_bin[0];
+		HALO->i_x.x[j] = R; 
+		HALO->i_x.y[j] = ix0 * y_bin[j] * sqrt(1 + pow2(R * HALO->Rvir / rc));
 		//fprintf(stderr, "%d  %f  %f\n", j, x_bin[j+1], y_bin[j]);
 	}
 

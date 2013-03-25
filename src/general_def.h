@@ -231,12 +231,12 @@ extern struct halo
 	float Ea[3]; 
 	float a[3];
 
-	float Mvir;
+	double Mvir;
 	float Rvir;
 	float Rmax;
 	float Vmax;
-	float Ekin;
-	float Epot;
+	double Ekin;
+	double Epot;
 	float th_vir;
 	float abs_th_vir;
 	float AngMom;
@@ -276,10 +276,10 @@ extern struct halo
 	} f_gas, nfw, rho_gas, i_x;
 
 	int *npart;
-	double *radius;
+	float *radius;
 	double *mass_r;
-	double *rho;
-	double *err;
+	float *rho;
+	float *err;
 
 #ifdef GAS
 	struct
@@ -302,7 +302,7 @@ extern struct halo
 		float lambda;
 		float lambdaE;
 		float b_fraction;
-		float Cum_u;
+		double Cum_u;
 		float T_mw; // Mass-weighted temperature
 		float I_X0; // X ray thermal emission
 		float shape;
@@ -323,9 +323,9 @@ extern struct halo
 		double *u;
 	
 		// Extra info
-		double *rho;
-		double *frac;
-		double *i_x;
+		float *rho;
+		float *frac;
+		float *i_x;
 	} gas_only;
 
 #endif  // GAS

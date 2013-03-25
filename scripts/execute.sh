@@ -50,7 +50,7 @@ m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=1.e+12
+m_th=1.e+13
 virial=1.5
 spin=0.15
 
@@ -61,7 +61,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=5
+use_criterion=1
 
 #Computer settings
 swap=0

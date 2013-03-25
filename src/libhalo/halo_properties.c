@@ -668,8 +668,6 @@ void sort_mass_relations()
 
 	nBins = Settings.n_bins;
 
-//	D_PRINT("nbins=", nBins);
-
 	nHaloesCut = n_haloes_per_criterion();
 	
 	if(Settings.use_sub == 1)
@@ -747,8 +745,6 @@ void sort_mass_relations()
 
 			mMin = F_MIN * minimum(mass, nHaloesCut);
 			mMax = F_MAX * maximum(mass, nHaloesCut);
-
-			F_PRINT("\nMMAX=",mMax);
 
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
@@ -878,6 +874,7 @@ void sort_T_mass_function()
 }
 
 
+
 void sort_gas_relations()
 {
  	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, m=0, n=0;
@@ -964,31 +961,25 @@ void sort_gas_relations()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			if(halo_condition(i) == 1)
+			if(halo_condition(i) == 1 && Haloes[i].gas.N > 0)
 			{
-
-				mass[n] = Haloes[i].Mvir;
-
-				if(Haloes[i].gas.N > 0)
-				{
-					gas_fraction[m] = Haloes[i].gas_only.b_fraction;
-					lambda[m] = Haloes[i].gas_only.lambda;
-					costh[m] = Haloes[i].gas_only.gas_dm_costh;
-					beta[m] = Haloes[i].fit_beta.beta;
-					temperature[m] = Haloes[i].gas_only.T_mw;
-					gas_ekin[m] = Haloes[i].gas.Ekin;
-					gas_virial[m] = Haloes[i].gas.vir;
-					dm_ekin[m] = Haloes[i].dm.Ekin;
-					dm_virial[m] = Haloes[i].dm.vir;
-					shape[m] = Haloes[i].gas_only.shape;
-					triax[m] = Haloes[i].gas_only.triax;
-					diff_cm[m] = Haloes[i].gas_only.diff.cm;
-					m++;
-				}
-
-				n++;
+				mass[m] = Haloes[i].Mvir;
+				gas_fraction[m] = Haloes[i].gas_only.b_fraction;
+				lambda[m] = Haloes[i].gas_only.lambda;
+				costh[m] = Haloes[i].gas_only.gas_dm_costh;
+				beta[m] = Haloes[i].fit_beta.beta;
+				temperature[m] = Haloes[i].gas_only.T_mw * Cosmo.h;
+				gas_ekin[m] = Haloes[i].gas.Ekin;
+				gas_virial[m] = Haloes[i].gas.vir;
+				dm_ekin[m] = Haloes[i].dm.Ekin;
+				dm_virial[m] = Haloes[i].dm.vir;
+				shape[m] = Haloes[i].gas_only.shape;
+				triax[m] = Haloes[i].gas_only.triax;
+				diff_cm[m] = Haloes[i].gas_only.diff.cm;
+				m++;
 			}
 		}
+			nHaloesCut = m;
 
 			mMin = F_MIN * minimum(mass, nHaloesCut);
 			mMax = F_MAX * maximum(mass, nHaloesCut);

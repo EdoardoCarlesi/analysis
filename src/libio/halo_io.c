@@ -5,6 +5,7 @@
 
 #include "../libcosmo/cosmo.h"
 #include "../libmath/math.h"
+#include "../libhalo/halo.h"
 #include "../general_def.h"
 
 #include "io.h"
@@ -305,7 +306,7 @@ void set_halo_url()
 	int n=0;
 	struct internal_urls *URLS;
 	
-	n = Settings.use_cat;
+	n = HALO_INDEX; 
 
 #ifdef WITH_MPI
 	URLS = &pUrls[ThisTask];
@@ -390,31 +391,31 @@ void read_halo_file()
 			{
 				sscanf(dummyline,
 #ifndef GAS
-	"%llu %llu %d  %f %d  %f %f %f %f %f \
+	"%llu %llu %d  %lf %d  %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
-	 %f %f %f %f %f %f %d  %f %f %f \
+	 %f %f %f %f %f %f %d  %f %lf %lf \
 	 %f %f %f \
 	",
 #else // There is a gas component
 #ifndef EXTRA_GAS
-	"%llu %llu %d  %f %d  %f %f %f %f %f \
+	"%llu %llu %d  %lf %d  %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
-	 %f %f %f %f %f %f %d  %f %f %f \
+	 %f %f %f %f %f %f %d  %f %lf %lf \
 	 %f %f %f \
 	 %d  %f %f %f %f %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
 	", 
 #else // Use extra gas columns
-	"%llu %llu %d  %f %d  %f %f %f %f %f \
+	"%llu %llu %d  %lf %d  %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
-	 %f %f %f %f %f %f %d  %f %f %f \
+	 %f %f %f %f %f %f %d  %f %lf %lf \
 	 %f %f %f \
 	 %d  %f %f %f %f %f %f %f %f %f \
 	 %f %f %f %f %f %f %f %f %f %f \
-	 %f %f %f %f %f %f %f\
+	 %f %f %f %f %f %f %lf\
 	", 
 #endif // Extra Gas
 #endif // GAS
@@ -568,8 +569,8 @@ void read_profiles_file()
 	int npart=0, halo_bins=0, counter=0;
 	int neg_r=0, npart_old=0;
 
-	double radius, overd, dens, mass_r, v_circ, a;
-	double overd_old, radius_old;
+	float radius, overd, dens, v_circ, a;
+	double mass_r;
 
 #ifdef GAS
 	double m_gas, u_gas;
@@ -595,8 +596,7 @@ void read_profiles_file()
 		if(p_file==NULL)
 			ERROR("Profiles file not found", URLS->profiles_file);
 		else
-			fprintf(stdout, "Found profiles file:%s\n", 
-				URLS->profiles_file);
+			fprintf(stdout, "Task=%d has found profiles file:%s\n", ThisTask, URLS->profiles_file);
 
 		if(ThisTask==0)
 			skip = 1;
@@ -617,16 +617,16 @@ void read_profiles_file()
 		{
 			sscanf(dummyline, 
 #ifndef GAS
-		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
-		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
-		%lf  %lf  %lf  %lf", 
+		"%f  %d   %lf  %f  %f  %f  %f  %f  %f  %f \
+		%f  %f  %f  %f  %f  %f  %f  %f  %f  %f \
+		%f  %lf  %f  %lf", 
 		&radius, &npart, &mass_r, &dens, &overd, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,     &a,    &a,      &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a	// 24
 #else
-		"%lf  %d   %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
-		%lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf  %lf \
-		%lf  %lf  %lf  %lf  %lf  %lf  %lf", 
+		"%f  %d   %lf  %f  %f  %f  %f  %f  %f  %f \
+		%f  %f  %f  %f  %f  %f  %f  %f  %f  %f \
+		%f  %f  %f  %f  %lf  %f  %lf", 
 		&radius, &npart, &mass_r, &dens, &overd, &v_circ, &a, &a, &a, &a, 
 		&a,      &a, 	 &a, &a,  &a,    &a,     &a, &a, &a, &a, 
 		&a, 	 &a,     &a, &a,  &m_gas,&a,     &u_gas  // 27
@@ -634,19 +634,22 @@ void read_profiles_file()
 		);
 				halo_bins = HALO[counter].n_bins;
 
+#ifdef USE_UNIT_MPC
+				radius *= 1.e-3; 
+#endif
 				if(i == 0)
 				{	
-					HALO[counter].radius = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].rho = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].err = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].radius = (float *) calloc(halo_bins,sizeof(float));
+					HALO[counter].rho = (float *) calloc(halo_bins,sizeof(float));
+					HALO[counter].err = (float *) calloc(halo_bins,sizeof(float));
 					HALO[counter].mass_r = (double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].npart = (int *) calloc(halo_bins,sizeof(int));
 #ifdef GAS
 					HALO[counter].gas_only.u = (double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].gas_only.m = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].gas_only.frac = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].gas_only.rho = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].gas_only.i_x = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].gas_only.frac = (float *) calloc(halo_bins,sizeof(float));
+					HALO[counter].gas_only.rho = (float *) calloc(halo_bins,sizeof(float));
+					HALO[counter].gas_only.i_x = (float *) calloc(halo_bins,sizeof(float));
 #endif
 				}
 
@@ -659,37 +662,28 @@ void read_profiles_file()
 					HALO[counter].gas_only.u[i] = u_gas;
 					HALO[counter].gas_only.m[i] = m_gas;
 #endif
-#ifdef USE_UNIT_MPC
-					HALO[counter].radius[i] *= 1.e-3; 
-#endif
 			//fprintf(stderr,dummyline);
 			//fprintf(stderr, "\nHaloR  [%d][%d]=%e ", counter, i, HALO[counter].radius[i]);
 			//fprintf(stderr, "HaloGas[%d][%d]=%f ", counter, i, HALO[counter].u_gas[i]);
 			//fprintf(stderr, "HaloRho[%d][%d]=%f\n", counter, i, HALO[counter].rho[i]);
-
-			if(HALO[counter].err[i] == 0.) 
-				HALO[counter].err[i] = HALO[counter].err[i-1]; 
 
 			if(radius<0.) 
 				neg_r++;
 
 			npart_old=npart;
 			i++;
+			j++;
 	
 		if(i == halo_bins) 
 		{
 			HALO[counter].neg_r_bins=neg_r; 
-	
+		//	fprintf(stderr, "task=%d, count=%d, bins=%d, neg=%d, r=%f, dens=%f\n", ThisTask, counter, i, neg_r, radius, dens);
 			i=0;
 			npart=0;
 			neg_r=0;
 			counter++;
 		}
 
-	overd_old=overd;
-	radius_old=radius;
-	npart_old=npart;
-	j++;
 	} 
 	else 
 	{ // Skip this line
