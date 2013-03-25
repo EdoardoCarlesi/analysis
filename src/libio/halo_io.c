@@ -644,6 +644,9 @@ void read_profiles_file()
 #ifdef GAS
 					HALO[counter].gas_only.u = (double *) calloc(halo_bins,sizeof(double));
 					HALO[counter].gas_only.m = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].gas_only.frac = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].gas_only.rho = (double *) calloc(halo_bins,sizeof(double));
+					HALO[counter].gas_only.i_x = (double *) calloc(halo_bins,sizeof(double));
 #endif
 				}
 

@@ -7,6 +7,10 @@
 #include "../libcosmo/cosmo.h"
 #include "../general_def.h"
 
+#ifdef WITH_MPI
+#include "../libparallel/general.h"
+#endif
+
 #include "io.h"
 
 // Define some useful macros
@@ -603,35 +607,55 @@ void print_numerical_mass_function()
 }
 
 
-/*
-void print_nfw()
+
+void print_halo_profile(int m)
 {
-// TODO //FIXME
-	nTot = NFW.bins;		
-	sprintf(out_url, "%s%s", Urls.output_prefix, "nfw_test.dat");
+	sprintf(out_url, "%s.%04d.%03d_%s", Urls.output_prefix, ThisTask, i, "profiles.dat");
 	out_file = fopen(out_url, "w");
 
-	DUMP_MSG("Navarro Frenk White profile", out_url);
+	struct halo * HALO;
+	nTot = HALO[m].n_bins - HALO[m].neg_r_bins;
+
+#ifdef WITH_MPI
+	HALO = pHaloes[ThisTask];
+#else 
+	HALO = Haloes;
+#endif
+
+	if(ThisTask==0)
+
+	DUMP_MSG("Dumping halo density profile", out_url);
 
 		fprintf(out_file, "#");
-		FILE_HEADER(out_file, "r", count);
-		FILE_HEADER(out_file, "overd", count);
-		FILE_HEADER(out_file, "rho_NFW", count);
-		FILE_HEADER(out_file, "err", count);
+		FILE_HEADER(out_file, "r      ", count);
+		FILE_HEADER(out_file, "rho_DM ", count);
+#ifdef GAS
+		FILE_HEADER(out_file, "rho_gas", count);
+		FILE_HEADER(out_file, "gas_fra", count);
+		FILE_HEADER(out_file, "I_X    ", count);
+#endif
+		fprintf(out_file, "\n");
+		fprintf(out_file, "#");
+		fprintf(out_file, "M=%e ", HALO[m].Mvir);
+		fprintf(out_file, "X=%f ", HALO[m].X[0]);
+		fprintf(out_file, "Y=%f ", HALO[m].X[1]);
+		fprintf(out_file, "Z=%f ", HALO[m].X[2]);
 		fprintf(out_file, "\n");
 
 			for(i=0; i<nTot; i++)
 			{
-				fprintf(out_file, "%lf", NFW.radius[i]);
-				fprintf(out_file, "\t%lf", NFW.overd[i]);
-				fprintf(out_file, "\t%lf", NFW.profile[i]);
-				fprintf(out_file, "\t%lf", NFW.err[i]);
+				fprintf(out_file, "%lf",   HALO[m].radius[i]);
+				fprintf(out_file, "\t%lf", HALO[m].rho[i]);
+#ifdef GAS
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.frac[i]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.rho[i]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.i_x[i]);
+#endif
 				fprintf(out_file, "\n");
 			}
 
 	fclose(out_file);
 }
-*/
 
 
 void print_halo_best_fit_results()

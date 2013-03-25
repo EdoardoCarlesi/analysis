@@ -321,6 +321,11 @@ extern struct halo
 
 		double *m;
 		double *u;
+	
+		// Extra info
+		double *rho;
+		double *frac;
+		double *i_x;
 	} gas_only;
 
 #endif  // GAS

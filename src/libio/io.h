@@ -15,6 +15,7 @@ void print_axis_alignment(void);
 
 void print_all_halo_properties_to_one_file(void);
 void print_all_haloes(void);
+void print_halo_profile(int);
 void print_all_subhalo_properties_to_one_file(void);
 void print_theoretical_mass_function(void);
 void print_numerical_mass_function(void);
