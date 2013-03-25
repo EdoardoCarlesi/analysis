@@ -57,6 +57,10 @@ void fit_and_store_gas_parameters(void)
 			{	
 				sort_f_gas_profile(&HALO[k]);
 				fit_I_X(&HALO[k]);
+					
+				if(HALO[k].Mvir > 5e14)
+					print_halo_profile(k);
+
 			}
 		}
 }
@@ -89,6 +93,7 @@ void sort_f_gas_profile(struct halo *HALO)
 			R = HALO->radius[j+skip];
 			x[j] = R/HALO->Rvir;
 			y[j] = HALO->gas_only.m[j+skip]/HALO->mass_r[j+skip];
+			HALO->gas_only.frac[j+skip] = y[j];
 		}
 	
 		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
@@ -156,6 +161,7 @@ void average_gas_profiles(void)
 			{
 				if(halo_condition(k) == 1)
 				{
+
 					f = Haloes[k].f_gas.y[i];
 					rho = Haloes[k].rho_gas.y[i];
 					ix = Haloes[k].i_x.y[i];
@@ -266,6 +272,9 @@ void fit_I_X(struct halo *HALO)
 				x[N-1] = 1 + R*R/(rc*rc);
 				y[N-1] = (HALO->gas_only.m[j])/ (4./3. * M_PI * pow3(R)) / rho0;
 				e[N-1] = y[N-1]/sqrt(HALO->npart[j]);
+
+				HALO->gas_only.rho[j+skip] = y[j];
+				HALO->gas_only.i_x[j+skip] = y[j] * sqrt(1 + pow2(r[j] * HALO->Rvir / rc));
 			}
 
 		}

@@ -222,8 +222,8 @@ void sort_numerical_mass_function(void)
 			}
 		}
 
-		mMin = F_MIN*minimum(mass, nHaloesCut);
-		mMax = F_MAX*maximum(mass, nHaloesCut);
+		mMin = F_MIN * minimum(mass, nHaloesCut);
+		mMax = F_MAX * maximum(mass, nHaloesCut);
 		mass_bin = log_stepper(mMin, mMax, nBins);
 	
 		lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	

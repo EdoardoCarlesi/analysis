@@ -387,6 +387,9 @@ void free_halo_profiles()
 #ifdef GAS
 			free(HALO[i].gas_only.u);
 			free(HALO[i].gas_only.m);
+			free(HALO[i].gas_only.rho);
+			free(HALO[i].gas_only.frac);
+			free(HALO[i].gas_only.i_x);
 #endif
 		}
 }
