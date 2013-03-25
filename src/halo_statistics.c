@@ -41,7 +41,7 @@ int main(int argc, char **argv)
 			read_profiles_file();
 	
 			fit_and_store_nfw_parameters();
-
+			
 #ifdef GAS
 			fit_and_store_gas_parameters();
 #endif
@@ -77,13 +77,13 @@ int main(int argc, char **argv)
 #ifdef GAS
 		average_gas_profiles();
 #endif
-		average_nfw_profile();
-		print_average_profiles();
+	//	average_nfw_profile();
+	//	print_average_profiles();
 
 		print_halo_best_fit_results();
 
-		sort_axis_alignment();
-		print_axis_alignment();
+	//	sort_axis_alignment();
+	//	print_axis_alignment();
 
 	//	compute_subhalo_properties();
 	//	print_all_subhalo_properties_to_one_file();

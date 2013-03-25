@@ -3,14 +3,14 @@
 #define WARNING(str1, str2) fprintf(stderr, "\n\t\tWARNING! %s: %s.\n", str1, str2)
 #define ERROR(str1, str2) fprintf(stderr, "\n\t\tERROR! %s: %s.\n", str1, str2)
 #define INFO_MSG(str) fprintf(stdout, "\n%s.\n", str)
-#define F_PRINT(str, num) fprintf(stdout, "\n%s %e.\n", str, num)
-#define D_PRINT(str, num) fprintf(stdout, "\n%s %d.\n", str, num)
+#define F_PRINT(str, num) fprintf(stdout, "%s %e.\n", str, num)
+#define D_PRINT(str, num) fprintf(stdout, "%s %d.\n", str, num)
 
 	// Factors that modify the binning
 #define F_MAX 1.0001
 #define F_MIN 0.9999
 
-#define BIN_PROFILE 10
+#define BIN_PROFILE 9
 #define Rvir_frac_min 0.1 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
 			  // and gas fraction from 1
 

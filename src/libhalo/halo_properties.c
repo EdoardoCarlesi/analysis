@@ -858,8 +858,8 @@ void sort_T_mass_function()
 			}
 		}
 
-			tMax = F_MAX*maximum(temp, nHaloesCut);  
-			tMin = F_MIN*minimum(temp, nHaloesCut);
+			tMax = F_MAX * maximum(temp, nHaloesCut);  
+			tMin = F_MIN * minimum(temp, nHaloesCut);
 
 			temp_bin_x = lin_stepper(tMin, tMax, nBins);
 			lin_bin(temp, temp_bin_x, nBins, nHaloesCut, temp_bin_y);	
@@ -966,42 +966,45 @@ void sort_gas_relations()
 		{
 			if(halo_condition(i) == 1)
 			{
-				mass[m] = Haloes[i].Mvir;
-				gas_fraction[m] = Haloes[i].gas_only.b_fraction;
-				lambda[m] = Haloes[i].gas_only.lambda;
-				costh[m] = Haloes[i].gas_only.gas_dm_costh;
+
+				mass[n] = Haloes[i].Mvir;
 
 				if(Haloes[i].gas.N > 0)
 				{
-					beta[n] = Haloes[i].fit_beta.beta;
-					temperature[n] = Haloes[i].gas_only.T_mw;
-					gas_ekin[n] = Haloes[i].gas.Ekin;
-					gas_virial[n] = Haloes[i].gas.vir;
-					n++;
+					gas_fraction[m] = Haloes[i].gas_only.b_fraction;
+					lambda[m] = Haloes[i].gas_only.lambda;
+					costh[m] = Haloes[i].gas_only.gas_dm_costh;
+					beta[m] = Haloes[i].fit_beta.beta;
+					temperature[m] = Haloes[i].gas_only.T_mw;
+					gas_ekin[m] = Haloes[i].gas.Ekin;
+					gas_virial[m] = Haloes[i].gas.vir;
+					dm_ekin[m] = Haloes[i].dm.Ekin;
+					dm_virial[m] = Haloes[i].dm.vir;
+					shape[m] = Haloes[i].gas_only.shape;
+					triax[m] = Haloes[i].gas_only.triax;
+					diff_cm[m] = Haloes[i].gas_only.diff.cm;
+					m++;
 				}
 
-				dm_ekin[m] = Haloes[i].dm.Ekin;
-				dm_virial[m] = Haloes[i].dm.vir;
-				shape[m] = Haloes[i].gas_only.shape;
-				triax[m] = Haloes[i].gas_only.triax;
-				diff_cm[m] = Haloes[i].gas_only.diff.cm;
-				m++;
+				n++;
 			}
 		}
 
-			mMin = F_MIN*minimum(mass, nHaloesCut);
-			mMax = F_MAX*maximum(mass, nHaloesCut);
+			mMin = F_MIN * minimum(mass, nHaloesCut);
+			mMax = F_MAX * maximum(mass, nHaloesCut);
 
+			//fprintf(stderr, "min=%e, max=%e\n", mMin, mMax);
+			//fprintf(stderr, "n=%d, m=%d\n", n, m);
 			mass_bin = log_stepper(mMin, mMax, nBins);
 
-			average_bin(mass, temperature, mass_bin, temperature_bin, temperature_err, nBins, n);
+			average_bin(mass, temperature, mass_bin, temperature_bin, temperature_err, nBins, nHaloesCut);
 			average_bin(mass, gas_fraction, mass_bin, gas_fraction_bin, gas_fraction_err, nBins, nHaloesCut);
 			average_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
-			average_bin(mass, beta, mass_bin, beta_bin, beta_err, nBins, n);
+			average_bin(mass, beta, mass_bin, beta_bin, beta_err, nBins, nHaloesCut);
 			average_bin(mass, triax, mass_bin, triax_bin, triax_err, nBins, nHaloesCut);
 			average_bin(mass, shape, mass_bin, shape_bin, shape_err, nBins, nHaloesCut);
-			average_bin(mass, gas_ekin, mass_bin, gas_ekin_bin, gas_ekin_err, nBins, n);
-			average_bin(mass, gas_virial, mass_bin, gas_virial_bin, gas_virial_err, nBins, n);
+			average_bin(mass, gas_ekin, mass_bin, gas_ekin_bin, gas_ekin_err, nBins, nHaloesCut);
+			average_bin(mass, gas_virial, mass_bin, gas_virial_bin, gas_virial_err, nBins, nHaloesCut);
 			average_bin(mass, dm_ekin, mass_bin, dm_ekin_bin, dm_ekin_err, nBins, nHaloesCut);
 			average_bin(mass, dm_virial, mass_bin, dm_virial_bin, dm_virial_err, nBins, nHaloesCut);
 			average_bin(mass, diff_cm, mass_bin, diff_cm_bin, diff_cm_err, nBins, nHaloesCut);
@@ -1009,7 +1012,6 @@ void sort_gas_relations()
 
 			for(i=0; i<nBins-1; i++)
 			{
-				HALOPROPERTIES[HALO_INDEX].mass[i]=mass_bin[i+1];
 				HALOPROPERTIES[HALO_INDEX].gas_T[i]=temperature_bin[i];
 				HALOPROPERTIES[HALO_INDEX].gas_fraction[i]=gas_fraction_bin[i];
 				HALOPROPERTIES[HALO_INDEX].gas_dm_costh[i]=costh_bin[i];
@@ -1049,6 +1051,27 @@ void sort_gas_relations()
 	free(beta); 
 	free(beta_bin); 
 	free(beta_err); 
+	free(gas_ekin); 
+	free(gas_ekin_bin); 
+	free(gas_ekin_err); 
+	free(gas_virial); 
+	free(gas_virial_bin); 
+	free(gas_virial_err); 
+	free(dm_ekin); 
+	free(dm_ekin_bin); 
+	free(dm_ekin_err); 
+	free(dm_virial); 
+	free(dm_virial_bin); 
+	free(dm_virial_err); 
+	free(costh); 
+	free(costh_bin); 
+	free(costh_err); 
+	free(triax); 
+	free(triax_bin); 
+	free(triax_err); 
+	free(shape); 
+	free(shape_bin); 
+	free(shape_err); 
 	free(temperature); 
 	free(temperature_bin); 
 	free(temperature_err); 

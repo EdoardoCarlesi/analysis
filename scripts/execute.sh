@@ -33,9 +33,9 @@ catalogue_z=0
 catalogue_number=57
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=14
+n_bins=12
 n_bins_th=200
-r_bins=12
+r_bins=8
 
 # Scale of P(k) for growth factor calculation
 k=0.13
@@ -50,7 +50,7 @@ m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=0.5e+13
+m_th=1.e+12
 virial=1.5
 spin=0.15
 
@@ -67,7 +67,7 @@ use_criterion=5
 swap=0
 
 # Radius for the halo alignement
-r_min=1
+r_min=3
 r_max=100
 
 # Cosmological parameters
