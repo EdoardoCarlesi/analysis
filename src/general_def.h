@@ -82,6 +82,7 @@ extern struct general_settings
 	int use_one_pk;
 	int cat_number;
 	int use_cat;
+	int c_web_size;
 
 	double box_size;
 	double zStart;
@@ -217,6 +218,9 @@ extern struct halo
 	int n_satellites;
         int n_bins;
 	int neg_r_bins;
+
+	// 0 void, 1 sheet, 2 filament, 3 node
+	int web_type[4];
 
 	// These variables are set to 1 if the halo satisfies the condition
 	int vir;
@@ -364,6 +368,7 @@ extern struct internal_urls
 	char *a_outputs;
 	char *output_prefix;
 	char *hubble_file;
+	char *c_web_file;
 	
 	// Using a single halo/profile/P(k) file for the analysis
 	char *halo_file;
