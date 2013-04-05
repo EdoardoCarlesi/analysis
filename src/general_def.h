@@ -109,6 +109,7 @@ extern struct general_settings
 	double mass_min;
 	int n_haloes_to_use; // Use the first N haloes
 	
+	// Conditions in halo subset to be used
 	int use_none;
 	int use_mass;
 	int use_spin;
@@ -116,7 +117,10 @@ extern struct general_settings
 	int use_conc;
 	int use_all;
 	int use_sub;
+	int use_web;
+	int use_web_type; // 0, 1, 2, 3
 
+	double l_web;
 	double rho_c;
 	double rho_0;
 	double Rmin;

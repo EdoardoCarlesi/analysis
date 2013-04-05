@@ -82,6 +82,9 @@ int main(int argc, char **argv)
 
 		print_halo_best_fit_results();
 
+		read_v_web();
+		assign_haloes_to_web();
+
 	//	sort_axis_alignment();
 	//	print_axis_alignment();
 

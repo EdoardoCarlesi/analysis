@@ -30,8 +30,8 @@ void initialize_halo_properties_structure(void);
 void find_substructure(void);
 void list_halo_sample(int*);
 
-void assign_haloes_to_web(void);
 void read_v_web(void);
+void assign_haloes_to_web(void);
 
 void free_halo_profiles(void);
 

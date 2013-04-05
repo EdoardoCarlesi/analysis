@@ -24,8 +24,9 @@ fi
 # Model and simulation ettings
 model1='cde099'
 model2='lcdm'
-box_size=250
-particle_number=1024
+box_size=75
+particle_number=256
+web_size=32
 tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
@@ -50,9 +51,12 @@ m_max=1.e+15
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=11
-m_th=5.e+13
+m_th=1.e+12
 virial=1.5
 spin=0.15
+
+# Minimum eigenvalue for the velocity shear tensor
+l_web=0.24
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
 use_n_min=0
@@ -94,11 +98,12 @@ base_temp=$base_analysis/temp/
 
 dir_ahf=ahf
 dir_snaps=snaps
+dir_pk=pk
 dir_halo=catalogues
+dir_web=vweb
 
 # General file prefixes 
 prefix=$base_out$model1'-'$box_size'-'$particle_number'-'
-
 
 # Where the output redshift file for the snapshot is
 if [ $particle_number -eq 32 ] ; then
@@ -134,6 +139,9 @@ halo_dir1=$DATA1$dir_halo/
 halo_dir2=$DATA2$dir_halo/
 halo_dir_ahf1=$DATA1$dir_ahf/
 halo_dir_ahf2=$DATA2$dir_ahf/
+pk_dir1=$DATA1$dir_pk/
+pk_dir2=$DATA2$dir_pk/
+web_dir1=$DATA1$dir_web/
 
 zzzz='.z'
 cat_zero='00'
@@ -155,12 +163,22 @@ cd $halo_dir1
 profile_name1=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
 profile_name2=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
 
-pk_file1=`ls $snaps_dir1*snap*$catalogue_number`
-pk_file2=`ls $snaps_dir2*snap*$catalogue_number`
+pk_file1=`ls $pk_dir1*snap*$catalogue_number`
+pk_file2=`ls $pk_dir2*snap*$catalogue_number`
+echo pk_file1=`ls $pk_dir1*snap*$catalogue_number`
+echo 'pk file 1'$pk_file1'*'
 
-if [ -n $pk_file1 ] ; then
+if [ -z $pk_file1 ] ; then
 pk_file1='pk_not_found.dummy'
 echo 'pk file 1' $pk_file1
+fi
+
+web_gas_file1=`ls $web_dir1*$web_size*ascii`
+web_dm_file1=`ls $web_dir1*$web_size*ascii`
+
+if [ -z $web_file1 ] ; then
+web_file1='web_not_found.dummy'
+echo 'web file 1' $web_file1
 fi
 
 halo_file1=$halo_dir1/$halo_name1
@@ -182,9 +200,9 @@ ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
 cd $base_analysis/src/
 make clean
 
-url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1
-set_var1=$box_size' '$particle_number' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
-set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion
+url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_file1
+set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
+set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
 evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
 halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$snaps_dir2' '$halo_dir2

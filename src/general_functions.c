@@ -31,7 +31,7 @@ void initialize_internal_variables(char **argv){
 #ifdef PRINT_INFO
 	int kk=0;
  	INFO_MSG("Printing info");
-	for(kk=1; kk<38; kk++) 
+	for(kk=1; kk<39; kk++) 
 		fprintf(stdout, "argv[%d]: %s \n", kk, argv[kk]);
 #endif
 
@@ -42,10 +42,12 @@ void initialize_internal_variables(char **argv){
 		Urls.halo_file = argv[count++];
 		Urls.profiles_file = argv[count++];
 		Urls.pk_file = argv[count++];
+		Urls.c_web_file = argv[count++];
 
 		// Basic simulation and analysis settings
 		Settings.box_size = atof(argv[count++]); 
 		Settings.n_part_1D = atoi(argv[count++]); 
+		Settings.c_web_size = atoi(argv[count++]); 
 		Settings.n_bins = atoi(argv[count++]);
 		Settings.n_bins_th = atoi(argv[count++]);
 		Settings.r_bins = atoi(argv[count++]);
@@ -59,6 +61,7 @@ void initialize_internal_variables(char **argv){
 		Settings.Mmax = atof(argv[count++]);
 		Settings.Rmin = atof(argv[count++]);
 		Settings.Rmax = atof(argv[count++]);
+		Settings.l_web = atof(argv[count++]);
 		Settings.n_min = atof(argv[count++]);
 		Settings.use_n_min = atof(argv[count++]);
 		Settings.n_haloes_to_use = atoi(argv[count++]); 
@@ -86,7 +89,6 @@ void initialize_internal_variables(char **argv){
 	set_halo_selection_criterion();
 	
 	default_init();
-
 }
 
 
@@ -98,7 +100,8 @@ void default_init()
 	MF_INDEX = 0;
 	PK_INDEX = 0;
 
-	Settings.use_cat=Urls.nCatalogueFiles-Settings.cat_number;
+	Settings.use_cat = Urls.nCatalogueFiles-Settings.cat_number;
+	Settings.use_web = 0;
 
 	MassFunc = malloc(30*sizeof(struct mass_function));
 	SubMassFunc = malloc(30*sizeof(struct mass_function));
@@ -165,6 +168,7 @@ void check_condition_consistency()
 }
 
 
+
 int subhalo_condition(int i)
 {
 
@@ -180,18 +184,14 @@ int subhalo_condition(int i)
 }
 
 
+
 int halo_condition(int i)
 {
-	int condition=0;
+	int j=0, condition=0;
 	
 	if(subhalo_condition(i) || Settings.use_sub == 0) 	
 	{	
-/*		fprintf(stderr, "i=%d", i);
-		fprintf(stderr, " UseSub=%d", Settings.use_sub);
-		fprintf(stderr, " UseAll=%d", Settings.use_all);
-		fprintf(stderr, " UseVir=%d", Settings.use_vir);
-		fprintf(stderr, " Host=%llu\n", Haloes[i].host);
-*/
+
 	if(Settings.use_spin == 1)
 	{
 		if(Haloes[i].spin == 1)
@@ -234,6 +234,12 @@ int halo_condition(int i)
 	
 		else 
 			condition = 0;
+	}
+
+	if(condition == 1 && Settings.use_web == 1)
+	{
+		if(Haloes[i].web_type[Settings.use_web_type] == 1)
+			condition = 1;
 	}
 
 	return condition;
