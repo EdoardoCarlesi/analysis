@@ -43,6 +43,7 @@ void initialize_internal_variables(char **argv){
 		Urls.profiles_file = argv[count++];
 		Urls.pk_file = argv[count++];
 		Urls.c_web_file = argv[count++];
+		Urls.c_web_gas_file = argv[count++];
 
 		// Basic simulation and analysis settings
 		Settings.box_size = atof(argv[count++]); 

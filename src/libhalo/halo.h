@@ -30,11 +30,14 @@ void initialize_halo_properties_structure(void);
 void find_substructure(void);
 void list_halo_sample(int*);
 
+// Cosmic Web Functions
 void read_v_web(void);
+void read_t_web(void);
+void sort_web_statistics(void);
+void print_web_statistics(void);
 void assign_haloes_to_web(void);
 
 void free_halo_profiles(void);
-
 void free_subhalo_properties(void);
 void free_halo_properties(void);
 void free_halo_profiles(void);

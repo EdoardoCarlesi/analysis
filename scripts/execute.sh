@@ -23,15 +23,15 @@ fi
 
 # Model and simulation ettings
 model1='cde099'
-model2='lcdm'
-box_size=75
-particle_number=256
-web_size=32
+model2='nothing'
+box_size=250
+particle_number=1024
+web_size=256
 tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=61
+catalogue_number=57
 
 # Number of bins for general distributions and for the radial alignment
 n_bins=10
@@ -56,7 +56,7 @@ virial=1.5
 spin=0.15
 
 # Minimum eigenvalue for the velocity shear tensor
-l_web=0.24
+l_web=0.3
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
 use_n_min=0
@@ -173,12 +173,17 @@ pk_file1='pk_not_found.dummy'
 echo 'pk file 1' $pk_file1
 fi
 
-web_gas_file1=`ls $web_dir1*$web_size*ascii`
-web_dm_file1=`ls $web_dir1*$web_size*ascii`
+web_dm_file1=`ls $web_dir1*_dm*$web_size*ascii`
+web_gas_file1=`ls $web_dir1*_gas*$web_size*ascii`
 
-if [ -z $web_file1 ] ; then
-web_file1='web_not_found.dummy'
-echo 'web file 1' $web_file1
+if [ -z $web_dm_file1 ] ; then
+web_dm_file1='web_not_found.dummy'
+echo 'web dm file 1' $web_dm_file1
+fi
+
+if [ -z $web_gas_file1 ] ; then
+web_gas_file1='web_not_found.dummy'
+echo 'web gas file 1' $web_gas_file1
 fi
 
 halo_file1=$halo_dir1/$halo_name1
@@ -200,7 +205,7 @@ ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
 cd $base_analysis/src/
 make clean
 
-url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_file1
+url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
 set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
 set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax

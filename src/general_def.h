@@ -373,6 +373,7 @@ extern struct internal_urls
 	char *output_prefix;
 	char *hubble_file;
 	char *c_web_file;
+	char *c_web_gas_file;
 	
 	// Using a single halo/profile/P(k) file for the analysis
 	char *halo_file;

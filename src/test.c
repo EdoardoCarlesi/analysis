@@ -18,6 +18,15 @@
 
 int main(int argc, char **argv)
 {
+
+	initialize_internal_variables(argv);
+	initialize_halo_storage();
+
+	read_v_web();
+	read_t_web();
+	sort_web_statistics();
+	print_web_statistics();
+
 /*
 	char *halo_urls[2];
 

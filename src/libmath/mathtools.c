@@ -152,6 +152,18 @@ double minimum(double *array, int size)
 
 
 
+double nonzero_minimum(double *array, int size)
+{
+	int i=0;
+	double min=array[0];
+ 
+			for(i=0;i<size;i++) 
+				if(array[i]<min && array[i]!=0) min = array[i];
+	return min;
+}
+
+
+
 double average(double *array, int size)
 {
 	int i=0; 
