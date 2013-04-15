@@ -398,17 +398,15 @@ void compute_subhalo_properties()
 	fprintf(stdout,"\nComputing subhalo properties.\n");
 
 
-		Settings.use_sub = 1;
-		compute_halo_properties();
-		Settings.use_sub = 0;
+	//	Settings.use_sub = 1;
+	//	compute_halo_properties();
+	//	Settings.use_sub = 0;
 	
-/*		
 		sort_host_axis_alignment_and_spatial_anisotropy();
 		sort_velocity_distribution();
 		n_r_subhalo();
 		n_r_subhalo_subset();
-		sort_eccentricity();
-*/
+		//sort_eccentricity();
 
 	fprintf(stdout,"\n");
 }

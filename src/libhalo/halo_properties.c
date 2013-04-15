@@ -179,17 +179,23 @@ void sort_numerical_mass_function(void)
 	nBins = Settings.n_bins; 
 	nHaloes = Settings.n_haloes; 
 
-	if(Settings.use_sub == 0)
+	if(Settings.use_web == 1)
 	{
 		MASSFUNC = MassFunc;
-		nHaloesCut = Settings.n_haloes; 
+		nHaloesCut = Settings.n_cweb_type[Settings.use_web_type]; 
 		D_PRINT("Sorting mass function for halo number=", nHaloesCut);
 	}
-		else
+		else if(Settings.use_sub == 1)
 	{ 
 		MASSFUNC = SubMassFunc;
 		nHaloesCut = SubStructure.N_sub;
 		D_PRINT("Sorting mass function for subhalo number=", nHaloesCut);
+	}
+		else
+	{
+		MASSFUNC = MassFunc;
+		nHaloesCut = Settings.n_haloes; 
+		D_PRINT("Sorting mass function for halo number=", nHaloesCut);
 	}
 	
 		Settings.tick=0;
@@ -210,14 +216,18 @@ void sort_numerical_mass_function(void)
 
 		for(i=0; i<nHaloes; i++)
 		{	
-			if(subhalo_condition(i) == 1)
+				if(subhalo_condition(i) == 1)
 			{
 				mass[j] = Haloes[i].Mvir;
 			//	fprintf(stderr, "i=%d, M=%e\n", j, mass[j]);
 				j++;
-			} 
+			}
 				else if (Settings.use_sub == 0) 
 			{
+				if(Settings.use_web == 1)
+					if(condition(i) == 1)
+						mass[j] = Haloes[i].Mvir
+				else 
 				mass[i] = Haloes[i].Mvir;			
 			}
 		}

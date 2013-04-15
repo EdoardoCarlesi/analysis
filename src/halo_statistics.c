@@ -97,8 +97,7 @@ int main(int argc, char **argv)
 				Settings.use_web_type = i;
 				sprintf(Urls.output_prefix, "%s%s_%02d_", base_out, "type", i);			
 				fprintf(stderr, "Sorting halo properties for web type=%d, using %d haloes.\n", 
-						i, n_haloes_per_criterion());
-
+						i, n_haloes_per_criterion());				
 				compute_halo_properties();
 #ifdef GAS
 				average_gas_profiles();
