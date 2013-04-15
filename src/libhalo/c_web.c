@@ -242,8 +242,8 @@ void assign_haloes_to_web()
 				index = VWeb[Node(NWeb, ix, iy, iz)].type;
 				Haloes[j].web_type[index] = 1;
 				Settings.n_cweb_type[index]++;
-			fprintf(stderr, "(%d , %d) type=%d, x=%f, y=%f z=%f; ix=%d iy=%d iz=%d\n",
-			j,Node(NWeb, ix, iy, iz),index,Haloes[j].X[0], Haloes[j].X[1], Haloes[j].X[2], ix, iy, iz);
+			//fprintf(stderr, "(%d , %d) type=%d, x=%f, y=%f z=%f; ix=%d iy=%d iz=%d\n",
+			//j,Node(NWeb, ix, iy, iz),index,Haloes[j].X[0], Haloes[j].X[1], Haloes[j].X[2], ix, iy, iz);
 			}
 		}
 

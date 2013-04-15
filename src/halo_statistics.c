@@ -53,11 +53,13 @@ int main(int argc, char **argv)
 
 		gather_halo_structures();
 
+		MPI_Finalize();
+
 	//	free_comm_structures();
+#endif
 	
 	if(ThisTask==0)
 	{
-#endif
 	
 		omp_set_num_threads(OMP_THREADS);	
 	
@@ -115,26 +117,25 @@ int main(int argc, char **argv)
 	//	sort_axis_alignment();
 	//	print_axis_alignment();
 
+		// FIXME
 	//	compute_subhalo_properties();
 	//	find_substructure();
 	//	print_all_subhalo_properties_to_one_file();
+	//	free_halo_properties();
 	// Redo all of the above for subhaloes
 
-		// FIXME
-		free_halo_properties();
-	
-#ifdef WITH_MPI
-	}
-
-	MPI_Barrier(MPI_COMM_WORLD);
-
-	if(ThisTask == 0)
-#endif
 	INFO_MSG("Computed halo statistical properties at fixed z");
 
-#ifdef WITH_MPI
-	MPI_Finalize();
-#endif
+	}
+
+	//MPI_Barrier(MPI_COMM_WORLD);
+
+	//if(ThisTask == 0)
+//#endif
+
+//#ifdef WITH_MPI
+//	MPI_Finalize();
+//#endif
 
 return 0;
 }

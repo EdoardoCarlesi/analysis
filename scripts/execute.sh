@@ -22,19 +22,19 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde099'
+model1='lcdm'
 model2='nothing'
-box_size=75
-particle_number=256
-web_size=32
-tot_snaps=61
+box_size=250
+particle_number=1024
+web_size=256
+tot_snaps=59
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
 catalogue_number=57
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=10
+n_bins=14
 n_bins_th=200
 r_bins=8
 
@@ -54,7 +54,7 @@ m_print=5.e+14
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=11
-m_th=1.e+10
+m_th=1.e+12
 virial=1.5
 spin=0.15
 
@@ -150,8 +150,8 @@ zzzz='.z'
 cat_zero='00'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-#zzzz='0000.z'
-zzzz='0000'
+zzzz='0000.z'
+#zzzz='0000'
 fi
 
 if [ $catalogue_number -gt 9 ] ; then
