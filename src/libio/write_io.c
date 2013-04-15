@@ -349,7 +349,7 @@ void print_evolution_to_file()
 
 			for(i=0; i<nTot; i++)
 			{ 
-				fprintf(out_file, "%lf", HaloProperties[i].z);   
+				fprintf(out_file, "%lf  ", HaloProperties[i].z);   
 				fprintf(out_file, "\t%lf", HaloProperties[i].l_0);   
 				fprintf(out_file, "\t%lf", HaloProperties[i].halo.s0);   
 				fprintf(out_file, "\t%lf", HaloProperties[i].halo.t0);   
@@ -360,7 +360,7 @@ void print_evolution_to_file()
 				fprintf(out_file, "\t%lf", SubHaloProperties[i].costh0);   	
 				fprintf(out_file, "\t%lf", SubHaloProperties[i].cosphi0);   	
 				fprintf(out_file, "\t%lf", SubHaloProperties[i].vel_0);   	
-				fprintf(out_file, "\t%e", SubHaloProperties[i].avgMass);   	
+				fprintf(out_file, "\t%e ", SubHaloProperties[i].avgMass);   	
 				fprintf(out_file,"\n");
 			}
 

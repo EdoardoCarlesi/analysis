@@ -24,9 +24,9 @@ fi
 # Model and simulation ettings
 model1='cde099'
 model2='nothing'
-box_size=250
-particle_number=1024
-web_size=256
+box_size=75
+particle_number=256
+web_size=32
 tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
@@ -45,13 +45,16 @@ k=0.13
 pk_skip=11
 mf_skip=1
 
-#Minimum and maximum mass for the mass function computation
+# Minimum and maximum mass for the mass function computation
 m_min=1.e+9
 m_max=1.e+15
 
+# Mass threshold for printing halo profiles
+m_print=5.e+14
+
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=11
-m_th=1.e+12
+m_th=1.e+10
 virial=1.5
 spin=0.15
 
@@ -207,7 +210,7 @@ make clean
 
 url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
 set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
-set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion
+set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion' '$m_print
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
 evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
 halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$snaps_dir2' '$halo_dir2
@@ -224,11 +227,9 @@ if [ $use_mpi -eq 1 ] ; then
 execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
 fi
 
-
 if [ $1 -eq 3 ] ; then
 execute=$base_analysis
 fi
-
 
 if [ $1 -eq 1 ] ; then
 make fit_nfw

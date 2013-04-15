@@ -57,7 +57,7 @@ void fit_and_store_gas_parameters(void)
 				sort_f_gas_profile(&HALO[k]);
 				fit_I_X(&HALO[k]);
 #if PRINT_HALO					
-				if(HALO[k].Mvir > 5.e14)
+				if(HALO[k].Mvir > Settings.Mprint)
 					print_halo_profile(k);
 #endif
 

@@ -35,8 +35,8 @@ struct c_web
 
 struct web_info
 {
-	unsigned int *ids[4];	 // Node index per type
 	unsigned int N[5];	 // Total number per type of node, 0 is the total nodes
+	unsigned int *ids[4];
 	float volume[4]; // Volume fraction in node type
 	float mass[4];	 // Mass fraction in node type
 
@@ -215,20 +215,23 @@ void assign_haloes_to_web()
 
 	NWeb = Settings.c_web_size;
 	L = Settings.box_size;
-	GridUnit = NWeb / L;
+	GridUnit = (float) NWeb / L;
 
 	nHaloes = Settings.n_haloes;
 
-#		pragma omp parallel for			\
+	for(i=0; i<4; i++)
+		Settings.n_cweb_type[i] = 0;
+
+//#		pragma omp parallel for			\
 		private(j,ix,iy,iz,index)		\
 		shared(nHaloes,GridUnit,Haloes,VWeb)
 		for(j=0; j<nHaloes; j++)
 		{
 			if(halo_condition(j) == 1)
 			{
-				ix = (int) GridUnit * Haloes[j].X[0]; 
-				iy = (int) GridUnit * Haloes[j].X[1]; 
-				iz = (int) GridUnit * Haloes[j].X[2]; 
+				ix = (int) (GridUnit * Haloes[j].X[0]); 
+				iy = (int) (GridUnit * Haloes[j].X[1]); 
+				iz = (int) (GridUnit * Haloes[j].X[2]); 
 	
 					// Init all node types to minus one
 				for(i=0; i<4; i++)
@@ -238,9 +241,9 @@ void assign_haloes_to_web()
 					// the nodes in the Web file are already ordered
 				index = VWeb[Node(NWeb, ix, iy, iz)].type;
 				Haloes[j].web_type[index] = 1;
-
-			//fprintf(stderr, "(%d , %d) type=%d, x=%f, y=%f z=%f; ix=%d iy=%d iz=%d\n",
-			//j,Node(NWeb, ix, iy, iz),index,Haloes[j].X[0], Haloes[j].X[1], Haloes[j].X[2], ix, iy, iz);
+				Settings.n_cweb_type[index]++;
+			fprintf(stderr, "(%d , %d) type=%d, x=%f, y=%f z=%f; ix=%d iy=%d iz=%d\n",
+			j,Node(NWeb, ix, iy, iz),index,Haloes[j].X[0], Haloes[j].X[1], Haloes[j].X[2], ix, iy, iz);
 			}
 		}
 

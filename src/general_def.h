@@ -94,6 +94,7 @@ extern struct general_settings
 	int n_all;
 	int n_haloes;
 	int n_haloes_size; // Used for MPI communication
+	int n_cweb_type[4];
 
 	int n_sub_min; // Minimum number of subhaloes per halo
 	int n_sub_threshold;
@@ -127,6 +128,7 @@ extern struct general_settings
 	double Rmax;
 	double Mmin;
 	double Mmax;
+	double Mprint;
 
 		struct
 		{

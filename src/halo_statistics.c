@@ -67,28 +67,56 @@ int main(int argc, char **argv)
 
 		initialize_halo_properties_structure();
 
-		find_substructure();
-
 		compute_halo_properties();
-		print_numerical_mass_function();
-		print_all_halo_properties_to_one_file();
-		print_all_haloes();
-
 #ifdef GAS
 		average_gas_profiles();
 #endif
 		average_nfw_profile();
-		print_average_profiles();
 
+		print_average_profiles();
 		print_halo_best_fit_results();
+		print_numerical_mass_function();
+		print_all_halo_properties_to_one_file();
+		//print_all_haloes();
 
 		read_v_web();
+		read_t_web();
+
+		sort_web_statistics();
+	
 		assign_haloes_to_web();
+
+			// Assign halo to nodes
+			int i=0;
+			char base_out[200]; 
+			sprintf(base_out, "%s", Urls.output_prefix);
+			Settings.use_web = 1;
+
+			for(i=0; i<4; i++)
+			{
+				Settings.use_web_type = i;
+				sprintf(Urls.output_prefix, "%s%s_%02d_", base_out, "type", i);			
+				fprintf(stderr, "Sorting halo properties for web type=%d, using %d haloes.\n", 
+						i, n_haloes_per_criterion());
+
+				compute_halo_properties();
+#ifdef GAS
+				average_gas_profiles();
+#endif
+				average_nfw_profile();
+	
+				// Print files
+				print_average_profiles();
+				print_halo_best_fit_results();
+				print_numerical_mass_function();
+				print_all_halo_properties_to_one_file();
+			}
 
 	//	sort_axis_alignment();
 	//	print_axis_alignment();
 
 	//	compute_subhalo_properties();
+	//	find_substructure();
 	//	print_all_subhalo_properties_to_one_file();
 	// Redo all of the above for subhaloes
 

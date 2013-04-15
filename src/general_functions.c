@@ -67,6 +67,7 @@ void initialize_internal_variables(char **argv){
 		Settings.use_n_min = atof(argv[count++]);
 		Settings.n_haloes_to_use = atoi(argv[count++]); 
 		Settings.use_criterion = atoi(argv[count++]); 
+		Settings.Mprint = atoi(argv[count++]); 
 	
 		// Cosmological parameters
 		Cosmo.h = atof(argv[count++]);
@@ -241,6 +242,8 @@ int halo_condition(int i)
 	{
 		if(Haloes[i].web_type[Settings.use_web_type] == 1)
 			condition = 1;
+		else 
+			condition = 0;
 	}
 
 	return condition;
@@ -272,6 +275,9 @@ int n_haloes_per_criterion()
 		// When using subhaloes neglect the former choices
 		if(Settings.use_sub == 1)
 			nTot = Settings.n_sub_threshold;
+
+	if(Settings.use_web == 1)
+		nTot = Settings.n_cweb_type[Settings.use_web_type];
 
 	return nTot;
 }
