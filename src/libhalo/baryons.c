@@ -125,20 +125,9 @@ void average_gas_profiles(void)
 	double rho, rho_tot;
 	double ix, ix_tot;
 
-	struct halo_properties *HALOPROPERTIES;
-
 	INFO_MSG("Sorting halo gas profiles");
 
 	nHaloesCut=n_haloes_per_criterion();
-	
-	if(Settings.use_sub == 1)
-	{
-		HALOPROPERTIES = SubHaloProperties;	
-	} 
-		else 
-	{
-		HALOPROPERTIES = HaloProperties;
-	}
 
 #ifdef WITH_MPI
 		nHaloes=Settings.n_haloes; 
@@ -187,20 +176,20 @@ void average_gas_profiles(void)
 		
 			}
 
-			HALOPROPERTIES[HALO_INDEX].f_gas.x[i] = Haloes[0].f_gas.x[i];
-			HALOPROPERTIES[HALO_INDEX].f_gas.y[i] = f_tot/f_bin;
-			HALOPROPERTIES[HALO_INDEX].f_gas.n[i] = f_bin;
-			HALOPROPERTIES[HALO_INDEX].rho_gas.x[i] = Haloes[0].rho_gas.x[i];
-			HALOPROPERTIES[HALO_INDEX].rho_gas.y[i] = rho_tot/rho_bin;
-			HALOPROPERTIES[HALO_INDEX].rho_gas.n[i] = rho_bin;
-			HALOPROPERTIES[HALO_INDEX].i_x.x[i] = Haloes[0].i_x.x[i];
-			HALOPROPERTIES[HALO_INDEX].i_x.y[i] = ix_tot/ix_bin;
-			HALOPROPERTIES[HALO_INDEX].i_x.n[i] = ix_bin;
+			HaloProperties[HALO_INDEX].f_gas.x[i] = Haloes[0].f_gas.x[i];
+			HaloProperties[HALO_INDEX].f_gas.y[i] = f_tot/f_bin;
+			HaloProperties[HALO_INDEX].f_gas.n[i] = f_bin;
+			HaloProperties[HALO_INDEX].rho_gas.x[i] = Haloes[0].rho_gas.x[i];
+			HaloProperties[HALO_INDEX].rho_gas.y[i] = rho_tot/rho_bin;
+			HaloProperties[HALO_INDEX].rho_gas.n[i] = rho_bin;
+			HaloProperties[HALO_INDEX].i_x.x[i] = Haloes[0].i_x.x[i];
+			HaloProperties[HALO_INDEX].i_x.y[i] = ix_tot/ix_bin;
+			HaloProperties[HALO_INDEX].i_x.n[i] = ix_bin;
 
 			if(Haloes[0].rho_gas.x[i]==0)
 			{
-				HALOPROPERTIES[HALO_INDEX].rho_gas.y[i] = 0; 
-				HALOPROPERTIES[HALO_INDEX].i_x.y[i] = 0; 
+				HaloProperties[HALO_INDEX].rho_gas.y[i] = 0; 
+				HaloProperties[HALO_INDEX].i_x.y[i] = 0; 
 			}
 		}
 }

@@ -149,20 +149,9 @@ void average_nfw_profile(void)
 	int nfw_bin;
 	double nfw, nfw_tot;
 
-	struct halo_properties *HALOPROPERTIES;
-
 	INFO_MSG("Sorting halo radial velocities and concentrations");
 
 	nHaloesCut=n_haloes_per_criterion();
-	
-	if(Settings.use_sub == 1)
-	{
-		HALOPROPERTIES = SubHaloProperties;	
-	} 
-		else 
-	{
-		HALOPROPERTIES = HaloProperties;
-	}
 
 #ifdef WITH_MPI
 		nHaloes=Settings.n_haloes; 
@@ -191,9 +180,9 @@ void average_nfw_profile(void)
 		
 			}
 
-			HALOPROPERTIES[HALO_INDEX].nfw.x[i] = Haloes[0].nfw.x[i];
-			HALOPROPERTIES[HALO_INDEX].nfw.y[i] = nfw_tot/nfw_bin;
-			HALOPROPERTIES[HALO_INDEX].nfw.n[i] = nfw_bin;
+			HaloProperties[HALO_INDEX].nfw.x[i] = Haloes[0].nfw.x[i];
+			HaloProperties[HALO_INDEX].nfw.y[i] = nfw_tot/nfw_bin;
+			HaloProperties[HALO_INDEX].nfw.n[i] = nfw_bin;
 		}
 }
 

@@ -200,7 +200,7 @@ extern struct mass_function
 	double *err;
 	double *err_dn;
 
-} *MassFunc, *SubMassFunc, *ThMassFunc; 
+} *MassFunc, *ThMassFunc; 
 
 
 extern struct num_density
@@ -512,6 +512,7 @@ extern struct halo_properties
 
 	int *n_vel_sub;
 	double *vel_sub;
+	double *vel_sub_r;
 	double *p_vel_sub;
 	double vel_0_sub;
 	
@@ -527,4 +528,4 @@ extern struct halo_properties
 	double *gas_dm_costh;
 	double *gas_diff_cm;
 
-} *HaloProperties, *SubHaloProperties;
+} *HaloProperties;

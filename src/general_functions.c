@@ -105,11 +105,9 @@ void default_init()
 	Settings.use_cat = Urls.nCatalogueFiles-Settings.cat_number;
 	Settings.use_web = 0;
 
-	MassFunc = malloc(30*sizeof(struct mass_function));
-	SubMassFunc = malloc(30*sizeof(struct mass_function));
-	ThMassFunc = malloc(30*sizeof(struct mass_function));
-	HaloProperties = malloc(30*sizeof(struct halo_properties));
-	SubHaloProperties = malloc(30*sizeof(struct halo_properties));
+	MassFunc = malloc(sizeof(struct mass_function));
+	ThMassFunc = malloc(sizeof(struct mass_function));
+	HaloProperties = malloc(sizeof(struct halo_properties));
 
 	Cosmo.H_0=Cosmo.h*100;
 	Cosmo.G=6.672e-8;

@@ -28,7 +28,7 @@ void stdout_halo_status(void);
  */
 void find_substructure()
 {
-	int i=0, host=0;
+	int i=0, host=0, nHaloes=0;
 
 	INFO_MSG("Sorting halo substructure");
 
@@ -38,7 +38,10 @@ void find_substructure()
 	SubStructure.sub = calloc(1, sizeof(struct sub_halo));
 	SubStructure.host = calloc(1, sizeof(struct host_halo));
 
-	for(i=0; i<Settings.n_haloes; i++)
+	//nHaloes = n_haloes_per_criterion();
+	nHaloes = Settings.n_haloes;
+
+	for(i=0; i<nHaloes; i++)
 	{
 		if(Haloes[i].n_satellites > 0)
 		{
@@ -103,19 +106,14 @@ int find_host_index(uint64_t host_id)
 
 void stdout_halo_status()
 {
+/*
 	fprintf(stdout, "%lf",   HaloProperties[HALO_INDEX].z);   
 	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].l_0);   
 	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].halo.s0);   
 	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].halo.t0);   
 	fprintf(stdout, "\t%lf", HaloProperties[HALO_INDEX].avgSub);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].l_0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].halo.s0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].halo.t0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].costh0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].cosphi0);   
-	fprintf(stdout, "\t%lf", SubHaloProperties[HALO_INDEX].vel_0);   
-	fprintf(stdout, "\t%e",  SubHaloProperties[HALO_INDEX].avgMass);   
 	fprintf(stdout, "\n");
+*/
 }
 
 
@@ -127,7 +125,6 @@ void initialize_halo_storage()
 	nTot = Urls.nCatalogueFiles;
 
 	HaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
-	SubHaloProperties = (struct halo_properties *) calloc(nTot, sizeof(struct halo_properties));
 }
 
 
@@ -175,56 +172,6 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].fit_nfw.chi = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].fit_nfw.per = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].fit_nfw.gof = (double*) calloc(nBins, sizeof(double));
-
-			// General subhalo properties
-		SubHaloProperties[HALO_INDEX].n_bins=nBins; 
-		SubHaloProperties[HALO_INDEX].c = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_c = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.l = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.p_l = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.s = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.p_s = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.t = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.p_t = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].mass = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].n_entry = (int*) calloc(nBins, sizeof(int));
-		SubHaloProperties[HALO_INDEX].vel = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].conc = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.shape = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.triax = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.lambda = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].halo.virial = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.shape = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.triax = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.lambda = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].fit_nfw.chi = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].fit_nfw.per = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].fit_nfw.gof = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_fit_nfw.chi = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_fit_nfw.p_chi = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_fit_nfw.per = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_fit_nfw.p_per = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_fit_nfw.gof = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_fit_nfw.p_gof = (double*) calloc(nBins, sizeof(double));
-
-			// Sub halo properties only
-		SubHaloProperties[HALO_INDEX].r_sub = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].n_r_sub = (int*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].cum_n_r_sub = (int*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].r_sub_subset = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].n_r_sub_subset = (int*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].cum_n_r_sub_subset = (int*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].vel_sub = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].n_vel_sub = (int*) calloc(nBins, sizeof(int));
-		SubHaloProperties[HALO_INDEX].p_vel_sub = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].n_sub = (int*) calloc(nBins, sizeof(int));
-		SubHaloProperties[HALO_INDEX].cum_n_sub = (int*) calloc(nBins, sizeof(int));
-		SubHaloProperties[HALO_INDEX].ecc = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].n_ecc = (int*) calloc(nBins, sizeof(int));
-		SubHaloProperties[HALO_INDEX].costh = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].costh_count = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].cosphi = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].cosphi_count = (double*) calloc(nBins, sizeof(double));
 #ifdef GAS
 		HaloProperties[HALO_INDEX].T = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].n_T = (double*) calloc(nBins, sizeof(double));
@@ -259,37 +206,26 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].gas_fraction = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas_dm_costh = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].gas_diff_cm = (double*) calloc(nBins, sizeof(double));
-
-		SubHaloProperties[HALO_INDEX].cm = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_cm = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_dm_cth = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].p_gas_dm_cth = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.virial = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.ekin = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].dm.virial = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].dm.ekin = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.shape = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.triax = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.lambda = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_T = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_u = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_fraction = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].diff.l = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].diff.p_l = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].diff.s = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].diff.p_s = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].diff.t = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].diff.p_t = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.l = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.p_l = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.s = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.p_s = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.t = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas.p_t = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_fraction = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_dm_costh = (double*) calloc(nBins, sizeof(double));
-		SubHaloProperties[HALO_INDEX].gas_diff_cm = (double*) calloc(nBins, sizeof(double));
 #endif
+			// Sub halo properties only
+		HaloProperties[HALO_INDEX].r_sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].n_r_sub = (int*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].cum_n_r_sub = (int*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].vel_sub_r = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].vel_sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].n_vel_sub = (int*) calloc(nBins, sizeof(int));
+		HaloProperties[HALO_INDEX].p_vel_sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].n_sub = (int*) calloc(nBins, sizeof(int));
+		HaloProperties[HALO_INDEX].cum_n_sub = (int*) calloc(nBins, sizeof(int));
+		HaloProperties[HALO_INDEX].costh = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].costh_count = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].cosphi = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].cosphi_count = (double*) calloc(nBins, sizeof(double));
+		//HaloProperties[HALO_INDEX].ecc = (double*) calloc(nBins, sizeof(double));
+		//HaloProperties[HALO_INDEX].n_ecc = (int*) calloc(nBins, sizeof(int));
+		//HaloProperties[HALO_INDEX].r_sub_subset = (double*) calloc(nBins, sizeof(double));
+		//HaloProperties[HALO_INDEX].n_r_sub_subset = (int*) calloc(nBins, sizeof(double));
+		//HaloProperties[HALO_INDEX].cum_n_r_sub_subset = (int*) calloc(nBins, sizeof(double));
 }
 
 
@@ -297,32 +233,7 @@ void initialize_halo_properties_structure()
 void free_halo_properties()
 {
 /*
-		free(SubHaloProperties[HALO_INDEX].costh); 
-		free(SubHaloProperties[HALO_INDEX].costh_count); 
-		free(SubHaloProperties[HALO_INDEX].cosphi); 
-		free(SubHaloProperties[HALO_INDEX].cosphi_count);
-		free(SubHaloProperties[HALO_INDEX].l); 		
-		free(SubHaloProperties[HALO_INDEX].p_l); 	
-		free(SubHaloProperties[HALO_INDEX].shape); 
-		free(SubHaloProperties[HALO_INDEX].p_s); 
-		free(SubHaloProperties[HALO_INDEX].triax); 
-		free(SubHaloProperties[HALO_INDEX].p_t); 
-		free(SubHaloProperties[HALO_INDEX].r_sub); 
-		free(SubHaloProperties[HALO_INDEX].n_r_sub); 
-		free(SubHaloProperties[HALO_INDEX].cum_n_r_sub); 
-		free(SubHaloProperties[HALO_INDEX].r_sub_subset); 
-		free(SubHaloProperties[HALO_INDEX].n_r_sub_subset); 
-		free(SubHaloProperties[HALO_INDEX].cum_n_r_sub_subset); 
-		free(SubHaloProperties[HALO_INDEX].vel_sub); 
-		free(SubHaloProperties[HALO_INDEX].p_vel_sub); 
-		free(SubHaloProperties[HALO_INDEX].n_vel_sub); 
-		free(SubHaloProperties[HALO_INDEX].mass); 
-		free(SubHaloProperties[HALO_INDEX].n_sub); 
-		free(SubHaloProperties[HALO_INDEX].cum_n_sub); 
-		free(SubHaloProperties[HALO_INDEX].ecc); 
-		free(SubHaloProperties[HALO_INDEX].n_ecc);
-	
-		free(HaloProperties[HALO_INDEX].c);
+				free(HaloProperties[HALO_INDEX].c);
 		free(HaloProperties[HALO_INDEX].p_c);
 		free(HaloProperties[HALO_INDEX].l);
 		free(HaloProperties[HALO_INDEX].p_l);
@@ -336,9 +247,6 @@ void free_halo_properties()
 		free(HaloProperties[HALO_INDEX].gas_T);
 		free(HaloProperties[HALO_INDEX].gas_u);
 		free(HaloProperties[HALO_INDEX].gas_fraction);
-		free(SubHaloProperties[HALO_INDEX].gas_T);
-		free(SubHaloProperties[HALO_INDEX].gas_u);
-		free(SubHaloProperties[HALO_INDEX].gas_fraction);
 #endif 
 		free(Haloes);
 */

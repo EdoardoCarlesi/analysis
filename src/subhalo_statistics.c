@@ -18,7 +18,7 @@ int main(int argc, char **argv)
 
 		Settings.n_sub_min=400;
 
-		print_all_subhalo_properties_to_one_file();
+	//	print_all_subhalo_properties_to_one_file();
 
 	fprintf(stdout, "\nmain(). Subhalo statistical properties computed.\n");
 

@@ -55,7 +55,7 @@ int main(int argc, char **argv)
 
 		MPI_Finalize();
 
-	//	free_comm_structures();
+		//free_comm_structures();
 #endif
 	
 	if(ThisTask==0)
@@ -74,6 +74,9 @@ int main(int argc, char **argv)
 		average_gas_profiles();
 #endif
 		average_nfw_profile();
+
+	//	sort_axis_alignment();
+	//	print_axis_alignment();
 
 		print_average_profiles();
 		print_halo_best_fit_results();
@@ -100,11 +103,11 @@ int main(int argc, char **argv)
 				sprintf(Urls.output_prefix, "%s%s_%02d_", base_out, "type", i);			
 				fprintf(stderr, "Sorting halo properties for web type=%d, using %d haloes.\n", 
 						i, n_haloes_per_criterion());				
-				compute_halo_properties();
+				//compute_halo_properties();
+				average_nfw_profile();
 #ifdef GAS
 				average_gas_profiles();
 #endif
-				average_nfw_profile();
 	
 				// Print files
 				print_average_profiles();
@@ -113,16 +116,30 @@ int main(int argc, char **argv)
 				print_all_halo_properties_to_one_file();
 			}
 
-	//	sort_axis_alignment();
-	//	print_axis_alignment();
+		// Now select subhaloes
+		find_substructure();
 
-		// FIXME
-	//	compute_subhalo_properties();
-	//	find_substructure();
-	//	print_all_subhalo_properties_to_one_file();
+		Settings.use_web = 0;
+		Settings.use_sub = 1;
+		sprintf(Urls.output_prefix, "%s%s", base_out, "substructure_");			
+		compute_subhalo_properties();
+		//compute_halo_properties();
+		average_nfw_profile();
+#ifdef GAS
+		average_gas_profiles();
+#endif
+	
+		print_average_profiles();
+		print_halo_best_fit_results();
+		print_numerical_mass_function();
+		print_all_halo_properties_to_one_file();
+
+		print_subhalo_only_properties();
+
 	//	free_halo_properties();
-	// Redo all of the above for subhaloes
 
+/*
+*/
 	INFO_MSG("Computed halo statistical properties at fixed z");
 
 	}
