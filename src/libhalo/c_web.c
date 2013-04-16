@@ -224,29 +224,34 @@ void assign_haloes_to_web()
 
 //#		pragma omp parallel for			\
 		private(j,ix,iy,iz,index)		\
-		shared(nHaloes,GridUnit,Haloes,VWeb)
+		shared(Settings,nHaloes,GridUnit,Haloes,VWeb)
 		for(j=0; j<nHaloes; j++)
 		{
+			// Init all node types to minus one
+			for(i=0; i<4; i++)
+				Haloes[j].web_type[i] = -1;
+
 			if(halo_condition(j) == 1)
 			{
 				ix = (int) (GridUnit * Haloes[j].X[0]); 
 				iy = (int) (GridUnit * Haloes[j].X[1]); 
 				iz = (int) (GridUnit * Haloes[j].X[2]); 
-	
-					// Init all node types to minus one
-				for(i=0; i<4; i++)
-					Haloes[j].web_type[i] = -1;
 					
 					// Find the nearest node's type assuming that
 					// the nodes in the Web file are already ordered
 				index = VWeb[Node(NWeb, ix, iy, iz)].type;
 				Haloes[j].web_type[index] = 1;
+				// Prevent race conditions when updating cweb type totals
+#				pragma omp atomic
 				Settings.n_cweb_type[index]++;
-			//fprintf(stderr, "(%d , %d) type=%d, x=%f, y=%f z=%f; ix=%d iy=%d iz=%d\n",
-			//j,Node(NWeb, ix, iy, iz),index,Haloes[j].X[0], Haloes[j].X[1], Haloes[j].X[2], ix, iy, iz);
+		//	fprintf(stderr, "(%d , %d) type=%d, x=%f, y=%f z=%f; ix=%d iy=%d iz=%d\n",
+		//	j,Node(NWeb, ix, iy, iz),index,Haloes[j].X[0], Haloes[j].X[1], Haloes[j].X[2], ix, iy, iz);
 			}
 		}
 
+		for(i=0; i<4; i++)
+			fprintf(stderr, "There are %d haloes on node type %d\n", Settings.n_cweb_type[i], i);
+				
 	free(VWeb);
 }
 
@@ -263,9 +268,7 @@ int compute_node_type(struct c_web *Web)
 	l3 = Web->lambda[2];
 
 	if(!(l1 > l2 && l2 > l3) && (l1 != 0.0))
-		fprintf(stderr, 
-	"Problem computing node type, incorrect ordering for the eigenvalues l1=%f, l2=%f, l3=%f\n", 
-			l1, l2, l3);
+		fprintf(stderr, "Incorrect ordering for l1=%f, l2=%f, l3=%f\n", l1, l2, l3);
 
 		if(l3 > l0) j=3;
 		if(l2 > l0 && l3 < l0) j=2;
@@ -319,7 +322,7 @@ void sort_web_statistics()
 		T_gas = malloc(NType * sizeof(double));
 		fprintf(stderr, "Done.\n");	 
 
-#	pragma omp parallel for					\
+//#	pragma omp parallel for					\
 	private(k, j) 						\
 	shared(i, alpha_dm, delta_dm, delta_gas, delta_tot) 	\
 	shared(TWeb, VWeb, NWeb, w_dm, w_gas, T_gas, WebInfoDm)	

@@ -149,7 +149,7 @@ void average_nfw_profile(void)
 	int nfw_bin;
 	double nfw, nfw_tot;
 
-	INFO_MSG("Sorting halo radial velocities and concentrations");
+	INFO_MSG("Sorting NFW parameters");
 
 	nHaloesCut=n_haloes_per_criterion();
 

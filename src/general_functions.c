@@ -18,7 +18,7 @@
 /*
  * Define functions
  */
-int subhalo_condition(int);
+void default_init(void);
 
 
 /*
@@ -169,76 +169,63 @@ void check_condition_consistency()
 
 
 
-int subhalo_condition(int i)
-{
-
-	if(Settings.use_sub == 1 && Haloes[i].host > 0)
-	{	
-		//fprintf(stderr, "i=%d", i);
-		//fprintf(stderr, " UseSub=%d", Settings.use_sub);
-		//fprintf(stderr, " Host=%llu\n", Haloes[i].host);
-		return 1;
-	} else {
-		return 0;
-	}
-}
-
-
-
 int halo_condition(int i)
 {
 	int j=0, condition=0;
-	
-	if(subhalo_condition(i) || Settings.use_sub == 0) 	
-	{	
 
 	if(Settings.use_spin == 1)
 	{
 		if(Haloes[i].spin == 1)
-				condition = 1;
+			condition = 1;
 		else 
-				condition = 0;
+			condition = 0;
 	}
 		
 		else if(Settings.use_conc == 1)
 		{
 			if(Haloes[i].conc == 1)
-					condition = 1;
+				condition = 1;
 			else 
-					condition = 0;
+				condition = 0;
 		}
 
 			else if(Settings.use_mass == 1)
 			{
 				if(Haloes[i].mass == 1)
-						condition = 1;
+					condition = 1;
 				else 
-						condition = 0;
+					condition = 0;
 			}
 
 				else if(Settings.use_vir == 1)
 				{
 					if(Haloes[i].vir == 1)
-							condition = 1;
+						condition = 1;
 					else 
-							condition = 0;
+						condition = 0;
 				}
 
 			else if(Settings.use_all == 1)
 			{
 				if(Haloes[i].all == 1)
-						condition = 1;
+					condition = 1;
 				else 
-						condition = 0;
+					condition = 0;
 			}
-	
-		else 
-			condition = 0;
-	}
 
-	if(condition == 1 && Settings.use_web == 1)
+		// If using subhaloes, check that they also satisfy the conditions
+		if(Settings.use_sub == 1)
+		{
+			if(Haloes[i].host > 0 && condition == 1)
+				condition = 1;
+			else 
+				condition = 0;
+		}
+
+	// Again check when using cosmic web criteria
+	if(Settings.use_web == 1)
 	{
-		if(Haloes[i].web_type[Settings.use_web_type] == 1)
+		if(Haloes[i].web_type[Settings.use_web_type] == 1 && condition == 1)
 			condition = 1;
 		else 
 			condition = 0;
@@ -270,12 +257,12 @@ int n_haloes_per_criterion()
 
 			else
 				nTot = Settings.n_haloes;
-		// When using subhaloes neglect the former choices
+
 		if(Settings.use_sub == 1)
 			nTot = Settings.n_sub_threshold;
 
-	if(Settings.use_web == 1)
-		nTot = Settings.n_cweb_type[Settings.use_web_type];
+		if(Settings.use_web == 1)
+			nTot = Settings.n_cweb_type[Settings.use_web_type];
 
 	return nTot;
 }
@@ -284,7 +271,7 @@ int n_haloes_per_criterion()
 
 void set_halo_selection_criterion()
 {
-		// Init all criteria to zero
+	// Init all criteria to zero
 	Settings.use_mass = 0;
 	Settings.use_spin = 0;
 	Settings.use_conc = 0;

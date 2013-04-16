@@ -34,7 +34,7 @@ catalogue_z=0
 catalogue_number=29
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=9
+n_bins=5
 n_bins_th=200
 r_bins=8
 
@@ -54,7 +54,7 @@ m_print=5.e+14
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=1.e+8
+m_th=1.e+11
 virial=2
 spin=0.5
 
@@ -224,7 +224,8 @@ $base_analysis/scripts/mpi_check.sh $base_analysis $2
 
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
-execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
+#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
+execute='mpiexec -n '$n_procs' '$base_analysis
 fi
 
 if [ $1 -eq 3 ] ; then

@@ -233,7 +233,7 @@ void initialize_halo_properties_structure()
 void free_halo_properties()
 {
 /*
-				free(HaloProperties[HALO_INDEX].c);
+		free(HaloProperties[HALO_INDEX].c);
 		free(HaloProperties[HALO_INDEX].p_c);
 		free(HaloProperties[HALO_INDEX].l);
 		free(HaloProperties[HALO_INDEX].p_l);
@@ -248,7 +248,6 @@ void free_halo_properties()
 		free(HaloProperties[HALO_INDEX].gas_u);
 		free(HaloProperties[HALO_INDEX].gas_fraction);
 #endif 
-		free(Haloes);
 */
 }
 

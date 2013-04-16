@@ -209,31 +209,49 @@ void sort_numerical_mass_function(void)
 		MassFunc[MF_INDEX].err = (double*) calloc(nBins-1, sizeof(double));
 		MassFunc[MF_INDEX].err_dn = (double*) calloc(nBins-1, sizeof(double));
 
+		j=0;
 		for(i=0; i<nHaloes; i++)
 		{	
-				if(subhalo_condition(i) == 1)
+			if(Settings.use_sub == 1) 
 			{
-				mass[j] = Haloes[i].Mvir;
-				j++;
-			}
-				else if (Settings.use_sub == 0) 
-			{
-				if(Settings.use_web == 1 && halo_condition(i) == 1)
+				if(Haloes[i].host > 0)
+				{
 					mass[j] = Haloes[i].Mvir;
+					j++;
+				}
+			}
+			else if (Settings.use_sub == 0) 
+			{
+				if(Settings.use_web == 1) 
+				{
+					if(Haloes[i].web_type[Settings.use_web_type] == 1)
+					{
+						mass[j] = Haloes[i].Mvir;
+						j++;
+					}
+				}
 				else 
+				{
 					mass[i] = Haloes[i].Mvir;			
+				}
 			}
 		}
 
+		fprintf(stderr, "\nBinned\n");
 		mMin = F_MIN * minimum(mass, nHaloesCut);
 		mMax = F_MAX * maximum(mass, nHaloesCut);
+		fprintf(stderr, "\nMin=%e max=%e\n", mMin, mMax);
 		mass_bin = log_stepper(mMin, mMax, nBins);
+		fprintf(stderr, "\nBinned\n");
 	
 		lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
+		fprintf(stderr, "\nBinned\n");
 		
 		cum_bin(n_mass, cum_n_mass, nBins-1);
+		fprintf(stderr, "\nBinned\n");
 
-			volume=Settings.box_size*Settings.box_size*Settings.box_size;
+		volume=Settings.box_size*Settings.box_size*Settings.box_size;
+
 
 		for(i=0; i<nBins-1; i++)
 		{
@@ -642,17 +660,18 @@ void sort_mass_relations()
 
 	nHaloesCut = n_haloes_per_criterion();
 
+
 #ifdef WITH_MPI
 		nHaloes=Settings.n_haloes; 
 #else
 		nHaloes=Settings.n_threshold; 
 #endif
 
-		mass = (double*) calloc(nHaloesCut, sizeof(double));	
-		conc = (double*) calloc(nHaloesCut, sizeof(double));	
+		lambda = (double*) calloc(nHaloesCut, sizeof(double));	
 		triax = (double*) calloc(nHaloesCut, sizeof(double));	
 		shape = (double*) calloc(nHaloesCut, sizeof(double));	
-		lambda = (double*) calloc(nHaloesCut, sizeof(double));	
+		mass = (double*) calloc(nHaloesCut, sizeof(double));	
+		conc = (double*) calloc(nHaloesCut, sizeof(double));	
 		vel = (double*) calloc(nHaloesCut, sizeof(double));	
 		vir = (double*) calloc(nHaloesCut, sizeof(double));	
 		gof = (double*) calloc(nHaloesCut, sizeof(double));	
@@ -705,7 +724,8 @@ void sort_mass_relations()
 			}
 		}
 			nHaloesCut=m;
-
+			
+		
 			mMin = F_MIN * minimum(mass, nHaloesCut);
 			mMax = F_MAX * maximum(mass, nHaloesCut);
 
@@ -1084,16 +1104,16 @@ void sort_alignment_and_displacement()
 
 void compute_halo_properties()
 {
-
 		sort_numerical_mass_function();
-		sort_lambda_and_concentration();
 		sort_mass_relations();
-		sort_shape_and_triaxiality();
 		sort_nfw_parameters();
-
+		sort_lambda_and_concentration();
+		sort_shape_and_triaxiality();
 #ifdef GAS
 		sort_T_mass_function();
 		sort_gas_relations();
 		sort_alignment_and_displacement();
 #endif
+/*
+*/
 }
