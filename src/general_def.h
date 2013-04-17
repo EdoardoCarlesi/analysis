@@ -200,7 +200,7 @@ extern struct mass_function
 	double *err;
 	double *err_dn;
 
-} *MassFunc, *ThMassFunc; 
+} *MassFunc, *VelFunc, *ThMassFunc; 
 
 
 extern struct num_density
@@ -490,8 +490,8 @@ extern struct halo_properties
 	double *n_T;
 
 	// Subhalo stuff
-	int *n_r_sub;
-	int *cum_n_r_sub;
+	double *n_r_sub;
+	double *cum_n_r_sub;
 
 	double *r_sub;
 	double avgMass;
@@ -518,8 +518,8 @@ extern struct halo_properties
 	
 	double *ecc;
 
-	int *n_sub;
-	int *cum_n_sub;
+	double *n_sub;
+	double *cum_n_sub;
 	int *n_ecc;
 
 	double *gas_T;

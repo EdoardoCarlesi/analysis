@@ -106,6 +106,7 @@ void default_init()
 	Settings.use_web = 0;
 
 	MassFunc = malloc(sizeof(struct mass_function));
+	VelFunc = malloc(sizeof(struct mass_function));
 	ThMassFunc = malloc(sizeof(struct mass_function));
 	HaloProperties = malloc(sizeof(struct halo_properties));
 
@@ -214,12 +215,18 @@ int halo_condition(int i)
 			}
 
 		// If using subhaloes, check that they also satisfy the conditions
+
 		if(Settings.use_sub == 1)
 		{
-			if(Haloes[i].host > 0 && condition == 1)
+			uint64_t g=0;
+			if(Haloes[i].host > g && condition == 1)
+			{
 				condition = 1;
+			}
 			else 
+			{
 				condition = 0;
+			}
 		}
 
 	// Again check when using cosmic web criteria
@@ -231,6 +238,8 @@ int halo_condition(int i)
 			condition = 0;
 	}
 
+	//	if(Settings.use_sub == 1 && Haloes[i].host >0)
+	//	D_PRINT("Condition=", condition);
 	return condition;
 }
 
@@ -278,6 +287,8 @@ void set_halo_selection_criterion()
 	Settings.use_vir = 0;
 	Settings.use_all = 0;
 	Settings.use_sub = 0;
+
+	Settings.n_sub_threshold = 0;
 	
 	switch(Settings.use_criterion)
 	{	

@@ -13,7 +13,6 @@
 /*
  * Declare functions
  */
-
 void n_r_subhalo(void);
 void sort_velocity_distribution(void);
 void sort_host_axis_alignment_and_spatial_anisotropy(void);
@@ -58,7 +57,8 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 			for(j=0; j<SubStructure.host[i].n_sub; j++)			 
 			{
 				sum = 0; ct = 0; R = 0; anis = 0;
-				l = SubStructure.host[i].sub_index[l];
+				l = SubStructure.host[i].sub_index[j];
+
 				// Center of mass distance host-satellite 
 				for(m=0; m<3; m++)
 					sum += pow2(Haloes[l].X[m] - Haloes[k].X[m]);
@@ -73,9 +73,10 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 				for(m=0; m<3; m++)
 					anis += Haloes[k].Ea[m]*(Haloes[l].X[m] - Haloes[k].X[m]);
 				anis = anis / R;
-					
-					if(halo_condition(i) == 1)
+
+					if(halo_condition(l) == 1)
 					{
+				//		fprintf(stderr, "%d) ct=%f, an=%f R=%f\n", n, ct, anis, R);
 						costh[n] = sqrt(ct*ct);
 						n++;
 					}
@@ -85,20 +86,19 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 			}
 		}
 
+			cMax = F_MAX * maximum(costh, totSubNmin); 
+			cMin = F_MIN * minimum(costh, totSubNmin); 
+			cpMax = F_MAX * maximum(cosphi, totSub); 
+			cpMin = F_MIN * minimum(cosphi, totSub);
 
-			cMax = 1.01*maximum(costh, totSubNmin); 
-			cMin = minimum(costh, totSubNmin); 
-			cpMax = 1.01*maximum(cosphi, totSub); 
-			cpMin = minimum(cosphi, totSub);
-
-			costh_bin   = lin_stepper(cMin, cMax, nBins);
+			costh_bin = lin_stepper(cMin, cMax, nBins);
 			lin_bin(costh, costh_bin, nBins, totSubNmin, costh_bin_y);
 
-		        cosphi_bin   = lin_stepper(cpMin, cpMax, nBins);
+		        cosphi_bin = lin_stepper(cpMin, cpMax, nBins);
 			lin_bin(cosphi, cosphi_bin, nBins, totSub, cosphi_bin_y);
 
-			halfstep = 0.5*(costh_bin[1]-costh_bin[0]);
-			halfstep2 = 0.5*(cosphi_bin[1]-cosphi_bin[0]);
+			halfstep  = 0.5 * (costh_bin[1]-costh_bin[0]);
+			halfstep2 = 0.5 * (cosphi_bin[1]-cosphi_bin[0]);
 	
 			HaloProperties[HALO_INDEX].costh0 = average(costh, totSubNmin);
 			HaloProperties[HALO_INDEX].cosphi0 = average(cosphi, totSub);
@@ -120,8 +120,6 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 	free(costh);
 	free(costh_bin);
 	free(costh_bin_y);
-
-	fprintf(stdout, "\n");
 }
 
 
@@ -129,9 +127,8 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 void n_r_subhalo()
 {
 	int h=0, i=0, j=0, k=0, m=0, host=0, cum=0, totSub=0, totHost=0, nBins=0; 
-	int *cum_n_r=NULL, *n_r=NULL; 
-	double r, rMin, rMax, sum=0;
-	double *R=NULL, *all_r=NULL;
+	double r, rMin, rMax, sum=0, sub_frac=0;
+	double *R=NULL, *all_r=NULL, *sub_r=NULL, *err_n_r=NULL, *bin_n_r=NULL, *cum_n_r=NULL;
 
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
@@ -141,9 +138,11 @@ void n_r_subhalo()
 	Settings.tick=0;
 
 	all_r = (double*) calloc(totSub, sizeof(double));
+	sub_r = (double*) calloc(totSub, sizeof(double));
 	R = (double*) calloc(nBins, sizeof(double));
-	n_r = (int*) calloc(nBins-1, sizeof(int)); 
-	cum_n_r = (int*) calloc(nBins-1, sizeof(int)); 
+	bin_n_r = (double*) calloc(nBins-1, sizeof(double));
+	cum_n_r = (double*) calloc(nBins-1, sizeof(double));
+	err_n_r = (double*) calloc(nBins-1, sizeof(double));
 
 		for(i=0; i<totHost; i++)
 		{
@@ -152,6 +151,8 @@ void n_r_subhalo()
 			for(j=0; j<SubStructure.host[i].n_sub; j++)
 			{
 				sum = 0;
+				sub_frac = 1./(double)SubStructure.host[i].n_sub;
+
 				k = SubStructure.host[i].sub_index[j];
 
 				for(m=0; m<3; m++)
@@ -159,33 +160,35 @@ void n_r_subhalo()
 
 				r = sqrt(sum);
 
+				//fprintf(stderr, "host=%d sub=%d r=%f frac=%f\n", host, k, r, sub_frac);
+
 				all_r[h] = r/Haloes[host].Rvir;
+				sub_r[h] = sub_frac;
 				h++;
 			}
 		}
 
-			rMin = all_r[0]; 
-			rMax = all_r[totSub-1];
+		rMin = minimum(all_r, totSub); 
+		rMax = maximum(all_r, totSub);
 
-			R = lin_stepper(rMin, rMax, nBins);
-			lin_bin(all_r, R, nBins, totSub, n_r);
+		R = lin_stepper(rMin, rMax, nBins);
 
-		for(i=0; i<nBins-1; i++) 
-		{
-			cum += n_r[i];
-			cum_n_r[i] = cum;
-		}
+		average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, totSub);
+			
+		cum_bin(bin_n_r, cum_n_r, nBins);
 
 	for(i=0; i<nBins-1; i++) 
 	{
 		HaloProperties[HALO_INDEX].r_sub[i] = 0.5 * (R[i] + R[i+1]);
-		HaloProperties[HALO_INDEX].n_r_sub[i] = n_r[i];
+		HaloProperties[HALO_INDEX].n_r_sub[i] = bin_n_r[i];
 		HaloProperties[HALO_INDEX].cum_n_r_sub[i] = cum_n_r[i]; 
 	}
 
 	free(R); 	
-	free(n_r); 
 	free(all_r); 
+	free(sub_r); 
+	free(bin_n_r); 
+	free(err_n_r); 
 	free(cum_n_r);
 
 	fprintf(stdout, "\n");
@@ -250,12 +253,12 @@ void sort_velocity_distribution()
 
 			velMin = minimum(vel,totSub); 
 			velMax = maximum(vel,totSub);
-			vel_x = lin_stepper(velMin, velMax, nBins);
+			vel_x = log_stepper(velMin, velMax, nBins);
 			lin_bin(vel, vel_x, nBins, totSub, vel_y);
 
 			rMin = minimum(all_r,totSub); 
 			rMax = maximum(all_r,totSub);
-			bin_r = lin_stepper(rMin, rMax, nBins);
+			bin_r = log_stepper(rMin, rMax, nBins);
 			average_bin(all_r, vel, bin_r, vel_r, vel_err, nBins, totSub);
 
 			HaloProperties[HALO_INDEX].vel_0 = vel_0;

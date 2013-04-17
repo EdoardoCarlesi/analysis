@@ -37,6 +37,10 @@ struct web_info
 {
 	unsigned int N[5];	 // Total number per type of node, 0 is the total nodes
 	unsigned int *ids[4];
+	
+	float A[5]; // Power-law parameters 
+	float a[5];
+
 	float volume[4]; // Volume fraction in node type
 	float mass[4];	 // Mass fraction in node type
 
@@ -222,7 +226,7 @@ void assign_haloes_to_web()
 	for(i=0; i<4; i++)
 		Settings.n_cweb_type[i] = 0;
 
-//#		pragma omp parallel for			\
+#		pragma omp parallel for			\
 		private(j,ix,iy,iz,index)		\
 		shared(Settings,nHaloes,GridUnit,Haloes,VWeb)
 		for(j=0; j<nHaloes; j++)
@@ -294,6 +298,8 @@ void sort_web_statistics()
 	double *delta_gas, *T_gas, *alpha_gas, *p_alpha_gas;
 	double *delta_tot, *alpha_tot, *p_alpha_tot;
 
+	double *param;
+
 	NWeb = Settings.c_web_size;
 	w_gas = 0.046 / 0.27;
 	w_dm = 1 - w_gas;
@@ -322,7 +328,9 @@ void sort_web_statistics()
 		T_gas = malloc(NType * sizeof(double));
 		fprintf(stderr, "Done.\n");	 
 
-//#	pragma omp parallel for					\
+		param = malloc(2 * sizeof(double));
+
+#	pragma omp parallel for					\
 	private(k, j) 						\
 	shared(i, alpha_dm, delta_dm, delta_gas, delta_tot) 	\
 	shared(TWeb, VWeb, NWeb, w_dm, w_gas, T_gas, WebInfoDm)	
@@ -365,6 +373,15 @@ void sort_web_statistics()
 			average_bin(delta_dm, T_gas, dm_bin, dm_bin_T, dm_bin_e, BIN_SIZE+1, NType);
 			average_bin(delta_dm, alpha_dm, dm_bin, dm_bin_alpha, dm_bin_e, BIN_SIZE+1, NType);
 			average_bin(delta_dm, delta_gas, dm_bin, dm_bin_gas, dm_bin_e, BIN_SIZE+1, NType);
+
+			param[0] = 1.;
+			param[1] = average(T_gas, BIN_SIZE);
+
+			param = best_fit_power_law(delta_gas, T_gas, dm_bin_e, BIN_SIZE, param);
+	
+			fprintf(stderr, "Best Fit PowerLaw a=%f, A=%f\n", param[0], param[1]);
+			WebInfoDm.a[i] = param[0];
+			WebInfoDm.A[i] = param[1];
 
 		for(j=0; j<BIN_SIZE; j++)
 		{
@@ -426,6 +443,7 @@ void print_web_statistics()
 		fprintf(file_out, "filament: %f\t", WebInfoGas.volume[2]);
 		fprintf(file_out, "node: %f\n", WebInfoGas.volume[3]);
 
+
 		fprintf(file_out,"\n#");
 		
 		// Print header file
@@ -437,6 +455,9 @@ void print_web_statistics()
 		}
 				
 			fprintf(file_out,"\n");
+
+		for(j=0; j<5; j++)
+			fprintf(file_out, "# Gas-T power law, type=%d, A=%e a=%f\n", i, WebInfoDm.A[j], WebInfoDm.a[j]);
 
 			// Print it all
 			for(i=0; i<BIN_SIZE; i++)

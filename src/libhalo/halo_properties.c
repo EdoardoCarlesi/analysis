@@ -170,9 +170,13 @@ void sort_axis_alignment()
 void sort_numerical_mass_function(void)
 {
 	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, j=0; 
-	double dn_norm=1., volume=0, mMin=0, mMax=0, halfstep=0, dM=0; 
+	double dn_norm=1., volume=0, mMin=0, mMax=0, vMax=0, vMin=0, halfstep=0, dM=0, dV=0; 
 	double *mass, *mass_bin; 
 	int *n_mass, *cum_n_mass;
+	double *vel, *vel_bin; 
+	int *n_vel, *cum_n_vel;
+
+	nBins = Settings.n_bins; 
 
 	nBins = Settings.n_bins; 
 	nHaloes = Settings.n_haloes; 
@@ -199,6 +203,10 @@ void sort_numerical_mass_function(void)
 		mass_bin = (double*) calloc(nBins, sizeof(double));
 		n_mass = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
+		vel = (double*) calloc(nHaloesCut, sizeof(double));
+		vel_bin = (double*) calloc(nBins, sizeof(double));
+		n_vel = (int*) calloc(nBins-1, sizeof(int));
+		cum_n_vel = (int*) calloc(nBins-1, sizeof(int));
 
 		MassFunc[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
 		MassFunc[MF_INDEX].mass_halfstep = (double*) calloc(nBins-1, sizeof(double));
@@ -209,6 +217,12 @@ void sort_numerical_mass_function(void)
 		MassFunc[MF_INDEX].err = (double*) calloc(nBins-1, sizeof(double));
 		MassFunc[MF_INDEX].err_dn = (double*) calloc(nBins-1, sizeof(double));
 
+		VelFunc[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
+		VelFunc[MF_INDEX].n = (double*) calloc(nBins-1, sizeof(double));
+		VelFunc[MF_INDEX].dn  = (double*) calloc(nBins-1, sizeof(double));
+		VelFunc[MF_INDEX].n_bin  = (int*) calloc(nBins-1, sizeof(int));
+		VelFunc[MF_INDEX].n_tot  = (int*) calloc(nBins-1, sizeof(int));
+
 		j=0;
 		for(i=0; i<nHaloes; i++)
 		{	
@@ -217,6 +231,7 @@ void sort_numerical_mass_function(void)
 				if(Haloes[i].host > 0)
 				{
 					mass[j] = Haloes[i].Mvir;
+					vel[j]  = Haloes[i].Vmax;
 					j++;
 				}
 			}
@@ -227,12 +242,14 @@ void sort_numerical_mass_function(void)
 					if(Haloes[i].web_type[Settings.use_web_type] == 1)
 					{
 						mass[j] = Haloes[i].Mvir;
+						vel[j]  = Haloes[i].Vmax;
 						j++;
 					}
 				}
 				else 
 				{
 					mass[i] = Haloes[i].Mvir;			
+					vel[i]  = Haloes[i].Vmax;
 				}
 			}
 		}
@@ -240,15 +257,17 @@ void sort_numerical_mass_function(void)
 		fprintf(stderr, "\nBinned\n");
 		mMin = F_MIN * minimum(mass, nHaloesCut);
 		mMax = F_MAX * maximum(mass, nHaloesCut);
-		fprintf(stderr, "\nMin=%e max=%e\n", mMin, mMax);
+		vMin = F_MIN * minimum(vel, nHaloesCut);
+		vMax = F_MAX * maximum(vel, nHaloesCut);
+
 		mass_bin = log_stepper(mMin, mMax, nBins);
-		fprintf(stderr, "\nBinned\n");
+		vel_bin = log_stepper(vMin, vMax, nBins);
 	
 		lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
-		fprintf(stderr, "\nBinned\n");
-		
 		cum_bin(n_mass, cum_n_mass, nBins-1);
-		fprintf(stderr, "\nBinned\n");
+	
+		lin_bin(vel, vel_bin, nBins, nHaloesCut, n_vel);	
+		cum_bin(n_vel, cum_n_vel, nBins-1);
 
 		volume=Settings.box_size*Settings.box_size*Settings.box_size;
 
@@ -257,6 +276,7 @@ void sort_numerical_mass_function(void)
 		{
 			dn_norm = 2*halfstep/nHaloesCut;
 			dM = mass_bin[i+1]-mass_bin[i];
+			dV = vel_bin[i+1]-vel_bin[i];
 
 			MassFunc[MF_INDEX].mass[i]=mass_bin[i];
 			MassFunc[MF_INDEX].mass_halfstep[i]=0.5 * (mass_bin[i]+mass_bin[i+1]);
@@ -267,12 +287,22 @@ void sort_numerical_mass_function(void)
 
 			MassFunc[MF_INDEX].n_bin[i]=n_mass[i];
 			MassFunc[MF_INDEX].n_tot[i]=cum_n_mass[i];
+
+			VelFunc[MF_INDEX].mass[i] = 0.5 * (vel_bin[i] + vel_bin[i+1]);
+			VelFunc[MF_INDEX].n[i] = cum_n_vel[i]/volume;
+			VelFunc[MF_INDEX].dn[i] = n_vel[i]/volume/dV;
+			VelFunc[MF_INDEX].n_bin[i] = n_vel[i];
+			VelFunc[MF_INDEX].n_tot[i] = cum_n_vel[i];
 		}
 	
 	free(cum_n_mass);
 	free(mass_bin); 
 	free(n_mass); 
 	free(mass); 
+	free(cum_n_vel);
+	free(vel_bin); 
+	free(n_vel); 
+	free(vel); 
 }
 
 
@@ -659,8 +689,7 @@ void sort_mass_relations()
 	nBins = Settings.n_bins;
 
 	nHaloesCut = n_haloes_per_criterion();
-
-
+	
 #ifdef WITH_MPI
 		nHaloes=Settings.n_haloes; 
 #else
@@ -704,8 +733,10 @@ void sort_mass_relations()
 
 		for(i=0; i<nHaloes; i++)
 		{
-			if(halo_condition(i) == 1)
+			if(halo_condition(i) == 1 && m < nHaloesCut)
 			{
+			//	D_PRINT("M=", m);
+			//	D_PRINT("i=", i);
 				vel[m] = Haloes[i].Vmax;
 				vir[m] = Haloes[i].abs_th_vir;
 				chi[m] = Haloes[i].fit_nfw.chi;
@@ -719,12 +750,11 @@ void sort_mass_relations()
 
 				if(conc[m] == -1) 
 					conc[m] = Haloes[i].c;
-
 				m++;
 			}
 		}
+
 			nHaloesCut=m;
-			
 		
 			mMin = F_MIN * minimum(mass, nHaloesCut);
 			mMax = F_MAX * maximum(mass, nHaloesCut);
@@ -756,7 +786,7 @@ void sort_mass_relations()
 				HaloProperties[HALO_INDEX].fit_nfw.per[i]=per_bin[i];
 				HaloProperties[HALO_INDEX].fit_nfw.gof[i]=gof_bin[i];
 			}
-	
+
 			INFO_MSG("Fitting Mass-Concentration relation to a power law");
 			param_conc[0] = 0.1; 
 			param_conc[1] = pow(1.e-14, param_conc[0]);
@@ -791,6 +821,8 @@ void sort_mass_relations()
 	free(vir_err); 
 	free(vir_bin); 
 	free(vir); 
+/*
+*/
 }
 
 
@@ -1044,9 +1076,9 @@ void sort_alignment_and_displacement()
 	nHaloesCut = n_haloes_per_criterion();
 
 #ifdef WITH_MPI
-		nHaloes = Settings.n_haloes; 
+	nHaloes = Settings.n_haloes; 
 #else
-		nHaloes = Settings.n_threshold; 
+	nHaloes = Settings.n_threshold; 
 #endif
 
 	Settings.tick=0;
@@ -1114,6 +1146,4 @@ void compute_halo_properties()
 		sort_gas_relations();
 		sort_alignment_and_displacement();
 #endif
-/*
-*/
 }

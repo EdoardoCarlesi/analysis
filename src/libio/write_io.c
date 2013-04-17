@@ -82,17 +82,16 @@ void print_subhalo_only_properties()
 
 			for(i=0; i<nTot; i++)	
 			{
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].r_sub[i]);
-				fprintf(out_file, "\t%d" , HaloProperties[HALO_INDEX].n_r_sub[i]);
-				fprintf(out_file, "\t%d" , HaloProperties[HALO_INDEX].cum_n_r_sub[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].vel_sub_r[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].vel_sub[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_vel_sub[i]);
-				fprintf(out_file, "\t%d" , HaloProperties[HALO_INDEX].cum_n_sub[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].costh[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].costh_count[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].cosphi[i]);
-				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].cosphi_count[i]);
+				fprintf(out_file, "%f", HaloProperties[HALO_INDEX].r_sub[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].n_r_sub[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].cum_n_r_sub[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].vel_sub_r[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].vel_sub[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].p_vel_sub[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].costh[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].costh_count[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].cosphi[i]);
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].cosphi_count[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].r_sub_subset[i]);
 				//fprintf(out_file, "\t%d" , HaloProperties[HALO_INDEX].cum_n_r_sub_subset[i]);
 				fprintf(out_file, "\n");
@@ -497,6 +496,11 @@ void print_numerical_mass_function()
 		FILE_HEADER(out_file, "dn   ", count);
 		FILE_HEADER(out_file, "n_bin", count);
 		FILE_HEADER(out_file, "dn_err", count);
+		FILE_HEADER(out_file, "V    ", count);
+		FILE_HEADER(out_file, "n    ", count);
+		FILE_HEADER(out_file, "dn   ", count);
+		FILE_HEADER(out_file, "n_bin", count);
+		FILE_HEADER(out_file, "n_tot", count);
 		fprintf(out_file,"\n");
 
 			for(i=0; i<nTot; i++) 
@@ -509,6 +513,11 @@ void print_numerical_mass_function()
 				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].dn[i]);
 				fprintf(out_file, "\t%d\t", MassFunc[MF_INDEX].n_bin[i]);
 				fprintf(out_file, "\t%e", MassFunc[MF_INDEX].err_dn[i]);
+				fprintf(out_file, "\t%f", VelFunc[MF_INDEX].mass[i]);
+				fprintf(out_file, "\t%e", VelFunc[MF_INDEX].n[i]);
+				fprintf(out_file, "\t%e", VelFunc[MF_INDEX].dn[i]);
+				fprintf(out_file, "\t%d\t", VelFunc[MF_INDEX].n_bin[i]);
+				fprintf(out_file, "\t%d\t", VelFunc[MF_INDEX].n_tot[i]);
 				fprintf(out_file,"\n");
 			}
 
