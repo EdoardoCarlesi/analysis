@@ -61,7 +61,7 @@ void print_number_densities()
 void print_subhalo_only_properties()
 {
 	count = 1;
-	nTot = HaloProperties[HALO_INDEX].n_bins;
+	nTot = (int) F_SUB * HaloProperties[HALO_INDEX].n_bins;
 	z = GrowthFac.z[Settings.use_cat];
  	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_sub_only_statistics.dat");
 	out_file = fopen(out_url,"w");

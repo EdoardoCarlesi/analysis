@@ -9,9 +9,8 @@
 
 #include "halo.h"
 
-#define rMin 0.3
+#define rMin 0.2
 #define rMax 1.1
-
 
 /*
  * Declare functions
@@ -39,7 +38,7 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
 	totSubNmin = Settings.n_sub_threshold;
-	nBins = Settings.n_bins; 
+	nBins = (int) F_SUB * Settings.n_bins; 
 
 	fprintf(stdout, "\nSorting sub halo radial alignment for %d sub haloes\n", totSubNmin);
 
@@ -131,11 +130,12 @@ void n_r_subhalo()
 {
 	int h=0, i=0, j=0, k=0, m=0, host=0, cum=0, totSub=0, totHost=0, nBins=0; 
 	double r, sum=0, sub_frac=0;
-	double *R=NULL, *all_r=NULL, *sub_r=NULL, *err_n_r=NULL, *bin_n_r=NULL, *all_n_r=NULL, *n_bin=NULL;
+	double *R=NULL, *all_r=NULL, *sub_r=NULL, *err_n_r=NULL, *all_n_r=NULL, *n_bin=NULL;
+	int *bin_n_r;
 
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
-	nBins = Settings.n_bins;
+	nBins = (int) F_SUB * Settings.n_bins; 
 
 	fprintf(stdout, "\nSubhalo N(<R)\n");
 	Settings.tick=0;
@@ -144,7 +144,7 @@ void n_r_subhalo()
 	sub_r = (double*) calloc(totSub, sizeof(double));
 	R = (double*) calloc(nBins, sizeof(double));
 	n_bin = (double*) calloc(nBins-1, sizeof(double));
-	bin_n_r = (double*) calloc(nBins-1, sizeof(double));
+	bin_n_r = (int*) calloc(nBins-1, sizeof(int));
 	all_n_r = (double*) calloc(nBins-1, sizeof(double));
 	err_n_r = (double*) calloc(nBins-1, sizeof(double));
 
@@ -172,20 +172,21 @@ void n_r_subhalo()
 				sub_r[j] = sub_frac;
 			}
 	
-			average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, j);
+			//average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, j);
+			lin_bin(all_r, R, nBins, j, bin_n_r);
 
 			for(k=0; k<nBins-1; k++)
 			{
 				if(bin_n_r[k] != bin_n_r[k])
 				{
-					bin_n_r[k] = 0.;
+					bin_n_r[k] = 0;
 				}
 
 				if(bin_n_r[k] > 0.)
 				{
 					n_bin[k]++;
 					all_n_r[k] += bin_n_r[k]; 
-			fprintf(stderr, "%d) bin_n_r=%lf, all_n_r=%lf n=%f\n", k, bin_n_r[k], all_n_r[k], n_bin[k]);
+			//fprintf(stderr, "%d) bin_n_r=%lf, all_n_r=%lf n=%f\n", k, bin_n_r[k], all_n_r[k], n_bin[k]);
 				}
 				///SubStructure.host[i].n_sub;
 			}
@@ -228,7 +229,7 @@ void sort_velocity_distribution()
 
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
-	nBins = Settings.n_bins;
+	nBins = (int) F_SUB * Settings.n_bins; 
 	
 	fprintf(stdout, "\nSorting sub halo velocity distribution.\n");
 	Settings.tick=0;
