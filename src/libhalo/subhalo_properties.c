@@ -9,6 +9,9 @@
 
 #include "halo.h"
 
+#define rMin 0.3
+#define rMax 1.1
+
 
 /*
  * Declare functions
@@ -127,8 +130,8 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 void n_r_subhalo()
 {
 	int h=0, i=0, j=0, k=0, m=0, host=0, cum=0, totSub=0, totHost=0, nBins=0; 
-	double r, rMin, rMax, sum=0, sub_frac=0;
-	double *R=NULL, *all_r=NULL, *sub_r=NULL, *err_n_r=NULL, *bin_n_r=NULL, *cum_n_r=NULL;
+	double r, sum=0, sub_frac=0;
+	double *R=NULL, *all_r=NULL, *sub_r=NULL, *err_n_r=NULL, *bin_n_r=NULL, *all_n_r=NULL, *n_bin=NULL;
 
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
@@ -140,9 +143,12 @@ void n_r_subhalo()
 	all_r = (double*) calloc(totSub, sizeof(double));
 	sub_r = (double*) calloc(totSub, sizeof(double));
 	R = (double*) calloc(nBins, sizeof(double));
+	n_bin = (double*) calloc(nBins-1, sizeof(double));
 	bin_n_r = (double*) calloc(nBins-1, sizeof(double));
-	cum_n_r = (double*) calloc(nBins-1, sizeof(double));
+	all_n_r = (double*) calloc(nBins-1, sizeof(double));
 	err_n_r = (double*) calloc(nBins-1, sizeof(double));
+
+		R = log_stepper(rMin, rMax, nBins);
 
 		for(i=0; i<totHost; i++)
 		{
@@ -151,7 +157,7 @@ void n_r_subhalo()
 			for(j=0; j<SubStructure.host[i].n_sub; j++)
 			{
 				sum = 0;
-				sub_frac = 1./(double)SubStructure.host[i].n_sub;
+				sub_frac = 1.; ///(double)SubStructure.host[i].n_sub;
 
 				k = SubStructure.host[i].sub_index[j];
 
@@ -160,28 +166,45 @@ void n_r_subhalo()
 
 				r = sqrt(sum);
 
-				//fprintf(stderr, "host=%d sub=%d r=%f frac=%f\n", host, k, r, sub_frac);
+			//	fprintf(stderr, "host=%d sub=%d r=%f frac=%f\n", host, k, r, sub_frac);
 
-				all_r[h] = r/Haloes[host].Rvir;
-				sub_r[h] = sub_frac;
-				h++;
+				all_r[j] = r/Haloes[host].Rvir;
+				sub_r[j] = sub_frac;
+			}
+	
+			average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, j);
+
+			for(k=0; k<nBins-1; k++)
+			{
+				if(bin_n_r[k] != bin_n_r[k])
+				{
+					bin_n_r[k] = 0.;
+				}
+
+				if(bin_n_r[k] > 0.)
+				{
+					n_bin[k]++;
+					all_n_r[k] += bin_n_r[k]; 
+			fprintf(stderr, "%d) bin_n_r=%lf, all_n_r=%lf n=%f\n", k, bin_n_r[k], all_n_r[k], n_bin[k]);
+				}
+				///SubStructure.host[i].n_sub;
 			}
 		}
 
-		rMin = minimum(all_r, totSub); 
-		rMax = maximum(all_r, totSub);
+	//	rMin = minimum(all_r, totSub); 
+	//	rMax = maximum(all_r, totSub);
 
-		R = lin_stepper(rMin, rMax, nBins);
+	//	R = lin_stepper(rMin, rMax, nBins);
 
-		average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, totSub);
+	//	average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, totSub);
 			
-		cum_bin(bin_n_r, cum_n_r, nBins);
+	//	cum_bin(bin_n_r, all_n_r, nBins);
 
 	for(i=0; i<nBins-1; i++) 
 	{
 		HaloProperties[HALO_INDEX].r_sub[i] = 0.5 * (R[i] + R[i+1]);
-		HaloProperties[HALO_INDEX].n_r_sub[i] = bin_n_r[i];
-		HaloProperties[HALO_INDEX].cum_n_r_sub[i] = cum_n_r[i]; 
+		HaloProperties[HALO_INDEX].n_r_sub[i] = all_n_r[i]/n_bin[i];
+		HaloProperties[HALO_INDEX].cum_n_r_sub[i] = n_bin[i]; 
 	}
 
 	free(R); 	
@@ -189,7 +212,7 @@ void n_r_subhalo()
 	free(sub_r); 
 	free(bin_n_r); 
 	free(err_n_r); 
-	free(cum_n_r);
+	free(all_n_r);
 
 	fprintf(stdout, "\n");
 }
@@ -200,7 +223,7 @@ void sort_velocity_distribution()
 {
 	int totSub=0, totHost=0, h=0, i=0, j=0, k=0, m=0, n=0, nBins=0;
 	int *vel_y=NULL;	
-	double vHost=0, vel_0=0, velMax=0, velMin=0, vDiff=0, sum=0, r=0, rMin=0, rMax=0; 
+	double vHost=0, vel_0=0, velMax=0, velMin=0, vDiff=0, sum=0, r=0; 
 	double *vel=NULL, *vel_x=NULL, *all_r=NULL, *vel_r=NULL, *bin_r=NULL, *vel_err=NULL;
 
 	totSub = SubStructure.N_sub;
@@ -256,9 +279,10 @@ void sort_velocity_distribution()
 			vel_x = log_stepper(velMin, velMax, nBins);
 			lin_bin(vel, vel_x, nBins, totSub, vel_y);
 
-			rMin = minimum(all_r,totSub); 
-			rMax = maximum(all_r,totSub);
+			//rMin = minimum(all_r,totSub); 
+			//rMax = maximum(all_r,totSub);
 			bin_r = log_stepper(rMin, rMax, nBins);
+
 			average_bin(all_r, vel, bin_r, vel_r, vel_err, nBins, totSub);
 
 			HaloProperties[HALO_INDEX].vel_0 = vel_0;
@@ -341,7 +365,7 @@ void n_r_subhalo_subset()
 {
 		// FIXME
 	int i, cumul=0, subDim=0, nBins=0, *n_r=NULL, *cum_n_r=NULL; 
-	double *all_r=NULL, *R=NULL, rMin, rMax;
+	double *all_r=NULL, *R=NULL;
 
 	subDim=Settings.n_sub_min; 
 	nBins=Settings.n_bins;
@@ -355,8 +379,6 @@ void n_r_subhalo_subset()
 
 		all_r = generate_average_from_random_set(all_r);
 
-		rMin = all_r[0]; 
-		rMax = all_r[subDim-1];
 		R = lin_stepper(rMin, rMax, nBins);
 		lin_bin(all_r, R, nBins, subDim, n_r);
 
