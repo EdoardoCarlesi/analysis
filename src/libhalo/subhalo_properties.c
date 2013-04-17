@@ -11,6 +11,7 @@
 
 #define rMin 0.2
 #define rMax 1.1
+#define SUB_MIN 3
 
 /*
  * Declare functions
@@ -154,6 +155,8 @@ void n_r_subhalo()
 		{
 			host = SubStructure.host[i].index;
 
+		if(SubStructure.host[i].n_sub > SUB_MIN)
+		{
 			for(j=0; j<SubStructure.host[i].n_sub; j++)
 			{
 				sum = 0;
@@ -189,6 +192,7 @@ void n_r_subhalo()
 			//fprintf(stderr, "%d) bin_n_r=%lf, all_n_r=%lf n=%f\n", k, bin_n_r[k], all_n_r[k], n_bin[k]);
 				}
 				///SubStructure.host[i].n_sub;
+			}
 			}
 		}
 

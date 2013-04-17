@@ -35,6 +35,7 @@ void find_substructure()
 	SubStructure.N_host = -1;
 	SubStructure.N_sub = -1;
 	Settings.n_sub_threshold = -1;
+	Settings.n_sub_min = 0;
 
 	SubStructure.sub = calloc(1, sizeof(struct sub_halo));
 	SubStructure.host = calloc(1, sizeof(struct host_halo));
@@ -83,6 +84,8 @@ void find_substructure()
 			if(halo_condition(i) == 1)
 				Settings.n_sub_threshold++;
 
+			if(Haloes[i].n_satellites > Settings.n_bins)
+				Settings.n_sub_min++;
 			//fprintf(stderr, "%d) Sub id=%llu, index=%d, host_id=%llu, host_index=%d halo_index=%d\n", 
 			//	i, Haloes[i].id, i, Haloes[i].host, host, SubStructure.host[host].index);
 		}
