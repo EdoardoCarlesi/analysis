@@ -22,21 +22,21 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde099'
+model1='lcdm'
 model2='nothing'
-box_size=75
-particle_number=256
-web_size=32
-tot_snaps=59
+box_size=250
+particle_number=1024
+web_size=256
+tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=29
+catalogue_number=57
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=9
+n_bins=14
 n_bins_th=200
-r_bins=8
+r_bins=11
 
 # Scale of P(k) for growth factor calculation
 k=0.13
@@ -50,13 +50,13 @@ m_min=1.e+9
 m_max=1.e+15
 
 # Mass threshold for printing halo profiles
-m_print=5.e+14
+m_print=3.e+14
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=1.e+10
-virial=2
-spin=0.5
+m_th=3.e+11
+virial=1.5
+spin=0.15
 
 # Minimum eigenvalue for the velocity shear tensor
 l_web=0.3
@@ -224,8 +224,8 @@ $base_analysis/scripts/mpi_check.sh $base_analysis $2
 
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
-#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
-execute='mpiexec -n '$n_procs' '$base_analysis
+execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
+#execute='mpiexec -n '$n_procs' '$base_analysis
 fi
 
 if [ $1 -eq 3 ] ; then
