@@ -9,7 +9,7 @@
 	// Factors that modify the binning
 #define F_MAX 1.0001
 #define F_MIN 0.9999
-#define F_SUB 1.0
+#define F_SUB 0.8
 
 #define BIN_PROFILE 9
 #define Rvir_frac_min 0.1 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
@@ -85,6 +85,8 @@ extern struct general_settings
 	int use_cat;
 	int c_web_size;
 
+	double totHaloMass;
+	double totSubMass;
 	double box_size;
 	double zStart;
 	

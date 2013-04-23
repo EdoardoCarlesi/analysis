@@ -9,9 +9,9 @@
 
 #include "halo.h"
 
-#define rMin 0.2
+#define rMin 0.3
 #define rMax 1.1
-#define SUB_MIN 3
+#define SUB_MIN 1
 
 /*
  * Declare functions
@@ -39,11 +39,11 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
 	totSubNmin = Settings.n_sub_threshold;
-	nBins = (int) F_SUB * Settings.n_bins; 
+	nBins = (int) (F_SUB * Settings.n_bins); 
 
-	fprintf(stdout, "\nSorting sub halo radial alignment for %d sub haloes\n", totSubNmin);
+	fprintf(stdout, "\nSorting sub halo radial alignment for %d sub haloes in %d bins\n", totSubNmin, nBins);
 
-	fprintf(stdout, "\nSorting sub halo spatial anisotropy for %d sub haloes\n", totSub);
+	fprintf(stdout, "\nSorting sub halo spatial anisotropy for %d sub haloes in %d bins\n", totSub, nBins);
 
 		cosphi = (double*) calloc(totSub, sizeof(double));
 		cosphi_bin = (double*) calloc(nBins, sizeof(double));
@@ -136,7 +136,7 @@ void n_r_subhalo()
 
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
-	nBins = (int) F_SUB * Settings.n_bins; 
+	nBins = (int) (F_SUB * Settings.n_bins); 
 
 	fprintf(stdout, "\nSubhalo N(<R)\n");
 	Settings.tick=0;
@@ -233,7 +233,7 @@ void sort_velocity_distribution()
 
 	totSub = SubStructure.N_sub;
 	totHost = SubStructure.N_host;
-	nBins = (int) F_SUB * Settings.n_bins; 
+	nBins = (int) (F_SUB * Settings.n_bins); 
 	
 	fprintf(stdout, "\nSorting sub halo velocity distribution.\n");
 	Settings.tick=0;
@@ -279,8 +279,8 @@ void sort_velocity_distribution()
 			}	
 		}	
 
-			velMin = minimum(vel,totSub); 
-			velMax = maximum(vel,totSub);
+			velMin = F_MIN * minimum(vel,totSub); 
+			velMax = F_MAX * maximum(vel,totSub);
 			vel_x = log_stepper(velMin, velMax, nBins);
 			lin_bin(vel, vel_x, nBins, totSub, vel_y);
 
@@ -368,7 +368,7 @@ double* generate_average_from_random_set(double* all_r)
 
 void n_r_subhalo_subset()
 {
-		// FIXME
+	// FIXME
 	int i, cumul=0, subDim=0, nBins=0, *n_r=NULL, *cum_n_r=NULL; 
 	double *all_r=NULL, *R=NULL;
 
@@ -411,7 +411,8 @@ void n_r_subhalo_subset()
 
 
 void sort_eccentricity()
-{	// FIXME
+{
+	// FIXME
 	int totSub=0, nBins=0, i=0; 
 	int *cum_n_ecc=NULL, *n_ecc=NULL;
 	double e=0, eMax=0, eMin=0; 

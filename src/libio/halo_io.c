@@ -461,6 +461,11 @@ void read_halo_file()
 	HALO[n].gas.a[0] = 1.0; 
 #endif
 
+	if(HALO[n].host > 0)
+		Settings.totSubMass += HALO[n].Mvir;
+
+	Settings.totHaloMass += HALO[n].Mvir;
+
 	set_additional_halo_properties(n);
 
 #ifdef USE_UNIT_MPC

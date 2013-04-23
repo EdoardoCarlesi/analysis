@@ -61,7 +61,7 @@ void print_number_densities()
 void print_subhalo_only_properties()
 {
 	count = 1;
-	nTot = (int) F_SUB * HaloProperties[HALO_INDEX].n_bins;
+	nTot = (int) (F_SUB * HaloProperties[HALO_INDEX].n_bins);
 	z = GrowthFac.z[Settings.use_cat];
  	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_sub_only_statistics.dat");
 	out_file = fopen(out_url,"w");
@@ -585,7 +585,10 @@ void print_halo_best_fit_results()
 	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_halo_best_fit.dat");
 	DUMP_MSG("best fit", out_url);
 	out_file=fopen(out_url,"w");
+
+	double MassFrac = Settings.totSubMass / Settings.totHaloMass;
 	
+		fprintf(out_file, "#Mass fraction in subhaloes :%e \n", MassFrac);
 		fprintf(out_file, "#Mass-concentration best fit values, c_0=%f, c_beta  :%f \n", 
 			HaloProperties[HALO_INDEX].c_0,HaloProperties[HALO_INDEX].c_beta );
 		fprintf(out_file, "#Mass-velocity best fit values, vel_0=%f, vel_beta  :%f \n", 

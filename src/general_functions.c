@@ -125,6 +125,9 @@ void default_init()
 	Settings.box.X[1][1] = 0;
 	Settings.box.X[2][0] = 100;
 	Settings.box.X[2][1] = 0;
+
+	Settings.totHaloMass = 0;
+	Settings.totSubMass = 0;
 	
 	// Init some commonly used structures to default values
 	GrowthFac.z = (double *) calloc(1, sizeof(double));
