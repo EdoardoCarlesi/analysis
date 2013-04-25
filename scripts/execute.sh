@@ -22,7 +22,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde099'
 model2='nothing'
 box_size=250
 particle_number=1024
@@ -31,10 +31,10 @@ tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=57
+catalogue_number=61
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=14
+n_bins=24
 n_bins_th=200
 r_bins=11
 
@@ -50,16 +50,16 @@ m_min=1.e+9
 m_max=1.e+15
 
 # Mass threshold for printing halo profiles
-m_print=3.e+14
+m_print=1.e+14
 
 #Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=3.e+11
+m_th=1.e+9
 virial=1.5
 spin=0.15
 
 # Minimum eigenvalue for the velocity shear tensor
-l_web=0.3
+l_web=0.15
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
 use_n_min=0
@@ -68,7 +68,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=1
+use_criterion=5
 
 #Computer settings
 swap=0

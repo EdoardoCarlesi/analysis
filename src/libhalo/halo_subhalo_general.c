@@ -94,16 +94,15 @@ void find_substructure()
 		SubStructure.N_host++;
 		SubStructure.N_sub++;
 		Settings.n_sub_threshold++;
-
+/*
 		for(i=0; i<SubStructure.N_host; i++)
 		{
-			fprintf(stderr, "%d) nsub =%d \n", 
-				i, SubStructure.host[i].n_sub);
+			fprintf(stderr, "%d) nsub =%d \n", i, SubStructure.host[i].n_sub);
 			for(j=0; j<SubStructure.host[i].n_sub; j++)
 				fprintf(stderr, "%d) Host=%d has sub_id=%d index=%llu\n", 
 	i, SubStructure.host[i].index, SubStructure.host[i].sub_index[j], SubStructure.host[i].id);
 		}
-
+*/
 	fprintf(stdout, "\nFound %d haloes with a total of %d subhaloes\n", 
 		SubStructure.N_host, SubStructure.N_sub);
 

@@ -11,7 +11,7 @@
 
 #define rMin 0.3
 #define rMax 1.1
-#define SUB_MIN 1
+#define SUB_MIN 20
 
 /*
  * Declare functions
