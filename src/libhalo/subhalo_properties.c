@@ -203,11 +203,12 @@ void n_r_subhalo()
 
 	//	average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, totSub);
 			
-		cum_bin(bin_n_r, all_n_r, nBins);
+	//	cum_bin(bin_n_r, all_n_r, nBins);
 
 	for(j=0; j<nBins; j++) 
 	{
-		i = nBins -j -2;
+		i = nBins -j -1;
+		//i = j; //nBins -j -2;
 		HaloProperties[HALO_INDEX].r_sub[i] = 0.5 * (R[i] + R[i+1]);
 		HaloProperties[HALO_INDEX].n_r_sub[i] = all_n_r[i]/n_bin[i];
 		sum += all_n_r[i]/n_bin[i];
