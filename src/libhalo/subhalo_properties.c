@@ -112,7 +112,7 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 	for(j=0; j<nBins-1; j++)
 	{
 		HaloProperties[HALO_INDEX].costh[j] = costh_bin[j] + halfstep;
-		HaloProperties[HALO_INDEX].costh_count[j] = (double) costh_bin_y[j] / totSub;
+		HaloProperties[HALO_INDEX].costh_count[j] = (double) costh_bin_y[j] / totSubNmin;
 		HaloProperties[HALO_INDEX].cosphi[j] = cosphi_bin[j] + halfstep2;
 		HaloProperties[HALO_INDEX].cosphi_count[j] = (double) cosphi_bin_y[j] / totSub;
 	}
