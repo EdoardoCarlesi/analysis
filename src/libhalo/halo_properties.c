@@ -830,8 +830,8 @@ void sort_mass_relations()
 void sort_T_mass_function()
 {
 	int nBins, nHaloesCut, nHaloes, i=0, m=0; 
-	int *temp_bin_y; 
-	double *temp, *temp_bin_x;
+	int *temp_bin_y, *cum_temp; 
+	double *temp, *temp_bin_x; 
 	double tMax, tMin, volume;
 
 	INFO_MSG("Sorting X-ray temperature function"); 
@@ -848,6 +848,7 @@ void sort_T_mass_function()
 	temp = (double*) calloc(nHaloes, sizeof(double));	
 	temp_bin_x = (double*) calloc(nBins, sizeof(double));	
 	temp_bin_y = (int*) calloc(nBins-1, sizeof(int));	
+	cum_temp = (int*) calloc(nBins-1, sizeof(int));	
 
 		for(i=0; i<nHaloes; i++)
 		{
@@ -863,13 +864,15 @@ void sort_T_mass_function()
 
 			temp_bin_x = lin_stepper(tMin, tMax, nBins);
 			lin_bin(temp, temp_bin_x, nBins, nHaloesCut, temp_bin_y);	
-
+	
+			cum_bin(temp_bin_y, cum_temp, nBins-1);
+	
 		volume = pow3(Settings.box_size);
 
 		for(i=0; i<nBins-1; i++)
 		{		
 			HaloProperties[HALO_INDEX].T[i] = 0.5 * (temp_bin_x[i] + temp_bin_x[i+1]);
-			HaloProperties[HALO_INDEX].n_T[i] = temp_bin_y[i] / volume;
+			HaloProperties[HALO_INDEX].n_T[i] = cum_temp[i] / volume;
 		}
 
 	free(temp_bin_y);
