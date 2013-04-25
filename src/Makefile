@@ -45,9 +45,9 @@ halo_evolution : halo_evolution.c ${LIBS} ${SRCS}
 	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS) ${LIBS} -o halo_evolution halo_evolution.c ${SRCS} ${LIBS} ${LIBS};
 		mv halo_evolution ${HOME_DIR}/bin/		
 
-mass_function : mass_function.c ${LIBS} ${SRCS}
-	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o mass_function mass_function.c ${SRCS} ${LIBS} ${LIBS};
-		mv mass_function ${HOME_DIR}/bin/		
+residuals : residuals.c ${LIBS} ${SRCS}
+	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o residuals residuals.c ${SRCS} ${LIBS} ${LIBS};
+#		mv residuals ${HOME_DIR}/bin/		
 
 #merger_tree : merger_tree.c ${LIBS} ${SRCS}
 #	$(CC)  $(OPT) $(INCLUDE) $(BASELIBS)  $(CFLAGS)  ${LIBS} -o merger_tree merger_tree.c ${SRCS} ${LIBS} ${LIBS};
