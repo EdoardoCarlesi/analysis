@@ -22,11 +22,12 @@ double get_interpolated_value(double x_array[], double y_array[], int npts, doub
 	double V; 
 
 		gsl_interp_accel *gia = gsl_interp_accel_alloc();	
-		gsl_spline *gs = gsl_spline_alloc(gsl_interp_cspline, npts);
-		gsl_spline_init(gs,  x_array, y_array, npts);
+		//gsl_spline *gs = gsl_spline_alloc(gsl_interp_cspline, npts);
+		gsl_spline *gs = gsl_spline_alloc(gsl_interp_akima, npts);
+		gsl_spline_init(gs, x_array, y_array, npts);
 	
 		V = gsl_spline_eval(gs,A,gia);
-	
+		//V = gsl_interp_eval(gsl_interp_akima, x_array, y_array, A, gia);
 		gsl_spline_free (gs);
 		gsl_interp_accel_free (gia);
 
