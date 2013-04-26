@@ -8,8 +8,13 @@
 #include "libhalo/halo.h"
 
 #define CHAR_SIZE 1024
-#define fac_max 1.0
+#define fac_max 0.99
 #define fac_min 1.0
+
+int SKIP;
+int EDGE;
+int USE_COLS;
+
 
 struct vector
 {
@@ -18,9 +23,6 @@ struct vector
 	double *y;
 
 } Vec01, Vec02, VecOUT;
-
-
-int SKIP;
 
 
 void calloc_vec(struct vector *V, int D)
@@ -36,7 +38,7 @@ void print_vec(struct vector *V)
 	int i=0;
 	
 		for(i=0; i<V->N; i++)
-			fprintf(stderr, "%d) %lf %lf\n", i, V->x[i], V->y[i]);
+			fprintf(stderr, "%d) %e %e\n", i, V->x[i], V->y[i]);
 	
 }
 
@@ -51,7 +53,7 @@ void print_vec_to_file(struct vector *V, char *fname)
 			fprintf(stderr, "Error: could not open file %s to write output\n", fname);	
 
 		for(i=0; i<V->N; i++)
-			fprintf(fout, "%lf\t%lf\n", V->x[i], V->y[i]);
+			fprintf(fout, "%e\t%e\n", V->x[i], V->y[i]);
 	
 	fclose(fout);
 }
@@ -59,27 +61,37 @@ void print_vec_to_file(struct vector *V, char *fname)
 
 void load_file_into_vec(FILE *f, struct vector *V, int colX, int colY, int totCol)
 {
-//	char dummy[CHAR_SIZE];
+	char dummy[CHAR_SIZE];
 	double *IN;
 	int i=0, j=0, count = -1;
 	
+	//	fprintf(stderr,"x=%d y=%d tot=%d skip=%d\n", colX, colY, totCol, SKIP);
 		IN = calloc(totCol, sizeof(double));	
 
 		for(j=0; j<V->N+SKIP; j++)
 		{
-	//		fgets(dummy, CHAR_SIZE, f);
-	//		fprintf(stderr, "%d) %s\n", j, dummy);
-		if(j>SKIP-1)
-			for(i=0; i<totCol; i++)
+			
+			if(j<SKIP)
+				fgets(dummy, CHAR_SIZE, f);
+			//	fprintf(stderr, "%d) %s\n", j, dummy);
+
+			else
 			{
-				fscanf(f, "%lf\t", &IN[i]);
-			//	fprintf(stderr, "%d) %lf\t", j, IN[i]);
+				for(i=0; i<totCol; i++)
+				{
+					fscanf(f, "%lf\t", &IN[i]);
+					//sscanf(dummy, "%lf\t", &IN[i]);
+					//fprintf(stderr, "(%d) %e\t", j, IN[i]);
+				}
 
-				V->x[j-SKIP] = IN[colX];
-				V->y[j-SKIP] = IN[colY];
-			}
+					V->x[j-SKIP] = IN[colX];
+					V->y[j-SKIP] = IN[colY];
 
-		//	fprintf(stderr,"\n");
+				if(USE_COLS == 0)
+					fgets(dummy, CHAR_SIZE, f);
+			}		
+			//fprintf(stderr,"x=%d y=%d skip=%d\n", colX, colY, SKIP);
+			//fprintf(stderr,"\n");
 		}
 
 		//print_vec(V);
@@ -136,6 +148,8 @@ int main(int argc, char **argv)
 	int binning = atoi(argv[count++]); // 0 = lin bin, 1 = log bin
 
 	SKIP = atoi(argv[count++]);
+	EDGE = atoi(argv[count++]);
+	USE_COLS = atoi(argv[count++]);
 
 	int D_01, D_02;
 	double min, max, x, y1, y2;	
@@ -150,8 +164,8 @@ int main(int argc, char **argv)
 	D_01 = get_lines(f01, fname01) - SKIP;
 	D_02 = get_lines(f02, fname02) - SKIP;
 
-	fprintf(stderr, "File01 N=%d\n", D_01);
-	fprintf(stderr, "File02 N=%d\n", D_02);
+	//fprintf(stderr, "File01 N=%d, x=%d y=%d\n", D_01, col_x_01, col_y_01);
+	//fprintf(stderr, "File02 N=%d\n", D_02);
 
 		calloc_vec(&Vec01, D_01);
 		calloc_vec(&Vec02, D_02);
@@ -169,15 +183,22 @@ int main(int argc, char **argv)
 			if(binning == 1)
 				VecOUT.x = log_stepper(min, max, VecOUT.N);
 
+		//	print_vec(&Vec01);
+		//	print_vec(&Vec02);
+
 			for(i=0; i<VecOUT.N; i++)
 			{
 				x = VecOUT.x[i];
 				y1 = get_interpolated_value(Vec01.x, Vec01.y, Vec01.N, x);
 				y2 = get_interpolated_value(Vec02.x, Vec02.y, Vec02.N, x);
+				//fprintf(stderr, "%d) x=%e, y1=%e, y2=%e\n", i, x, y1, y2);
 				VecOUT.y[i] = y1 / y2;
+
+				if(EDGE == 1 && i == VecOUT.N-1)
+					VecOUT.y[i] = Vec01.y[Vec01.N-1] / Vec02.y[Vec02.N-1];
+		
 			}
 
-		//print_vec(&Vec01);
 		//print_vec(&VecOUT);
 		print_vec_to_file(&VecOUT, fnameOUT);
 
