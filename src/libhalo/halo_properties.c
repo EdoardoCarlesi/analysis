@@ -208,20 +208,10 @@ void sort_numerical_mass_function(void)
 		n_vel = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_vel = (int*) calloc(nBins-1, sizeof(int));
 
-		MassFunc[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
-		MassFunc[MF_INDEX].mass_halfstep = (double*) calloc(nBins-1, sizeof(double));
-		MassFunc[MF_INDEX].n = (double*) calloc(nBins-1, sizeof(double));
-		MassFunc[MF_INDEX].n_tot = (int*) calloc(nBins-1, sizeof(int));
-		MassFunc[MF_INDEX].n_bin = (int*) calloc(nBins-1, sizeof(int));
-		MassFunc[MF_INDEX].dn  = (double*) calloc(nBins-1, sizeof(double));
-		MassFunc[MF_INDEX].err = (double*) calloc(nBins-1, sizeof(double));
-		MassFunc[MF_INDEX].err_dn = (double*) calloc(nBins-1, sizeof(double));
-
-		VelFunc[MF_INDEX].mass = (double*) calloc(nBins, sizeof(double));
-		VelFunc[MF_INDEX].n = (double*) calloc(nBins-1, sizeof(double));
-		VelFunc[MF_INDEX].dn  = (double*) calloc(nBins-1, sizeof(double));
-		VelFunc[MF_INDEX].n_bin  = (int*) calloc(nBins-1, sizeof(int));
-		VelFunc[MF_INDEX].n_tot  = (int*) calloc(nBins-1, sizeof(int));
+		allocate_mass_function(&MassFunc[MF_INDEX], nBins);
+		allocate_mass_function(&VelFunc[MF_INDEX], nBins);
+		allocate_mass_function(&GasFunc[MF_INDEX], nBins);
+		allocate_mass_function(&NoGasFunc[MF_INDEX], nBins);
 
 		j=0;
 		for(i=0; i<nHaloes; i++)

@@ -81,7 +81,7 @@ int main(int argc, char **argv)
 		print_halo_best_fit_results();
 		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
-		print_all_haloes();
+	//	print_all_haloes();
 
 		read_v_web();
 		read_t_web();

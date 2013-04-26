@@ -16,8 +16,8 @@ int main(int arg, char **argv)
 {
 	INFO_MSG("Computing the halo mass function");
 
+/*
 	initialize_internal_variables(argv);
-
 #ifdef WITH_MPI
 	MPI_Init(&arg, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
@@ -81,4 +81,5 @@ int main(int arg, char **argv)
 	MPI_Finalize();
 #endif
 	return 0;
+*/
 }

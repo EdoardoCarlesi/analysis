@@ -11,8 +11,8 @@
 #define F_MIN 0.9999
 #define F_SUB 0.8
 
-#define BIN_PROFILE 9
-#define Rvir_frac_min 0.1 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
+#define BIN_PROFILE 10
+#define Rvir_frac_min 0.15 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
 			  // and gas fraction from 1
 
 #ifdef WITH_MPI
@@ -87,6 +87,7 @@ extern struct general_settings
 
 	double totHaloMass;
 	double totSubMass;
+	double totGasMassInHalo;
 	double box_size;
 	double zStart;
 	
@@ -101,7 +102,7 @@ extern struct general_settings
 
 	int n_sub_min; // Minimum number of subhaloes per halo
 	int n_sub_threshold;
-
+	
 	int n_bins;
 	int n_bins_th;
 	int r_bins;
@@ -203,7 +204,7 @@ extern struct mass_function
 	double *err;
 	double *err_dn;
 
-} *MassFunc, *VelFunc, *ThMassFunc; 
+} *MassFunc, *VelFunc, *ThMassFunc, *GasFunc, *NoGasFunc; 
 
 
 extern struct num_density
@@ -532,3 +533,6 @@ extern struct halo_properties
 	double *gas_diff_cm;
 
 } *HaloProperties;
+
+
+void allocate_mass_function(struct mass_function *, int);

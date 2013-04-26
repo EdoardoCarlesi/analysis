@@ -11,7 +11,7 @@
 
 #define rMin 0.3
 #define rMax 1.1
-#define SUB_MIN 20
+#define SUB_MIN 10
 
 /*
  * Declare functions
@@ -204,14 +204,19 @@ void n_r_subhalo()
 	//	average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, totSub);
 			
 	//	cum_bin(bin_n_r, all_n_r, nBins);
+	
+	sum = 0;
+	double sum1 = 0;
 
-	for(j=0; j<nBins; j++) 
+	for(j=0; j<nBins-1; j++) 
 	{
-		i = nBins -j -1;
-		//i = j; //nBins -j -2;
+		//i = nBins -j -1;
+		i = nBins -j -2;
 		HaloProperties[HALO_INDEX].r_sub[i] = 0.5 * (R[i] + R[i+1]);
 		HaloProperties[HALO_INDEX].n_r_sub[i] = all_n_r[i]/n_bin[i];
-		sum += all_n_r[i]/n_bin[i];
+		sum1 += n_bin[i];
+		sum += all_n_r[i]/sum1;
+		//fprintf(stderr,"%d) sum=%f, sum1=%f\n", i, sum, sum1);
 		HaloProperties[HALO_INDEX].cum_n_r_sub[i] = sum; 
 	}
 

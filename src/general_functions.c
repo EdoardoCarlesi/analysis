@@ -108,6 +108,8 @@ void default_init()
 	MassFunc = malloc(sizeof(struct mass_function));
 	VelFunc = malloc(sizeof(struct mass_function));
 	ThMassFunc = malloc(sizeof(struct mass_function));
+	GasFunc = malloc(sizeof(struct mass_function));
+	NoGasFunc = malloc(sizeof(struct mass_function));
 	HaloProperties = malloc(sizeof(struct halo_properties));
 
 	Cosmo.H_0=Cosmo.h*100;
@@ -323,4 +325,17 @@ void set_halo_selection_criterion()
 			WARNING("No halo selection criterion specified",
 				"set_halo_selection_criterion()");
 	}
+}
+
+
+void allocate_mass_function(struct mass_function *MF, int Size)
+{
+		MF->mass = (double*) calloc(Size, sizeof(double));
+		MF->mass_halfstep = (double*) calloc(Size-1, sizeof(double));
+		MF->n = (double*) calloc(Size-1, sizeof(double));
+		MF->n_tot = (int*) calloc(Size-1, sizeof(int));
+		MF->n_bin = (int*) calloc(Size-1, sizeof(int));
+		MF->dn  = (double*) calloc(Size-1, sizeof(double));
+		MF->err = (double*) calloc(Size-1, sizeof(double));
+		MF->err_dn = (double*) calloc(Size-1, sizeof(double));
 }

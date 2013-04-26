@@ -10,7 +10,7 @@ struct sub_structure SubStructure;
 
 struct merger_tree *MergerTree;
 
-struct mass_function *MassFunc, *VelFunc, *ThMassFunc;
+struct mass_function *MassFunc, *VelFunc, *ThMassFunc, *GasFunc, *NoGasFunc;
 struct num_density NumDen;
 
 struct correlation_function Xi, *Xis;

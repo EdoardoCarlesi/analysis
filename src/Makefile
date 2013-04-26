@@ -21,7 +21,7 @@ endif
 	mass_function number_density merger_tree
 
 EXECS = growth_factor halo_statistics halo_evolution subhalo_statistics theoretical_mass_function\
-	mass_function number_density
+	number_density
 
 all:	${EXECS}
 
