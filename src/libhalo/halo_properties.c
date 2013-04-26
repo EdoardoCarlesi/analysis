@@ -169,12 +169,17 @@ void sort_axis_alignment()
 
 void sort_numerical_mass_function(void)
 {
-	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, j=0; 
+	int nBins=0, nHaloes=0, nHaloesCut=0, i=0, j=0, k=0, l=0; 
 	double dn_norm=1., volume=0, mMin=0, mMax=0, vMax=0, vMin=0, halfstep=0, dM=0, dV=0; 
+	double gMax, gMin, ngMax, ngMin;
 	double *mass, *mass_bin; 
 	int *n_mass, *cum_n_mass;
 	double *vel, *vel_bin; 
 	int *n_vel, *cum_n_vel;
+	double *gas, *gas_bin; 
+	int *n_gas, *cum_n_gas;
+	double *nogas, *nogas_bin; 
+	int *n_nogas, *cum_n_nogas;
 
 	nBins = Settings.n_bins; 
 
@@ -203,17 +208,27 @@ void sort_numerical_mass_function(void)
 		mass_bin = (double*) calloc(nBins, sizeof(double));
 		n_mass = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_mass = (int*) calloc(nBins-1, sizeof(int));
+
 		vel = (double*) calloc(nHaloesCut, sizeof(double));
 		vel_bin = (double*) calloc(nBins, sizeof(double));
 		n_vel = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_vel = (int*) calloc(nBins-1, sizeof(int));
+
+		gas = (double*) calloc(nHaloesCut, sizeof(double));
+		gas_bin = (double*) calloc(nBins, sizeof(double));
+		n_gas = (int*) calloc(nBins-1, sizeof(int));
+		cum_n_gas = (int*) calloc(nBins-1, sizeof(int));
+
+		nogas = (double*) calloc(nHaloesCut, sizeof(double));
+		nogas_bin = (double*) calloc(nBins, sizeof(double));
+		n_nogas = (int*) calloc(nBins-1, sizeof(int));
+		cum_n_nogas = (int*) calloc(nBins-1, sizeof(int));
 
 		allocate_mass_function(&MassFunc[MF_INDEX], nBins);
 		allocate_mass_function(&VelFunc[MF_INDEX], nBins);
 		allocate_mass_function(&GasFunc[MF_INDEX], nBins);
 		allocate_mass_function(&NoGasFunc[MF_INDEX], nBins);
 
-		j=0;
 		for(i=0; i<nHaloes; i++)
 		{	
 			if(Settings.use_sub == 1) 
@@ -223,6 +238,17 @@ void sort_numerical_mass_function(void)
 					mass[j] = Haloes[i].Mvir;
 					vel[j]  = Haloes[i].Vmax;
 					j++;
+
+					if(Haloes[i].gas.M > 0)
+					{
+						gas[k] = Haloes[i].gas.M;
+						k++;
+					} 
+					else
+					{
+						nogas[l] = Haloes[i].Mvir;
+						l++;
+					}
 				}
 			}
 			else if (Settings.use_sub == 0) 
@@ -234,10 +260,34 @@ void sort_numerical_mass_function(void)
 						mass[j] = Haloes[i].Mvir;
 						vel[j]  = Haloes[i].Vmax;
 						j++;
+					
+						if(Haloes[i].gas.M > 0)
+						{
+							gas[k] = Haloes[i].gas.M;
+							k++;
+						} 
+						else
+						{
+							nogas[l] = Haloes[i].Mvir;
+							l++;
+						}
+	
 					}
 				}
 				else 
 				{
+			
+					if(Haloes[i].gas.M > 0)
+					{
+						gas[k] = Haloes[i].gas.M;
+						k++;
+					} 
+					else
+					{
+						nogas[l] = Haloes[i].Mvir;
+						l++;
+					}
+
 					mass[i] = Haloes[i].Mvir;			
 					vel[i]  = Haloes[i].Vmax;
 				}
@@ -249,15 +299,29 @@ void sort_numerical_mass_function(void)
 		mMax = F_MAX * maximum(mass, nHaloesCut);
 		vMin = F_MIN * minimum(vel, nHaloesCut);
 		vMax = F_MAX * maximum(vel, nHaloesCut);
+	
+		gMin = F_MIN * minimum(gas, k);	
+		gMax = F_MAX * maximum(gas, k);	
+	
+		ngMin = F_MIN * minimum(nogas, l);	
+		ngMax = F_MAX * maximum(nogas, l);	
 
 		mass_bin = log_stepper(mMin, mMax, nBins);
 		vel_bin = log_stepper(vMin, vMax, nBins);
+		gas_bin = log_stepper(gMin, gMax, nBins);
+		nogas_bin = log_stepper(ngMin, ngMax, nBins);
 	
 		lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
 		cum_bin(n_mass, cum_n_mass, nBins-1);
 	
 		lin_bin(vel, vel_bin, nBins, nHaloesCut, n_vel);	
 		cum_bin(n_vel, cum_n_vel, nBins-1);
+	
+		lin_bin(gas, gas_bin, nBins, k, n_gas);	
+		cum_bin(n_gas, cum_n_gas, nBins-1);
+	
+		lin_bin(nogas, nogas_bin, nBins, l, n_nogas);	
+		cum_bin(n_nogas, cum_n_nogas, nBins-1);
 
 		volume=Settings.box_size*Settings.box_size*Settings.box_size;
 
@@ -283,6 +347,14 @@ void sort_numerical_mass_function(void)
 			VelFunc[MF_INDEX].dn[i] = n_vel[i]/volume/dV;
 			VelFunc[MF_INDEX].n_bin[i] = n_vel[i];
 			VelFunc[MF_INDEX].n_tot[i] = cum_n_vel[i];
+	
+			GasFunc[MF_INDEX].mass[i] = 0.5 * (gas_bin[i] + gas_bin[i+1]);
+			GasFunc[MF_INDEX].n[i] = cum_n_gas[i]/volume;
+			GasFunc[MF_INDEX].n_tot[i] = cum_n_gas[i];
+
+			NoGasFunc[MF_INDEX].mass[i] = 0.5 * (nogas_bin[i] + nogas_bin[i+1]);
+			NoGasFunc[MF_INDEX].n[i] = cum_n_nogas[i]/volume;
+			NoGasFunc[MF_INDEX].n_tot[i] = cum_n_nogas[i];
 		}
 	
 	free(cum_n_mass);
@@ -293,6 +365,14 @@ void sort_numerical_mass_function(void)
 	free(vel_bin); 
 	free(n_vel); 
 	free(vel); 
+	free(cum_n_gas);
+	free(gas_bin); 
+	free(n_gas); 
+	free(gas); 
+	free(cum_n_nogas);
+	free(nogas_bin); 
+	free(n_nogas); 
+	free(nogas); 
 }
 
 

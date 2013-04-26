@@ -501,6 +501,12 @@ void print_numerical_mass_function()
 		FILE_HEADER(out_file, "dn   ", count);
 		FILE_HEADER(out_file, "n_bin", count);
 		FILE_HEADER(out_file, "n_tot", count);
+		FILE_HEADER(out_file, "Mgas ", count);
+		FILE_HEADER(out_file, "n    ", count);
+		FILE_HEADER(out_file, "n_tot", count);
+		FILE_HEADER(out_file, "Nogas", count);
+		FILE_HEADER(out_file, "n    ", count);
+		FILE_HEADER(out_file, "n_tot", count);
 		fprintf(out_file,"\n");
 
 			for(i=0; i<nTot; i++) 
@@ -518,6 +524,12 @@ void print_numerical_mass_function()
 				fprintf(out_file, "\t%e", VelFunc[MF_INDEX].dn[i]);
 				fprintf(out_file, "\t%d\t", VelFunc[MF_INDEX].n_bin[i]);
 				fprintf(out_file, "\t%d\t", VelFunc[MF_INDEX].n_tot[i]);
+				fprintf(out_file, "\t%e", GasFunc[MF_INDEX].mass[i]);
+				fprintf(out_file, "\t%e", GasFunc[MF_INDEX].n[i]);
+				fprintf(out_file, "\t%d\t", GasFunc[MF_INDEX].n_tot[i]);
+				fprintf(out_file, "\t%e", NoGasFunc[MF_INDEX].mass[i]);
+				fprintf(out_file, "\t%e", NoGasFunc[MF_INDEX].n[i]);
+				fprintf(out_file, "\t%d\t", NoGasFunc[MF_INDEX].n_tot[i]);
 				fprintf(out_file,"\n");
 			}
 
