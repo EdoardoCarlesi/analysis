@@ -184,6 +184,9 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].n_entry = (int*) calloc(nBins, sizeof(int));
 		HaloProperties[HALO_INDEX].vel = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].conc = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].avg_sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].p_avg_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].halo.shape = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].halo.triax = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].halo.lambda = (double*) calloc(nBins, sizeof(double));
@@ -234,8 +237,8 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].vel_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].n_vel_sub = (int*) calloc(nBins, sizeof(int));
 		HaloProperties[HALO_INDEX].p_vel_sub = (double*) calloc(nBins, sizeof(double));
-		HaloProperties[HALO_INDEX].n_sub = (int*) calloc(nBins, sizeof(int));
-		HaloProperties[HALO_INDEX].cum_n_sub = (int*) calloc(nBins, sizeof(int));
+		HaloProperties[HALO_INDEX].n_sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].cum_n_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].costh = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].costh_count = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].cosphi = (double*) calloc(nBins, sizeof(double));

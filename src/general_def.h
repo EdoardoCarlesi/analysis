@@ -6,12 +6,18 @@
 #define F_PRINT(str, num) fprintf(stdout, "%s %e.\n", str, num)
 #define D_PRINT(str, num) fprintf(stdout, "%s %d.\n", str, num)
 
+	// How to bin the cosmic web
+#define BIN_SIZE 15
 	// Factors that modify the binning
 #define F_MAX 1.0001
 #define F_MIN 0.9999
 #define F_SUB 0.8
-
-#define BIN_PROFILE 10
+	// Subhalo distribution parameters
+#define SUB_MIN 10
+#define RMIN 0.3
+#define RMAX 1.1
+	// Density profile parameters
+#define BIN_PROFILE 8
 #define Rvir_frac_min 0.15 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
 			  // and gas fraction from 1
 
@@ -407,7 +413,6 @@ extern struct halo_properties
 	int z_bins;
 	int r_bins;
 	int n_bins;
-	double avgSub;
 	double z;
 
 	// Axis alignment
@@ -469,6 +474,12 @@ extern struct halo_properties
 	// Distributions
 	double *c;
 	double *p_c;
+	
+	// Subhaloes
+	double avgSub;
+	double *sub;
+	double *avg_sub;
+	double *p_avg_sub;
 
 	// Gas displacement and alignment
 	double *cm;

@@ -9,10 +9,6 @@
 
 #include "halo.h"
 
-#define rMin 0.3
-#define rMax 1.1
-#define SUB_MIN 10
-
 /*
  * Declare functions
  */
@@ -149,7 +145,7 @@ void n_r_subhalo()
 	all_n_r = (double*) calloc(nBins-1, sizeof(double));
 	err_n_r = (double*) calloc(nBins-1, sizeof(double));
 
-		R = log_stepper(rMin, rMax, nBins);
+		R = log_stepper(RMIN, RMAX, nBins);
 
 		for(i=0; i<totHost; i++)
 		{
@@ -196,10 +192,10 @@ void n_r_subhalo()
 			}
 		}
 
-	//	rMin = minimum(all_r, totSub); 
-	//	rMax = maximum(all_r, totSub);
+	//	RMIN = minimum(all_r, totSub); 
+	//	RMAX = maximum(all_r, totSub);
 
-	//	R = lin_stepper(rMin, rMax, nBins);
+	//	R = lin_stepper(RMIN, RMAX, nBins);
 
 	//	average_bin(all_r, sub_r, R, bin_n_r, err_n_r, nBins, totSub);
 			
@@ -292,9 +288,9 @@ void sort_velocity_distribution()
 			vel_x = log_stepper(velMin, velMax, nBins);
 			lin_bin(vel, vel_x, nBins, totSub, vel_y);
 
-			//rMin = minimum(all_r,totSub); 
-			//rMax = maximum(all_r,totSub);
-			bin_r = log_stepper(rMin, rMax, nBins);
+			//RMIN = minimum(all_r,totSub); 
+			//RMAX = maximum(all_r,totSub);
+			bin_r = log_stepper(RMIN, RMAX, nBins);
 
 			average_bin(all_r, vel, bin_r, vel_r, vel_err, nBins, totSub);
 
@@ -392,7 +388,7 @@ void n_r_subhalo_subset()
 
 		all_r = generate_average_from_random_set(all_r);
 
-		R = lin_stepper(rMin, rMax, nBins);
+		R = lin_stepper(RMIN, RMAX, nBins);
 		lin_bin(all_r, R, nBins, subDim, n_r);
 
 		for(i=0; i<nBins-1; i++) 

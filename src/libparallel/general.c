@@ -135,8 +135,8 @@ void gather_halo_structures()
 
 			SizeDisplStructHalo[0] = 0;
 	
-			fprintf(stderr, "Need to allocate %d MB to gather halo structures...\n",
-					Settings.n_haloes * sizeof(struct halo) / pow2(1024));
+			fprintf(stderr, "Need to allocate %f MB to gather halo structures...\n",
+					(float) Settings.n_haloes * sizeof(struct halo) / pow2(1024));
 
 			Haloes = (struct halo*) calloc(Settings.n_haloes, sizeof(struct halo));
 

@@ -554,6 +554,9 @@ void sort_lambda_and_concentration()
 	int *conc_int_y; 
 	double *c_bin_x, *conc, *conc_bin_x, *conc_err_y, *conc_double_y;
 	double c_halfstep, cMax, cMin, c_norm, c_value;
+	int *avg_sub_int_y; 
+	double *a_bin_x, *avg_sub, *avg_sub_bin_x, *avg_sub_err_y, *avg_sub_double_y;
+	double a_halfstep, aMax, aMin, a_norm, a_value;
 #ifdef GAS
 	// TODO add gas lambda only
 	//int *lambda_int_y; 
@@ -577,6 +580,7 @@ void sort_lambda_and_concentration()
 
 	l_bin_x = (double*) calloc(nBins, sizeof(double));	
 	c_bin_x = (double*) calloc(nBins, sizeof(double));	
+	a_bin_x = (double*) calloc(nBins, sizeof(double));	
 
 	lambda_int_y = (int*) calloc(nBins-1, sizeof(int));	
 	lambda_bin_x = (double*) calloc(nBins-1, sizeof(double));	
@@ -588,10 +592,16 @@ void sort_lambda_and_concentration()
 	conc_double_y = (double*) calloc(nBins-1, sizeof(double));	
 	conc_err_y = (double*) calloc(nBins-1, sizeof(double));	
 
+	avg_sub_int_y = (int*) calloc(nBins-1, sizeof(int));	
+	avg_sub_bin_x = (double*) calloc(nBins-1, sizeof(double));	
+	avg_sub_double_y = (double*) calloc(nBins-1, sizeof(double));	
+	avg_sub_err_y = (double*) calloc(nBins-1, sizeof(double));	
+
 	params = (double*) calloc(2, sizeof(double));
 
 	lambda = (double*) calloc(nHaloesCut, sizeof(double));	
 	conc = (double*) calloc(nHaloesCut, sizeof(double));	
+	avg_sub = (double*) calloc(nHaloesCut, sizeof(double));	
 
 		for(i=0; i<nHaloes; i++)
 		{
@@ -599,6 +609,7 @@ void sort_lambda_and_concentration()
 			{
 				lambda[m] = Haloes[i].lambda;
 				conc[m] = Haloes[i].c_nfw;
+				avg_sub[m] = (double) Haloes[i].n_satellites;
 
 				if(conc[m] == -1) 
 					conc[m] = Haloes[i].c;
@@ -615,6 +626,10 @@ void sort_lambda_and_concentration()
 			cMin = F_MIN*minimum(conc, nHaloesCut);
 			c_norm = 1./(nHaloesCut);
 
+			aMax = F_MAX*maximum(avg_sub, nHaloesCut);  
+			aMin = F_MIN*minimum(avg_sub, nHaloesCut);
+			a_norm = 1./(nHaloesCut);
+
 			l_bin_x = lin_stepper(lMin, lMax, nBins);
 			lin_bin(lambda, l_bin_x, nBins, nHaloesCut, lambda_int_y);	
 			l_halfstep=(l_bin_x[1]-l_bin_x[0])*0.5;
@@ -622,6 +637,10 @@ void sort_lambda_and_concentration()
 			c_bin_x = lin_stepper(cMin, cMax, nBins);
 			lin_bin(conc, c_bin_x, nBins, nHaloesCut, conc_int_y);	
 			c_halfstep=(c_bin_x[1]-c_bin_x[0])*0.5;
+
+			a_bin_x = lin_stepper(aMin, aMax, nBins);
+			lin_bin(avg_sub, a_bin_x, nBins, nHaloesCut, avg_sub_int_y);	
+			a_halfstep=(a_bin_x[1]-a_bin_x[0])*0.5;
 
 			for(i=0; i<nBins-1; i++)
 			{	
@@ -634,6 +653,11 @@ void sort_lambda_and_concentration()
 				conc_bin_x[i]=c_bin_x[i]+c_halfstep;
 				conc_err_y[i]=sqrt(c_value)*c_norm; 
 				conc_double_y[i]=c_norm*c_value; 
+
+				a_value = (double) avg_sub_int_y[i];
+				avg_sub_bin_x[i]=a_bin_x[i]+a_halfstep;
+				avg_sub_err_y[i]=sqrt(a_value)*a_norm; 
+				avg_sub_double_y[i]=a_norm*a_value; 
 			}
 
 		for(i=0; i<nBins-1; i++)
@@ -642,6 +666,8 @@ void sort_lambda_and_concentration()
 			HaloProperties[HALO_INDEX].halo.p_l[i]=lambda_double_y[i];
 			HaloProperties[HALO_INDEX].c[i]=conc_bin_x[i];
 			HaloProperties[HALO_INDEX].p_c[i]=conc_double_y[i];
+			HaloProperties[HALO_INDEX].avg_sub[i]=conc_bin_x[i];
+			HaloProperties[HALO_INDEX].p_avg_sub[i]=conc_double_y[i];
 		}
 	
 			INFO_MSG("Fitting spin parameter distribution to a lognorm");
@@ -665,6 +691,12 @@ void sort_lambda_and_concentration()
 	free(lambda_bin_x);
 	free(lambda);
 	free(l_bin_x);
+	free(avg_sub_double_y);
+	free(avg_sub_int_y);
+	free(avg_sub_err_y);
+	free(avg_sub_bin_x);
+	free(avg_sub);
+	free(a_bin_x);
 	free(params);
 }
 
@@ -745,6 +777,7 @@ void sort_mass_relations()
 	double *vel_bin, *vel_err, *mass, *vel, *mass_bin; 
 	double *vir_bin, *vir_err, *vir; 
 	double *conc_bin, *conc_err, *conc;
+	double *avg_sub_bin, *avg_sub_err, *avg_sub;
 	double *lambda_bin, *lambda_err, *lambda;
 	double *shape_bin, *shape_err, *shape;
 	double *triax_bin, *triax_err, *triax;
@@ -771,6 +804,7 @@ void sort_mass_relations()
 		shape = (double*) calloc(nHaloesCut, sizeof(double));	
 		mass = (double*) calloc(nHaloesCut, sizeof(double));	
 		conc = (double*) calloc(nHaloesCut, sizeof(double));	
+		avg_sub = (double*) calloc(nHaloesCut, sizeof(double));	
 		vel = (double*) calloc(nHaloesCut, sizeof(double));	
 		vir = (double*) calloc(nHaloesCut, sizeof(double));	
 		gof = (double*) calloc(nHaloesCut, sizeof(double));	
@@ -785,6 +819,8 @@ void sort_mass_relations()
 		vir_err = (double*) calloc(nBins-1, sizeof(double));	
 		conc_bin = (double*) calloc(nBins-1, sizeof(double));	
 		conc_err = (double*) calloc(nBins-1, sizeof(double));	
+		avg_sub_bin = (double*) calloc(nBins-1, sizeof(double));	
+		avg_sub_err = (double*) calloc(nBins-1, sizeof(double));	
 		lambda_bin = (double*) calloc(nBins-1, sizeof(double));	
 		lambda_err = (double*) calloc(nBins-1, sizeof(double));	
 		shape_bin = (double*) calloc(nBins-1, sizeof(double));	
@@ -814,6 +850,7 @@ void sort_mass_relations()
 				per[m] = Haloes[i].fit_nfw.per;
 				mass[m] = Haloes[i].Mvir; 
 				conc[m] = Haloes[i].c_nfw;
+				avg_sub[m] = (double) Haloes[i].n_satellites;
 				lambda[m] = Haloes[i].lambda;
 				triax[m] = Haloes[i].triax;
 				shape[m] = Haloes[i].shape;
@@ -834,6 +871,7 @@ void sort_mass_relations()
 			average_bin(mass, vel, mass_bin, vel_bin, vel_err, nBins, nHaloesCut);
 			average_bin(mass, vir, mass_bin, vir_bin, vir_err, nBins, nHaloesCut);
 			average_bin(mass, conc, mass_bin, conc_bin, conc_err, nBins, nHaloesCut);
+			average_bin(mass, avg_sub, mass_bin, avg_sub_bin, avg_sub_err, nBins, nHaloesCut);
 			average_bin(mass, triax, mass_bin, triax_bin, triax_err, nBins, nHaloesCut);
 			average_bin(mass, shape, mass_bin, shape_bin, shape_err, nBins, nHaloesCut);
 			average_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
@@ -849,6 +887,7 @@ void sort_mass_relations()
 				HaloProperties[HALO_INDEX].vel[i]=vel_bin[i];
 				HaloProperties[HALO_INDEX].halo.virial[i]=vir_bin[i];
 				HaloProperties[HALO_INDEX].conc[i]=conc_bin[i];
+				HaloProperties[HALO_INDEX].sub[i]=avg_sub_bin[i];
 				HaloProperties[HALO_INDEX].halo.lambda[i]=lambda_bin[i];
 				HaloProperties[HALO_INDEX].halo.shape[i]=shape_bin[i];
 				HaloProperties[HALO_INDEX].halo.triax[i]=triax_bin[i];
@@ -870,12 +909,16 @@ void sort_mass_relations()
 			param_vel = best_fit_power_law(mass_bin, vel_bin, vel_err, nBins-1, param_vel);
 			HaloProperties[HALO_INDEX].vel_0 = param_vel[1] * pow(1.e14, param_vel[0]);
 			HaloProperties[HALO_INDEX].vel_beta = param_vel[0];
+			HaloProperties[HALO_INDEX].avgSub = average(avg_sub, nHaloesCut);
 
 	free(mass_bin);
 	free(mass);
 	free(conc_err); 
 	free(conc_bin); 
 	free(conc); 
+	free(avg_sub_err); 
+	free(avg_sub_bin); 
+	free(avg_sub); 
 	free(triax_err); 
 	free(triax_bin); 
 	free(triax); 

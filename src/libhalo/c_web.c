@@ -22,7 +22,6 @@
  * Declare functions
  */
 #define Node(N, x, y, z) (x + N*y + N*N*z)
-#define BIN_SIZE 12
 
 struct c_web
 {
@@ -45,6 +44,8 @@ struct web_info
 	float mass[4];	 // Mass fraction in node type
 
 		// Overdensity values
+	int N_dm[5][BIN_SIZE];
+	int N_dm_cum[5][BIN_SIZE];
 	float delta[5][BIN_SIZE];
 	float delta_dm[5][BIN_SIZE];
 	float delta_gas[5][BIN_SIZE];
@@ -291,13 +292,14 @@ int compute_node_type(struct c_web *Web)
 void sort_web_statistics()
 {
 	int NWeb, NType, Ns, i=0, j=0, k=0, l=0;
+	int *dm_bin_int, *cum_dm_bin_int;
 	double w_gas, w_dm;
 	double dmMax, dmMin, *dm_bin, *dm_bin_e; 
 	double *dm_bin_T, *dm_bin_alpha, *dm_bin_gas;	
 	double *delta_dm, *alpha_dm, *p_alpha_dm;
 	double *delta_gas, *T_gas, *alpha_gas, *p_alpha_gas;
 	double *delta_tot, *alpha_tot, *p_alpha_tot;
-
+	
 	double *param;
 
 	NWeb = Settings.c_web_size;
@@ -319,6 +321,8 @@ void sort_web_statistics()
 		dm_bin_T = malloc((BIN_SIZE)*sizeof(double));
 		dm_bin_alpha = malloc((BIN_SIZE)*sizeof(double));
 		dm_bin_gas = malloc((BIN_SIZE)*sizeof(double));
+		dm_bin_int = malloc((BIN_SIZE)*sizeof(int));
+		cum_dm_bin_int = malloc((BIN_SIZE)*sizeof(int));
 
 		fprintf(stderr, "Allocating %.2f MB for type analysis...", (double) Ns*NType*sizeof(double)/1024/1024);
 		alpha_dm  = malloc(NType * sizeof(double));
@@ -369,7 +373,9 @@ void sort_web_statistics()
 		//fprintf(stderr, "min=%f, max=%f, dm[1]=%f\n", dmMin, dmMax, delta_dm[1]);
 
 			dm_bin = log_stepper(dmMin, dmMax, BIN_SIZE+1);
-
+			
+			lin_bin(delta_dm, dm_bin, BIN_SIZE+1, NType, dm_bin_int);
+			cum_bin(dm_bin_int, cum_dm_bin_int, BIN_SIZE);
 			average_bin(delta_dm, T_gas, dm_bin, dm_bin_T, dm_bin_e, BIN_SIZE+1, NType);
 			average_bin(delta_dm, alpha_dm, dm_bin, dm_bin_alpha, dm_bin_e, BIN_SIZE+1, NType);
 			average_bin(delta_dm, delta_gas, dm_bin, dm_bin_gas, dm_bin_e, BIN_SIZE+1, NType);
@@ -391,6 +397,8 @@ void sort_web_statistics()
 
 			// Overdensity values
 			WebInfoDm.delta[i][j] = 0.5 * (dm_bin[j] + dm_bin[j+1]);
+			WebInfoDm.N_dm[i][j] = dm_bin_int[j];
+			WebInfoDm.N_dm_cum[i][j] = cum_dm_bin_int[j];
 			WebInfoDm.delta_gas[i][j] = dm_bin_gas[j];
 			WebInfoDm.T_vs_delta[i][j] = dm_bin_T[j];
 		}
@@ -404,6 +412,8 @@ void sort_web_statistics()
 		free(dm_bin);
 		free(dm_bin_e);
 		free(dm_bin_T);
+		free(dm_bin_int);
+		free(dm_bin_gas);
 		free(dm_bin_alpha);
 	}
 }
@@ -453,11 +463,16 @@ void print_web_statistics()
 			fprintf(file_out,"Gas type=%d (%d)\t", j, count++);
 			fprintf(file_out,"T   type=%d (%d)\t", j, count++);
 		}
-				
-			fprintf(file_out,"\n");
 
 		for(j=0; j<5; j++)
-			fprintf(file_out, "# Gas-T power law, type=%d, A=%e a=%f\n", i, WebInfoDm.A[j], WebInfoDm.a[j]);
+		{
+			fprintf(file_out,"n(dDM) t=%d (%d)\t", j, count++);
+			fprintf(file_out,"n(>dDM)t=%d (%d)\t", j, count++);
+		}		
+			fprintf(file_out,"\n");
+
+		//for(j=0; j<5; j++)
+		//	fprintf(file_out, "# Gas-T power law, type=%d, A=%e a=%f\n", i, WebInfoDm.A[j], WebInfoDm.a[j]);
 
 			// Print it all
 			for(i=0; i<BIN_SIZE; i++)
@@ -467,6 +482,12 @@ void print_web_statistics()
 					fprintf(file_out, "%f\t", WebInfoDm.delta[j][i]);
 					fprintf(file_out, "%f\t", WebInfoDm.delta_gas[j][i]);
 					fprintf(file_out, "%f\t", WebInfoDm.T_vs_delta[j][i]);
+				}
+
+				for(j=0; j<5; j++)
+				{
+					fprintf(file_out, "%d      \t", WebInfoDm.N_dm[j][i]);
+					fprintf(file_out, "%d      \t", WebInfoDm.N_dm_cum[j][i]);
 				}
 
 				fprintf(file_out,"\n");
