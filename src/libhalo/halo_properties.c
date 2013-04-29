@@ -180,11 +180,16 @@ void sort_numerical_mass_function(void)
 	int *n_gas, *cum_n_gas;
 	double *nogas, *nogas_bin; 
 	int *n_nogas, *cum_n_nogas;
+	double totMass, totDm, totGas;
 
 	nBins = Settings.n_bins; 
 
 	nBins = Settings.n_bins; 
 	nHaloes = Settings.n_haloes; 
+
+	Settings.totHaloMass = 0; 
+	Settings.totDarkMass = 0;
+	Settings.totGasMassInHalo = 0;
 
 	if(Settings.use_web == 1)
 	{
@@ -235,17 +240,20 @@ void sort_numerical_mass_function(void)
 			{
 				if(Haloes[i].host > 0)
 				{
+					Settings.totHaloMass += Haloes[i].Mvir;
 					mass[j] = Haloes[i].Mvir;
 					vel[j]  = Haloes[i].Vmax;
 					j++;
 
 					if(Haloes[i].gas.M > 0)
-					{
+					{	
+						Settings.totGasMassInHalo += Haloes[i].gas.M;
 						gas[k] = Haloes[i].gas.M;
 						k++;
 					} 
 					else
 					{
+						Settings.totDarkMass += Haloes[i].Mvir;
 						nogas[l] = Haloes[i].Mvir;
 						l++;
 					}
@@ -257,17 +265,20 @@ void sort_numerical_mass_function(void)
 				{
 					if(Haloes[i].web_type[Settings.use_web_type] == 1)
 					{
+						Settings.totHaloMass += Haloes[i].Mvir;
 						mass[j] = Haloes[i].Mvir;
 						vel[j]  = Haloes[i].Vmax;
 						j++;
 					
 						if(Haloes[i].gas.M > 0)
 						{
+							Settings.totGasMassInHalo += Haloes[i].gas.M;
 							gas[k] = Haloes[i].gas.M;
 							k++;
 						} 
 						else
 						{
+							Settings.totDarkMass += Haloes[i].Mvir;
 							nogas[l] = Haloes[i].Mvir;
 							l++;
 						}
@@ -279,15 +290,18 @@ void sort_numerical_mass_function(void)
 			
 					if(Haloes[i].gas.M > 0)
 					{
+						Settings.totGasMassInHalo += Haloes[i].gas.M;
 						gas[k] = Haloes[i].gas.M;
 						k++;
 					} 
 					else
 					{
+						Settings.totDarkMass += Haloes[i].Mvir;
 						nogas[l] = Haloes[i].Mvir;
 						l++;
 					}
 
+					Settings.totHaloMass += Haloes[i].Mvir;
 					mass[i] = Haloes[i].Mvir;			
 					vel[i]  = Haloes[i].Vmax;
 				}
@@ -295,6 +309,15 @@ void sort_numerical_mass_function(void)
 		}
 
 		fprintf(stderr, "\nBinned\n");
+
+		totDm = Settings.dmMass * pow3(Settings.n_part_1D);		
+		totGas = Settings.gasMass * pow3(Settings.n_part_1D);		
+		totMass = totDm + totGas;
+
+		Settings.totGasMassInHalo /= totGas;
+		Settings.totHaloMass /= totMass;
+		Settings.totDarkMass /= totMass;
+
 		mMin = F_MIN * minimum(mass, nHaloesCut);
 		mMax = F_MAX * maximum(mass, nHaloesCut);
 		vMin = F_MIN * minimum(vel, nHaloesCut);

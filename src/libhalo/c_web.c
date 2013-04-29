@@ -481,7 +481,7 @@ void print_web_statistics()
 				{
 					fprintf(file_out, "%f\t", WebInfoDm.delta[j][i]);
 					fprintf(file_out, "%f\t", WebInfoDm.delta_gas[j][i]);
-					fprintf(file_out, "%f\t", WebInfoDm.T_vs_delta[j][i]);
+					fprintf(file_out, "%e\t", WebInfoDm.T_vs_delta[j][i]);
 				}
 
 				for(j=0; j<5; j++)

@@ -288,8 +288,6 @@ void sort_velocity_distribution()
 			vel_x = log_stepper(velMin, velMax, nBins);
 			lin_bin(vel, vel_x, nBins, totSub, vel_y);
 
-			//RMIN = minimum(all_r,totSub); 
-			//RMAX = maximum(all_r,totSub);
 			bin_r = log_stepper(RMIN, RMAX, nBins);
 
 			average_bin(all_r, vel, bin_r, vel_r, vel_err, nBins, totSub);

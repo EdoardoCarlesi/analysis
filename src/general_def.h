@@ -11,15 +11,16 @@
 	// Factors that modify the binning
 #define F_MAX 1.0001
 #define F_MIN 0.9999
+	// Number of bins for subhaloes is multiplied by this
 #define F_SUB 0.8
 	// Subhalo distribution parameters
-#define SUB_MIN 10
-#define RMIN 0.3
+#define SUB_MIN 5
+#define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
 #define BIN_PROFILE 8
-#define Rvir_frac_min 0.15 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
-			  // and gas fraction from 1
+	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
+#define Rvir_frac_min 0.15 
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -91,9 +92,11 @@ extern struct general_settings
 	int use_cat;
 	int c_web_size;
 
+	double totGasMassInHalo;
 	double totHaloMass;
 	double totSubMass;
-	double totGasMassInHalo;
+	double totDarkMass;
+
 	double box_size;
 	double zStart;
 	
@@ -451,6 +454,7 @@ extern struct halo_properties
 		double *p_l;
 		double *b;
 		double *p_b;
+
 	} halo, dm, gas, diff;
 
 	struct
@@ -469,6 +473,7 @@ extern struct halo_properties
 		int n[BIN_PROFILE];
 		double x[BIN_PROFILE];
 		double y[BIN_PROFILE];
+
 	} f_gas, nfw, rho_gas, i_x;
 
 	// Distributions
@@ -525,7 +530,8 @@ extern struct halo_properties
 	double *cosphi_count;
 	double *cum_cosphi;
 
-	int *n_vel_sub;
+	double *n_vel_sub;
+	double *cum_n_vel_sub;
 	double *vel_sub;
 	double *vel_sub_r;
 	double *p_vel_sub;

@@ -235,7 +235,8 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].cum_n_r_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].vel_sub_r = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].vel_sub = (double*) calloc(nBins, sizeof(double));
-		HaloProperties[HALO_INDEX].n_vel_sub = (int*) calloc(nBins, sizeof(int));
+		HaloProperties[HALO_INDEX].n_vel_sub = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].cum_n_vel_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].p_vel_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].n_sub = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].cum_n_sub = (double*) calloc(nBins, sizeof(double));
