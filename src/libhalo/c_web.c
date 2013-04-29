@@ -486,8 +486,8 @@ void print_web_statistics()
 
 				for(j=0; j<5; j++)
 				{
-					fprintf(file_out, "%d         \t", WebInfoDm.N_dm[j][i]);
-					fprintf(file_out, "%d         \t", WebInfoDm.N_dm_cum[j][i]);
+					fprintf(file_out, "%d       \t", WebInfoDm.N_dm[j][i]);
+					fprintf(file_out, "%d       \t", WebInfoDm.N_dm_cum[j][i]);
 				}
 
 				fprintf(file_out,"\n");
