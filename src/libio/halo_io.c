@@ -180,7 +180,7 @@ void set_additional_halo_properties(int n)
 
 #ifdef EXTRA_GAS
 		// Mass-weighter Temperature
-		HALO[n].gas_only.T_mw = convert_u_to_T(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
+		HALO[n].gas_only.T_mw = u2T(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
 
 		for(i=0; i<3; i++)
 		{
@@ -527,7 +527,7 @@ void read_halo_file()
 				} else {
 					HALO[n].spin=1;
 					spin++;	
-			}
+				}
 
 			vir++;
 		HALO[n].vir=1;
@@ -655,6 +655,8 @@ void read_profiles_file()
 					HALO[counter].gas_only.frac = (float *) calloc(halo_bins,sizeof(float));
 					HALO[counter].gas_only.rho = (float *) calloc(halo_bins,sizeof(float));
 					HALO[counter].gas_only.i_x = (float *) calloc(halo_bins,sizeof(float));
+					HALO[counter].gas_only.T = (float *) calloc(halo_bins,sizeof(float));
+					HALO[counter].gas_only.hydro_m = (float *) calloc(halo_bins,sizeof(float));
 #endif
 				}
 
@@ -678,7 +680,7 @@ void read_profiles_file()
 			npart_old=npart;
 			i++;
 			j++;
-	
+
 		if(i == halo_bins) 
 		{
 			HALO[counter].neg_r_bins=neg_r; 

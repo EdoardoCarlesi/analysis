@@ -564,6 +564,8 @@ void print_halo_profile(int m)
 		FILE_HEADER(out_file, "gas_fra", count);
 		FILE_HEADER(out_file, "rho_gas", count);
 		FILE_HEADER(out_file, "I_X    ", count);
+		FILE_HEADER(out_file, "hydro_M", count);
+		FILE_HEADER(out_file, "T      ", count);
 #endif
 		fprintf(out_file, "\n");
 		fprintf(out_file, "#");
@@ -584,6 +586,8 @@ void print_halo_profile(int m)
 				fprintf(out_file, "\t%lf", HALO[m].gas_only.frac[i+skip]);
 				fprintf(out_file, "\t%lf", HALO[m].gas_only.rho[i+skip]);
 				fprintf(out_file, "\t%lf", HALO[m].gas_only.i_x[i+skip]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.hydro_m[i+skip]);
+				fprintf(out_file, "\t%lf", HALO[m].gas_only.T[i+skip]);
 #endif
 				fprintf(out_file, "\n");
 			}

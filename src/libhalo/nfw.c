@@ -74,6 +74,7 @@ void fit_halo_profile(struct halo *HALO)
 		N = bins - skip;
 
 		rho0 = HALO->rho0;
+		//rho0 = 1.; //HALO->rho0;
 		rs = HALO->r2;
 
 		x = (double*) calloc(N, sizeof(double));
@@ -85,11 +86,14 @@ void fit_halo_profile(struct halo *HALO)
 		{
 			x[j] = HALO->radius[j+skip];
 			y[j] = HALO->rho[j+skip];
-			e[j] = HALO->err[j+skip];
+			//e[j] = HALO->err[j+skip];
+			e[j] = 0.1*HALO->rho[j+skip];
 			R[j] = HALO->radius[j+skip]/r;
 		}
 
+			fprintf(stderr, "before rs=%f rho0=%f\n", rs, rho0);
 			best_fit_nfw(rho0, rs, N, x, y, e);
+			fprintf(stderr, "after  rs=%f rho0=%f\n", rs, rho0);
 
 			HALO->fit_nfw.rho0 = rho0;
 			HALO->fit_nfw.rs = rs;
@@ -100,7 +104,7 @@ void fit_halo_profile(struct halo *HALO)
 		for(j=skip; j<bins; j++)
 		{
 			y_th[j-skip] = nfw(HALO->radius[j], HALO->fit_nfw.rs, HALO->fit_nfw.rho0);
-			//fprintf(stderr, "%d) R=%e, %e %e  %e\n", j, R[j-skip], rho0, y[j-skip], y_th[j-skip]);
+			fprintf(stderr, "%d) R=%e, rho=%e y=%e  y_th=%e\n", j, R[j-skip], rho0, y[j-skip], y_th[j-skip]);
 		}
 
 	// Various estimators for the goodness of fit

@@ -18,9 +18,9 @@
 #define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 8
+#define BIN_PROFILE 15
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
-#define Rvir_frac_min 0.15 
+#define Rvir_frac_min 0.005
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -296,7 +296,7 @@ extern struct halo
 	{
 		float x[BIN_PROFILE];
 		float y[BIN_PROFILE];
-	} f_gas, nfw, rho_gas, i_x;
+	} f_gas, nfw, rho_gas, i_x, hydro_m, T;
 
 	int *npart;
 	float *radius;
@@ -327,6 +327,7 @@ extern struct halo
 		float b_fraction;
 		double Cum_u;
 		float T_mw; // Mass-weighted temperature
+		float T_0; // Central cluster temperature
 		float I_X0; // X ray thermal emission
 		float shape;
 		float triax;
@@ -349,6 +350,8 @@ extern struct halo
 		float *rho;
 		float *frac;
 		float *i_x;
+		float *hydro_m;
+		float *T;
 	} gas_only;
 
 #endif  // GAS

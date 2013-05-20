@@ -67,7 +67,7 @@ void initialize_internal_variables(char **argv){
 		Settings.use_n_min = atof(argv[count++]);
 		Settings.n_haloes_to_use = atoi(argv[count++]); 
 		Settings.use_criterion = atoi(argv[count++]); 
-		Settings.Mprint = atoi(argv[count++]); 
+		Settings.Mprint = atof(argv[count++]); 
 	
 		// Cosmological parameters
 		Cosmo.h = atof(argv[count++]);

@@ -14,7 +14,6 @@
 # MPI Settings - if using MPI
 use_mpi=$2
 n_procs=$3
-
 use_multiple_cat=$4
 
 if [ $use_mpi -eq 1 ] ; then 
@@ -34,7 +33,7 @@ catalogue_z=0
 catalogue_number=61
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=16
+n_bins=14
 n_bins_th=200
 r_bins=11
 
@@ -50,9 +49,9 @@ m_min=1.e+9
 m_max=1.e+15
 
 # Mass threshold for printing halo profiles
-m_print=1.e+14
+m_print=5.e+15
 
-#Minimum particles per halo or minimum mass per halo, spin and virial criterion
+# Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
 m_th=1.e+12
 virial=1.5

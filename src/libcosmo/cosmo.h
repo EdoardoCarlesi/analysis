@@ -17,7 +17,6 @@ void best_fit_mf_tinker(double *, double*, double*, int);
 
 double default_rho0(void);
 double mass_temperature(double);
-double convert_u_to_T(double);
 
 double* integrate_number_density(double, double);
 
