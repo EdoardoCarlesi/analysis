@@ -87,7 +87,7 @@ void fit_halo_profile(struct halo *HALO)
 
 		N = bins - skip;
 
-		rho = HALO->rho0;
+		rho0 = HALO->rho0;
 		//rho0 = 1.; //HALO->rho0;
 		rs = HALO->r2;
 
