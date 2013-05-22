@@ -21,6 +21,7 @@
 #define BIN_PROFILE 15
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.005
+	// How many megaparsec should we ignore when looking at halo profiles
 #define soft_fac 0.03
 
 #ifdef WITH_MPI

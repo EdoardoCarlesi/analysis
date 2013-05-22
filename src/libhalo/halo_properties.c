@@ -632,7 +632,7 @@ void sort_lambda_and_concentration()
 			{
 				lambda[m] = Haloes[i].lambda;
 				//conc[m] = Haloes[i].c_nfw;
-				conc[m] = Haloes[i].Rvir/Haloes[i].fit_nfw.rs;
+				conc[m] = Haloes[i].fit_nfw.c;
 				//conc[m] = Haloes[i].Rvir/Haloes[i].fit_nfw.c;
 				avg_sub[m] = (double) Haloes[i].n_satellites;
 
