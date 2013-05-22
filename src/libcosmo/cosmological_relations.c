@@ -39,22 +39,6 @@ double mass_temperature(double M)
 
 
 
-double convert_u_to_T(double u)
-{
-	double g, m_p, mu, k_b;
-
- 		g = 5./3.;
-		m_p = 1.672e-24; // cgs
- 		mu = 0.588; 
- 		k_b = 1.3806e-16; // cgs
-
-		// eV to Kelvin factor = 8.6173e-8
-	//return u*(g-1)*m_p*mu*(1./k_b); // Kelvin
-	return u*(g-1)*m_p*mu*(1./k_b)/(8.6173e-5); // KeV
-}
-
-
-
 double w_z(double z)
 {
 	return get_interpolated_value(Cosmo.z_hub, Cosmo.w, Cosmo.npts, z);

@@ -11,15 +11,17 @@
 	// Factors that modify the binning
 #define F_MAX 1.0001
 #define F_MIN 0.9999
+	// Number of bins for subhaloes is multiplied by this
 #define F_SUB 0.8
 	// Subhalo distribution parameters
-#define SUB_MIN 10
-#define RMIN 0.3
+#define SUB_MIN 5
+#define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 8
-#define Rvir_frac_min 0.15 // Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, 
-			  // and gas fraction from 1
+#define BIN_PROFILE 15
+	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
+#define Rvir_frac_min 0.005
+#define soft_fac 0.03
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -91,9 +93,11 @@ extern struct general_settings
 	int use_cat;
 	int c_web_size;
 
+	double totGasMassInHalo;
 	double totHaloMass;
 	double totSubMass;
-	double totGasMassInHalo;
+	double totDarkMass;
+
 	double box_size;
 	double zStart;
 	
@@ -293,7 +297,7 @@ extern struct halo
 	{
 		float x[BIN_PROFILE];
 		float y[BIN_PROFILE];
-	} f_gas, nfw, rho_gas, i_x;
+	} f_gas, nfw, rho_gas, i_x, hydro_m, T;
 
 	int *npart;
 	float *radius;
@@ -324,6 +328,7 @@ extern struct halo
 		float b_fraction;
 		double Cum_u;
 		float T_mw; // Mass-weighted temperature
+		float T_0; // Central cluster temperature
 		float I_X0; // X ray thermal emission
 		float shape;
 		float triax;
@@ -346,6 +351,8 @@ extern struct halo
 		float *rho;
 		float *frac;
 		float *i_x;
+		float *hydro_m;
+		float *T;
 	} gas_only;
 
 #endif  // GAS
@@ -451,6 +458,7 @@ extern struct halo_properties
 		double *p_l;
 		double *b;
 		double *p_b;
+
 	} halo, dm, gas, diff;
 
 	struct
@@ -469,6 +477,7 @@ extern struct halo_properties
 		int n[BIN_PROFILE];
 		double x[BIN_PROFILE];
 		double y[BIN_PROFILE];
+
 	} f_gas, nfw, rho_gas, i_x;
 
 	// Distributions
@@ -525,7 +534,8 @@ extern struct halo_properties
 	double *cosphi_count;
 	double *cum_cosphi;
 
-	int *n_vel_sub;
+	double *n_vel_sub;
+	double *cum_n_vel_sub;
 	double *vel_sub;
 	double *vel_sub_r;
 	double *p_vel_sub;
@@ -546,4 +556,5 @@ extern struct halo_properties
 } *HaloProperties;
 
 
-void allocate_mass_function(struct mass_function *, int);
+void alloc_mass_function(struct mass_function *, int);
+void alloc_halo_profiles(struct halo *, int);

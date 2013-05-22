@@ -180,7 +180,7 @@ void set_additional_halo_properties(int n)
 
 #ifdef EXTRA_GAS
 		// Mass-weighter Temperature
-		HALO[n].gas_only.T_mw = convert_u_to_T(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
+		HALO[n].gas_only.T_mw = u2T(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
 
 		for(i=0; i<3; i++)
 		{
@@ -527,7 +527,7 @@ void read_halo_file()
 				} else {
 					HALO[n].spin=1;
 					spin++;	
-			}
+				}
 
 			vir++;
 		HALO[n].vir=1;
@@ -643,23 +643,11 @@ void read_profiles_file()
 				radius *= 1.e-3; 
 #endif
 				if(i == 0)
-				{	
-					HALO[counter].radius = (float *) calloc(halo_bins,sizeof(float));
-					HALO[counter].rho = (float *) calloc(halo_bins,sizeof(float));
-					HALO[counter].err = (float *) calloc(halo_bins,sizeof(float));
-					HALO[counter].mass_r = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].npart = (int *) calloc(halo_bins,sizeof(int));
-#ifdef GAS
-					HALO[counter].gas_only.u = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].gas_only.m = (double *) calloc(halo_bins,sizeof(double));
-					HALO[counter].gas_only.frac = (float *) calloc(halo_bins,sizeof(float));
-					HALO[counter].gas_only.rho = (float *) calloc(halo_bins,sizeof(float));
-					HALO[counter].gas_only.i_x = (float *) calloc(halo_bins,sizeof(float));
-#endif
-				}
+					alloc_halo_profiles(&HALO[counter], halo_bins);	
 
 					HALO[counter].radius[i] = sqrt(pow2(radius));	
-					HALO[counter].rho[i] = dens;
+					//HALO[counter].rho[i] = dens;
+					HALO[counter].rho[i] = overd;
 					HALO[counter].mass_r[i] = mass_r;
 					HALO[counter].npart[i] = npart;
 					HALO[counter].err[i] = dens/sqrt(npart-npart_old); 
@@ -678,7 +666,7 @@ void read_profiles_file()
 			npart_old=npart;
 			i++;
 			j++;
-	
+
 		if(i == halo_bins) 
 		{
 			HALO[counter].neg_r_bins=neg_r; 

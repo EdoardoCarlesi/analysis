@@ -5,6 +5,7 @@ void average_nfw_profile(void);
 double nfw(double, double, double);
 
 #ifdef GAS
+double u2T(double);
 void fit_and_store_gas_parameters(void);
 void average_gas_profiles(void);
 

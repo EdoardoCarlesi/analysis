@@ -67,7 +67,7 @@ void initialize_internal_variables(char **argv){
 		Settings.use_n_min = atof(argv[count++]);
 		Settings.n_haloes_to_use = atoi(argv[count++]); 
 		Settings.use_criterion = atoi(argv[count++]); 
-		Settings.Mprint = atoi(argv[count++]); 
+		Settings.Mprint = atof(argv[count++]); 
 	
 		// Cosmological parameters
 		Cosmo.h = atof(argv[count++]);
@@ -328,14 +328,34 @@ void set_halo_selection_criterion()
 }
 
 
-void allocate_mass_function(struct mass_function *MF, int Size)
+void alloc_mass_function(struct mass_function *MF, int Size)
 {
-		MF->mass = (double*) calloc(Size, sizeof(double));
-		MF->mass_halfstep = (double*) calloc(Size-1, sizeof(double));
-		MF->n = (double*) calloc(Size-1, sizeof(double));
-		MF->n_tot = (int*) calloc(Size-1, sizeof(int));
-		MF->n_bin = (int*) calloc(Size-1, sizeof(int));
-		MF->dn  = (double*) calloc(Size-1, sizeof(double));
-		MF->err = (double*) calloc(Size-1, sizeof(double));
-		MF->err_dn = (double*) calloc(Size-1, sizeof(double));
+	MF->mass = (double*) calloc(Size, sizeof(double));
+	MF->mass_halfstep = (double*) calloc(Size-1, sizeof(double));
+	MF->n = (double*) calloc(Size-1, sizeof(double));
+	MF->n_tot = (int*) calloc(Size-1, sizeof(int));
+	MF->n_bin = (int*) calloc(Size-1, sizeof(int));
+	MF->dn  = (double*) calloc(Size-1, sizeof(double));
+	MF->err = (double*) calloc(Size-1, sizeof(double));
+	MF->err_dn = (double*) calloc(Size-1, sizeof(double));
+}
+
+
+
+void alloc_halo_profiles(struct halo *HALO, int Size)
+{
+	HALO->radius = (float *) calloc(Size,sizeof(float));
+	HALO->rho = (float *) calloc(Size,sizeof(float));
+	HALO->err = (float *) calloc(Size,sizeof(float));
+	HALO->mass_r = (double *) calloc(Size,sizeof(double));
+	HALO->npart = (int *) calloc(Size,sizeof(int));
+#ifdef GAS
+	HALO->gas_only.u = (double *) calloc(Size,sizeof(double));
+	HALO->gas_only.m = (double *) calloc(Size,sizeof(double));
+	HALO->gas_only.frac = (float *) calloc(Size,sizeof(float));
+	HALO->gas_only.rho = (float *) calloc(Size,sizeof(float));
+	HALO->gas_only.i_x = (float *) calloc(Size,sizeof(float));
+	HALO->gas_only.T = (float *) calloc(Size,sizeof(float));
+	HALO->gas_only.hydro_m = (float *) calloc(Size,sizeof(float));
+#endif
 }

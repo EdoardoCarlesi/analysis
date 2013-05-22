@@ -2,6 +2,7 @@
 output/*
 temp/*
 bin/*
+test.nfw
 *.swp
 *.o
 *.a

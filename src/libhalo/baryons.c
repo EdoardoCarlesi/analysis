@@ -22,6 +22,10 @@
 #include "../libparallel/general.h"
 #endif
 
+#define	m_p (1.672e-24) // cgs
+#define	mu (0.588) 
+#define	k_b (1.3806e-16) // cgs
+#define gamma (5./3.)
 
 /*
  *  Function declaration
@@ -30,10 +34,20 @@ void fit_polytropic_T(struct halo *HALO);
 void sort_f_gas_profile(struct halo *HALO);
 void fit_I_X(struct halo *HALO);
 
+double compute_hydrostatic_mass(struct halo *HALO, int);
 
 /*
  *  Function implementations
  */
+double u2T(double u)
+{
+		// eV to Kelvin factor = 8.6173e-8
+	//return u*(g-1)*m_p*mu*(1./k_b); // Kelvin
+	return u*(gamma-1)*m_p*mu*(1./k_b)/(8.6173e-5); // KeV
+}
+
+
+
 void fit_and_store_gas_parameters(void)
 {	
 	int k=0; 
@@ -276,7 +290,7 @@ void fit_I_X(struct halo *HALO)
 			params[0] = a;
 			params[1] = A;
 
-			HALO->gas_only.T_mw = convert_u_to_T(u) / HALO->gas.N;	
+			HALO->gas_only.T_mw = u2T(u) / HALO->gas.N;	
 		
 			params = best_fit_power_law(x, y, e, N, params);
 	
@@ -334,6 +348,18 @@ void fit_I_X(struct halo *HALO)
 }
 
 
+double compute_hydrostatic_mass(struct halo *HALO, int index)
+{
+	double d_ln_r, d_ln_rho, d_ln_T;
+	double G;
+	double Mr, r, T;
+
+		Mr = - (k_b*T*r/mu/m_p/G) * (d_ln_rho/d_ln_r + d_ln_T/d_ln_r);
+	
+	return Mr;
+}
+
+
 
 double polytropic_T(double T, double a, double A)
 {	
@@ -352,7 +378,6 @@ void fit_polytropic_T(struct halo *HALO)
 	int bins, skip, j=0, N=0;
 	struct general_settings *SETTINGS;
 		// FIXME
-/*
 #ifdef WITH_MPI
 	SETTINGS = &pSettings[ThisTask];
 #else
@@ -362,44 +387,40 @@ void fit_polytropic_T(struct halo *HALO)
 		A = 1.;
 		a = 5./3.;
 
+		R = HALO->radius[skip];
+		V = 4./3. * M_PI * pow3(R);
 		bins = HALO->n_bins;
 		skip = HALO->neg_r_bins;
 		N = bins - skip;
-		R = HALO->radius[skip];
-		V0 = 4./3. * M_PI * pow3(R);
-		R0 = HALO->gas_only.m[skip] / V0;
-		rho0 = R0; ///SETTINGS->rho_b;
-		T0 = convert_u_to_T(HALO->gas_only.u[skip])/HALO->npart[skip]; // / V0;
+		T0 = 0;
 		M = 0;
 		T = 0;
-		MT = 0;
-		Mtot = 0;
+
+		for (j=0; j<skip; j++)
+		{
+			HALO->gas_only.T[j] = u2T(HALO->gas_only.u[j]);
+			HALO->gas_only.T_0 += u2T(HALO->gas_only.u[j]);
+		}
 
 		params = (double*) calloc(2, sizeof(double));
 		x = (double*) calloc(N, sizeof(double));
 		y = (double*) calloc(N, sizeof(double));
 		e = (double*) calloc(N, sizeof(double));
 
-		for(j=0; j<N; j++)
+		for(j=skip; j<N; j++)
 		{
-			R = HALO->radius[j+skip];
+			R = HALO->radius[j];
 			V = 4./3. * M_PI * pow3(R);
 
-			if(j>0)
-				M = HALO->gas_only.m[j+skip-1];
+			HALO->gas_only.T[j] = u2T(HALO->gas_only.u[j]);
+			HALO->gas_only.hydro_m[j] = compute_hydrostatic_mass(HALO,j);
 
-			T = convert_u_to_T(HALO->gas_only.u[j+skip]);
-			MT += (HALO->gas_only.m[j+skip]-M)*T;
-
-			x[j] = M/V/rho0;
-			y[j] = MT/HALO->gas_only.m[j+skip]/T0;
-
-	//		y[j] = HALO->gas_only.u[j+skip]; ///T0;
-			e[j] = y[j]/sqrt(HALO->npart[j+skip]);
+			x[j] = HALO->gas_only.m[j]/V;
+			y[j] = HALO->gas_only.T[j]/HALO->gas_only.T_0;
+			e[j] = y[j]/sqrt(HALO->gas_only.m[j]-HALO->gas_only.m[j-1]);
 
 			fprintf(stderr, "%e %e\n", x[j], y[j]);
 		}
-
 			
 			params[0] = a;
 			params[1] = A;
@@ -411,8 +432,8 @@ void fit_polytropic_T(struct halo *HALO)
 	
 			y_th = (double*) calloc(N, sizeof(double));
 
-			double gamma = 1 + 1./a;
-			F_PRINT("gamma=", gamma);
+			double ga = 1 + 1./a;
+			F_PRINT("gamma=", ga);
 
 		for(j=0; j<N; j++)
 		{
@@ -429,6 +450,5 @@ void fit_polytropic_T(struct halo *HALO)
 	HALO->fit_poly.chi = chi;
 	HALO->fit_poly.gof = gof;
 	HALO->fit_poly.per = per;
-*/
 }
 #endif
