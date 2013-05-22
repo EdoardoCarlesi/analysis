@@ -594,7 +594,6 @@ void sort_lambda_and_concentration()
 
 		HaloProperties = HaloProperties;
 
-
 #ifdef WITH_MPI
 		nHaloes = Settings.n_haloes; 
 #else
@@ -631,13 +630,14 @@ void sort_lambda_and_concentration()
 			if(halo_condition(i) == 1)
 			{
 				lambda[m] = Haloes[i].lambda;
-				//conc[m] = Haloes[i].c_nfw;
-				conc[m] = Haloes[i].fit_nfw.c;
-				//conc[m] = Haloes[i].Rvir/Haloes[i].fit_nfw.c;
 				avg_sub[m] = (double) Haloes[i].n_satellites;
-
-				//if(conc[m] == -1) 
-				//	conc[m] = Haloes[i].c;
+#ifdef SKIP_SOFT
+				conc[m] = Haloes[i].fit_nfw.c;
+#else
+				conc[m] = Haloes[i].c_nfw;
+				if(conc[m] == -1) 
+					conc[m] = Haloes[i].c;
+#endif
 				m++;
 			}
 		}
@@ -645,7 +645,7 @@ void sort_lambda_and_concentration()
 			lMax = F_MAX*maximum(lambda, nHaloesCut);  
 			lMin = F_MIN*minimum(lambda, nHaloesCut);
 			delta_l = (lMax-lMin)/nBins; 
-			l_norm = 1./(delta_l*nHaloesCut);
+			l_norm = (delta_l*nHaloesCut);
 
 			cMax = F_MAX*maximum(conc, nHaloesCut);  
 			cMin = F_MIN*minimum(conc, nHaloesCut);
@@ -874,17 +874,19 @@ void sort_mass_relations()
 				gof[m] = Haloes[i].fit_nfw.gof;
 				per[m] = Haloes[i].fit_nfw.per;
 				mass[m] = Haloes[i].Mvir; 
-				//conc[m] = Haloes[i].c_nfw;
 				//conc[m] = Haloes[i].Rvir/Haloes[i].fit_nfw.rs;
 				//conc[m] = Haloes[i].Rvir/Haloes[i].r2;
-				conc[m] = Haloes[i].fit_nfw.c;
 				avg_sub[m] = (double) Haloes[i].n_satellites;
 				lambda[m] = Haloes[i].lambda;
 				triax[m] = Haloes[i].triax;
 				shape[m] = Haloes[i].shape;
-
-				//if(conc[m] == -1) 
-				//	conc[m] = Haloes[i].c;
+#ifdef SKIP_SOFT
+				conc[m] = Haloes[i].fit_nfw.c;
+#else
+				conc[m] = Haloes[i].c_nfw;
+				if(conc[m] == -1) 
+					conc[m] = Haloes[i].c;
+#endif
 				m++;
 			}
 		}
