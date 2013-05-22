@@ -21,6 +21,7 @@
 #define BIN_PROFILE 15
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.005
+#define soft_fac 0.03
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -555,4 +556,5 @@ extern struct halo_properties
 } *HaloProperties;
 
 
-void allocate_mass_function(struct mass_function *, int);
+void alloc_mass_function(struct mass_function *, int);
+void alloc_halo_profiles(struct halo *, int);

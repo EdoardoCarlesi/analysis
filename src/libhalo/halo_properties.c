@@ -229,10 +229,10 @@ void sort_numerical_mass_function(void)
 		n_nogas = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_nogas = (int*) calloc(nBins-1, sizeof(int));
 
-		allocate_mass_function(&MassFunc[MF_INDEX], nBins);
-		allocate_mass_function(&VelFunc[MF_INDEX], nBins);
-		allocate_mass_function(&GasFunc[MF_INDEX], nBins);
-		allocate_mass_function(&NoGasFunc[MF_INDEX], nBins);
+		alloc_mass_function(&MassFunc[MF_INDEX], nBins);
+		alloc_mass_function(&VelFunc[MF_INDEX], nBins);
+		alloc_mass_function(&GasFunc[MF_INDEX], nBins);
+		alloc_mass_function(&NoGasFunc[MF_INDEX], nBins);
 
 		for(i=0; i<nHaloes; i++)
 		{	

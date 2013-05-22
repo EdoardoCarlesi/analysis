@@ -66,14 +66,28 @@ void fit_halo_profile(struct halo *HALO)
 	double *x, *y, *e, *R, *y_th, *x_bin, *y_bin, *e_bin, rMin, rMax; 
 	int bins, skip, N, j=0;
 
-		r = HALO->Rvir;
 		c = HALO->c; 
 		bins = HALO->n_bins;
 		skip = HALO->neg_r_bins;
+	
+		fprintf(stderr, "* * * skip=%d", skip);	
+
+#ifdef SKIP_SOFT
+		skip=0;
+		for(j=0; j<bins; j++)
+		{
+			r = HALO->radius[j];
+			
+			if(r < soft_fac)
+				skip++;
+		}
+#endif
+
+		fprintf(stderr, "* * * skip=%d\n", skip);	
 
 		N = bins - skip;
 
-		rho0 = HALO->rho0;
+		rho = HALO->rho0;
 		//rho0 = 1.; //HALO->rho0;
 		rs = HALO->r2;
 
@@ -84,13 +98,14 @@ void fit_halo_profile(struct halo *HALO)
 		
 		for(j=0; j<N; j++)
 		{
-			x[j] = HALO->radius[j+skip];
+			x[j] = HALO->radius[j+skip]; //*1.e+3;
 			y[j] = HALO->rho[j+skip];
-			//e[j] = HALO->err[j+skip];
-			e[j] = 0.1*HALO->rho[j+skip];
-			R[j] = HALO->radius[j+skip]/r;
+			e[j] = HALO->err[j+skip];
+			//e[j] = 0.05*HALO->rho[j+skip];
+			R[j] = HALO->radius[j+skip]/HALO->Rvir;
 		}
-
+			//rs *= 1.e+3;
+			//rho0 = 1;
 			fprintf(stderr, "before rs=%f rho0=%f\n", rs, rho0);
 			best_fit_nfw(rho0, rs, N, x, y, e);
 			fprintf(stderr, "after  rs=%f rho0=%f\n", rs, rho0);
@@ -194,14 +209,14 @@ void average_nfw_profile(void)
 
 double nfw(double r, double rs, double rho_0)
 {
-	return (rho_0*rs)/(r*pow2(1.+ r/rs));
+	return (rho_0*pow3(rs))/(r*pow2(rs + r));
 }
 
 
 
 double nfw_drs(double r, double rs, double rho_0)
 {
-	return (rho_0/r)*(1./pow2(1.+r/rs)+3.*pow2(rs)/pow2(rs+r)-2.*pow3(rs)/pow3(rs+r));
+	return (rho_0*pow2(rs)/r)*(3/pow2(r+rs)-2.*rs/pow3(rs+r));
 }
 
 
@@ -226,16 +241,16 @@ int nfw_f(const gsl_vector *x, void *data, gsl_vector *f)
 	rs = gsl_vector_get(x,0);
 	rho0 = gsl_vector_get(x,1);
 
-	for(i=1; i<n; i++)
+	for(i=0; i<n; i++)
 	{
 		t = vx[i];
 		rrs = t/rs;
-		Yi = rho0*(1./(rrs*pow2(1.+rrs)));
-		fset =  (Yi - vy[i])/err[i];
-	
+		//Yi = rho0*(1./(rrs*pow2(1.+rrs)));
+		Yi = nfw(t, rs, rho0);
+		fset = abs(Yi - vy[i])/err[i];
 		if(fset!=fset) 
 			fset=0;
-
+		fprintf(stderr, "fset=%f, Yi=%f vy=%f\n", fset, Yi, vy[i]);
 		gsl_vector_set(f, i, fset);
 	}
 
@@ -256,13 +271,15 @@ int d_nfw_f(const gsl_vector *x, void *data, gsl_matrix *J)
 	rs = gsl_vector_get(x,0);
 	rho0 = gsl_vector_get(x,1);
 
-	for(i = 1; i < n; i++)
+	for(i = 0; i < n; i++)
 	{
 		s = err[i];
 		r = vx[i]; 
 	
 		e1 = nfw_drs(r, rs, rho0);
 		e2 = nfw_drho0(r, rs, rho0);
+
+		//fprintf(stderr, "*e1=%f e2=%f*\n", e1, e2);	
 
 		gsl_matrix_set(J,i,0,e1/s);
 		gsl_matrix_set(J,i,1,e2/s);
@@ -286,6 +303,7 @@ int fd_nfw_f(const gsl_vector *x, void *data, gsl_vector * f, gsl_matrix *J)
 void best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, double *array_data_y, double *y_err)
 {
 	double *params;
+	int i=0;
 	struct data dat;
 	struct parameters par;
 
@@ -301,6 +319,12 @@ void best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, doubl
 	par.guess_p[1] = rho0;
 	par.fitted_p = gsl_vector_alloc(par.n);
 
+	//for(i=0; i<dat.n; i++)
+	//	dat.x[i] += 1.e+3;
+		//fprintf(stderr, "x=%f y=%f e=%f n=%d\n", 
+		//	dat.x[i],dat.y[i],dat.err[i],dat.n);
+
+
 		/* Initialize function */
 	gsl_multifit_function_fdf f;
        	f.f = &nfw_f;
@@ -309,7 +333,7 @@ void best_fit_nfw(double rho0, double rs, int nBins, double *array_data_x, doubl
        	f.n = dat.n;
        	f.p = par.n;
        	f.params = &dat;
-
+	
 	if(dat.n > 3)
 	{
 		/* Do the fit */
