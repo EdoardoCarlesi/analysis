@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "libio/io.h"
-#include "libmath/math.h"
-#include "libcosmo/cosmo.h"
-#include "libhalo/halo.h"
+#include "../src/libio/io.h"
+#include "../src/libmath/math.h"
+#include "../src/libcosmo/cosmo.h"
+#include "../src/libhalo/halo.h"
 
 #define CHAR_SIZE 1024
 #define fac_max 0.99

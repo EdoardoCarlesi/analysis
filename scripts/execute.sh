@@ -22,11 +22,11 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde099'
 model2='nothing'
-box_size=250
-particle_number=1024
-web_size=256
+box_size=75
+particle_number=256
+web_size=32
 tot_snaps=61
 
 # Catalogue settings when using one halo catalogue only
