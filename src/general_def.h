@@ -22,7 +22,14 @@
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.005
 	// How many megaparsec should we ignore when looking at halo profiles
-#define soft_fac 0.029
+#define soft_fac 0.025
+	// Haloes with gas less than this will be considered dark
+#define dark_gas_frac 0.05 
+	// Fix maxima when gathering functions to remove outliers
+#define USE_MAXIMA
+#define concentration_max 20
+#define	gof_nfw_max 0.9
+#define concentration_halomass_max 3.e+14
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -215,7 +222,7 @@ extern struct mass_function
 	double *err;
 	double *err_dn;
 
-} *MassFunc, *VelFunc, *ThMassFunc, *GasFunc, *NoGasFunc; 
+} *MassFunc, *VelFunc, *ThMassFunc, *GasFunc, *NoGasFunc, *DarkFunc, *TempFunc; 
 
 
 extern struct num_density
@@ -273,6 +280,8 @@ extern struct halo
 	float shape;
 	float triax;
 	float z_form;
+	// Mass fraction in subhaloes
+	float Msub;
 
 	// NFW parameters
 	float c;
@@ -284,11 +293,26 @@ extern struct halo
 	
 	struct
 	{
-		float c; // NFW only
-		float rs;
-		float rho0;
-		float ix0; // X-ray surface brightness parameter
-		float beta; // X-ray surface brightness parameter / beta model
+		union
+		{
+			struct
+			{
+				float c; // NFW only
+				float rs;
+				float rho0;
+			};
+			struct
+			{
+				float ix0; // X-ray surface brightness parameter
+				float beta; // X-ray surface brightness parameter / beta model
+			};
+			struct
+			{
+				float gamma; // Polytropic gas index
+				float A; // Polytropic amplitude
+			};
+		};
+
 		float chi;
 		float gof;
 		float per;
@@ -324,15 +348,16 @@ extern struct halo
 
 	struct
 	{
+		float shape;
+		float triax;
 		float lambda;
 		float lambdaE;
 		float b_fraction;
-		double Cum_u;
 		float T_mw; // Mass-weighted temperature
 		float T_0; // Central cluster temperature
 		float I_X0; // X ray thermal emission
-		float shape;
-		float triax;
+		double M_hydro; // Cluster mass by hydrostatic equilibrium
+		double Cum_u; // Cumulative internal energy
 		
 		// Alignment angle of the cluster/gas major axis
 		float gas_dm_costh;
@@ -471,7 +496,7 @@ extern struct halo_properties
 		double *p_gof;	
 		double *p_per;	
 
-	} fit_nfw, fit_king, p_fit_nfw;
+	} fit_nfw, fit_king, p_fit_nfw, fit_poly;
 
 	struct
 	{
@@ -498,7 +523,9 @@ extern struct halo_properties
 	double *p_gas_dm_cth;
 
 	// Best fit parameters
-	double beta0; // Gas density
+	double gamma0; // Polytropic gas index
+	double dM0; // Hydro mass difference
+	double beta0; // Gas density model
 	double l_0;
 	double l_sig;
 	double c_0;
@@ -513,6 +540,26 @@ extern struct halo_properties
 	// n(T)
 	double *T;
 	double *n_T;
+
+	// HydroMass and gamma
+	double *dM_hydro;
+	double *dM_hydro_bin;
+	double *gamma;
+	double *gamma_bin;
+
+	// Correlations with shape, triaxiality, subhalo mass fraction
+	double *shape_dM;
+	double *shape_dM_hydro;
+	double *shape_g;
+	double *shape_gamma;
+	double *triax_dM;
+	double *triax_dM_hydro;
+	double *triax_g;
+	double *triax_gamma;
+	double *sub_dM;
+	double *sub_dM_hydro;
+	double *sub_g;
+	double *sub_gamma;
 
 	// Subhalo stuff
 	double *n_r_sub;

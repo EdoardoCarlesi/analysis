@@ -345,7 +345,7 @@ void sort_web_statistics()
 			delta_dm[j] =  VWeb[j].dens;	
 			delta_gas[j] = TWeb[j].dens;	
 			delta_tot[j] = w_gas * TWeb[j].dens + w_dm * VWeb[j].dens;	
-			T_gas[j] = u2T(TWeb[j].temp);
+			T_gas[j] = u2TK(TWeb[j].temp);
 	
 			if(delta_dm[j]!=0.0)
 				alpha_dm[j] = T_gas[j] / delta_dm[j];
@@ -358,7 +358,7 @@ void sort_web_statistics()
 			delta_dm[j] = VWeb[k].dens;	
 			delta_gas[j] = TWeb[k].dens;	
 			delta_tot[j] = w_gas * TWeb[k].dens + w_dm * VWeb[k].dens;	
-			T_gas[j] = u2T(TWeb[k].temp);
+			T_gas[j] = u2TK(TWeb[k].temp);
 
 			if(delta_dm[j]!=0.0)
 				alpha_dm[j] = T_gas[j] / delta_dm[j];	

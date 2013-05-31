@@ -25,7 +25,11 @@
 #define	m_p (1.672e-24) // cgs
 #define	mu (0.588) 
 #define	k_b (1.3806e-16) // cgs
-#define gamma (5./3.)
+#define GAMMA (5./3.)
+#define GN (6.672e-8) // cgs
+#define SOLAR_MASS  1.989e33
+#define CM_PER_MPC  3.085678e24
+#define Tfac 5.38
 
 /*
  *  Function declaration
@@ -39,11 +43,17 @@ double compute_hydrostatic_mass(struct halo *HALO, int);
 /*
  *  Function implementations
  */
-double u2T(double u)
+double u2TK(double u)
 {
-		// eV to Kelvin factor = 8.6173e-8
-	//return u*(g-1)*m_p*mu*(1./k_b); // Kelvin
-	return u*(gamma-1)*m_p*mu*(1./k_b)/(8.6173e-5); // KeV
+	return u*(GAMMA-1)*m_p*mu*(Tfac/k_b)*1.e+10; // Kelvin
+}
+
+
+
+double u2TkeV(double u)
+{
+		// Kelvin to eV factor = 8.6173e-8
+	return u2TK(u)*(8.6173e-8); // KeV
 }
 
 
@@ -70,6 +80,7 @@ void fit_and_store_gas_parameters(void)
 			{	
 				sort_f_gas_profile(&HALO[k]);
 				fit_I_X(&HALO[k]);
+				fit_polytropic_T(&HALO[k]);
 #if PRINT_HALO					
 				if(HALO[k].Mvir > Settings.Mprint)
 					print_halo_profile(k);
@@ -110,9 +121,9 @@ void sort_f_gas_profile(struct halo *HALO)
 			HALO->gas_only.frac[j+skip] = y[j];
 		}
 	
-		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
-		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
-		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+			x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
+			y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+			e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 			rMin = 2 * Rvir_frac_min;
 			rMax = F_MAX * 1.01; //R/HALO->Rvir;
@@ -227,7 +238,7 @@ double I_X(double r, double rc, double beta, double rho0)
 	// Fits X-ray surface and beta gas density profile
 void fit_I_X(struct halo *HALO)
 {
-	double rc, u=0, A=0, a=0, rho, rho0, ix0; 
+	double rc, Np=0, u=0, T=0, A=0, a=0, rho, rho0, ix0; 
 	double *r, *x, *y, *e, *y_th, *params; 
 	double rMax, rMin, *x_bin, *y_bin, *e_bin;
 	double beta, chi, per, gof, R, V;
@@ -261,11 +272,16 @@ void fit_I_X(struct halo *HALO)
 		for(j=0; j<bins; j++)
 		{
 			R = HALO->radius[j];
-			V = 4./3. * M_PI * pow3(R);
-			rho = (HALO->gas_only.m[j]) / (4./3. * M_PI * pow3(R));
+			//V = 4./3. * M_PI * pow3(R);
+			rho = (HALO->gas_only.m[j]) / V; //(4./3. * M_PI * pow3(R));
 
 			if(j >= skip)
 			{
+				// Mass weighted emission
+				Np = HALO->gas_only.m[j]/SETTINGS->gasMass;
+				T += u2TK(HALO->gas_only.u[j]);
+				HALO->gas_only.T[j] = T/Np; //u2T(HALO->gas_only.u[j]);
+				HALO->gas_only.hydro_m[j] = compute_hydrostatic_mass(HALO,j);
 				HALO->gas_only.rho[j] = (float) rho / rho0;
 				HALO->gas_only.i_x[j] = (float) ix0 * rho * sqrt(1 + pow2(R / rc));
 				u += HALO->gas_only.u[j];			
@@ -286,11 +302,13 @@ void fit_I_X(struct halo *HALO)
 			}
 
 		}
-			
+		
+			HALO->gas_only.M_hydro = HALO->gas_only.hydro_m[bins-1];
+	
 			params[0] = a;
 			params[1] = A;
 
-			HALO->gas_only.T_mw = u2T(u) / HALO->gas.N;	
+			HALO->gas_only.T_mw = u2TkeV(u) / HALO->gas.N;	
 		
 			params = best_fit_power_law(x, y, e, N, params);
 	
@@ -343,18 +361,44 @@ void fit_I_X(struct halo *HALO)
 	HALO->fit_IX.chi = chi;
 	HALO->fit_IX.gof = gof;
 	HALO->fit_IX.per = per;
-/*
-*/
 }
 
 
 double compute_hydrostatic_mass(struct halo *HALO, int index)
 {
+	struct general_settings *SETTINGS;
+	long double r1, r2, rho1, rho2, T1, T2, V1, V2, N1, N2;
 	double d_ln_r, d_ln_rho, d_ln_T;
-	double G;
 	double Mr, r, T;
 
-		Mr = - (k_b*T*r/mu/m_p/G) * (d_ln_rho/d_ln_r + d_ln_T/d_ln_r);
+#ifdef WITH_MPI
+	SETTINGS = &pSettings[ThisTask];
+#else
+	SETTINGS = &Settings;
+#endif
+
+		r1 = HALO->radius[index-1];
+		r2 = HALO->radius[index];
+
+		V1 = 4./3. * M_PI * pow3(r1);
+		V2 = 4./3. * M_PI * pow3(r2);
+
+		rho1 = HALO->gas_only.m[index-1]/V1;
+		rho2 = HALO->gas_only.m[index]/V2;
+
+		// Mass weighted temperature
+		T1 = HALO->gas_only.T[index-1];
+		T2 = HALO->gas_only.T[index];
+
+		r = 0.5 * (r1+r2) * CM_PER_MPC;
+		T = 0.5 * (T2+T1);
+
+		// d ln(x) = delta x / x
+		d_ln_rho = (rho2-rho1)/(rho2+rho1);
+		d_ln_r = (r2-r1)/(r2+r1);
+		d_ln_T = (T2-T1)/(T2+T1);
+
+		Mr = - (k_b*T*r)/(mu*m_p*GN) * (d_ln_rho/d_ln_r + d_ln_T/d_ln_r) / SOLAR_MASS;
 	
 	return Mr;
 }
@@ -363,7 +407,7 @@ double compute_hydrostatic_mass(struct halo *HALO, int index)
 
 double polytropic_T(double T, double a, double A)
 {	
-	// T is in T0 units, returns rho in rho0 units
+	// T must be T0 units, returns rho in rho0 units
 	// a = 1 / (gamma - 1)
 	return A * pow(T, a);
 }
@@ -372,12 +416,12 @@ double polytropic_T(double T, double a, double A)
 
 void fit_polytropic_T(struct halo *HALO)
 {
-	double T=0, M=0, Mtot, MT, A=0, a=0, rho0, R, V, T0, V0, R0; 
+	double T1=0, T2=0, T=0, M=0, Mtot, MT, A=0, a=0, rho0, R, V, T0, V0, R0; 
 	double *x, *y, *e, *y_th, *params; 
-	double chi, per, gof;
-	int bins, skip, j=0, N=0;
+	double chi, per, gof, gamma_ply;
+	int bins, skip, n_eff, j=0, N=0;
 	struct general_settings *SETTINGS;
-		// FIXME
+
 #ifdef WITH_MPI
 	SETTINGS = &pSettings[ThisTask];
 #else
@@ -386,40 +430,61 @@ void fit_polytropic_T(struct halo *HALO)
 
 		A = 1.;
 		a = 5./3.;
-
-		R = HALO->radius[skip];
-		V = 4./3. * M_PI * pow3(R);
+		
 		bins = HALO->n_bins;
 		skip = HALO->neg_r_bins;
-		N = bins - skip;
-		T0 = 0;
-		M = 0;
-		T = 0;
 
-		for (j=0; j<skip; j++)
+		for (j=0; j<bins; j++)
+			HALO->gas_only.T[j] = u2TK(HALO->gas_only.u[j]);
+
+		for (j=0; j<bins-1; j++)
 		{
-			HALO->gas_only.T[j] = u2T(HALO->gas_only.u[j]);
-			HALO->gas_only.T_0 += u2T(HALO->gas_only.u[j]);
-		}
+			T1 = u2TK(HALO->gas_only.u[j-1]);
+			T = u2TK(HALO->gas_only.u[j]);
+			T2 = u2TK(HALO->gas_only.u[j+1]);
 
+			if(T > T1 && T > T2)
+			{
+				n_eff = j;
+			}
+		}
+		
+		//n_eff = skip;
+
+		HALO->gas_only.T_0 = HALO->gas_only.T[n_eff]; 
+		T0 = HALO->gas_only.T_0;
+		R = HALO->radius[n_eff];
+		M = HALO->gas_only.m[n_eff];
+		V = 4./3. * M_PI * pow3(R);
+		rho0 = M/V;
+
+		N = bins - n_eff;
+
+	//	fprintf(stderr, "%d, T1=%e T=%e T2=%e neff=%d, N=%d\n", j, T1, T, T2, n_eff, N);
+
+	// Fit only with enough bins
+	if(N>3)
+	{
 		params = (double*) calloc(2, sizeof(double));
 		x = (double*) calloc(N, sizeof(double));
 		y = (double*) calloc(N, sizeof(double));
 		e = (double*) calloc(N, sizeof(double));
 
-		for(j=skip; j<N; j++)
+		for(j=n_eff; j<bins; j++)
 		{
 			R = HALO->radius[j];
+			T = HALO->gas_only.T[j];
+			M = HALO->gas_only.m[j];
 			V = 4./3. * M_PI * pow3(R);
 
-			HALO->gas_only.T[j] = u2T(HALO->gas_only.u[j]);
-			HALO->gas_only.hydro_m[j] = compute_hydrostatic_mass(HALO,j);
+			T = HALO->gas_only.T[j];
 
-			x[j] = HALO->gas_only.m[j]/V;
-			y[j] = HALO->gas_only.T[j]/HALO->gas_only.T_0;
-			e[j] = y[j]/sqrt(HALO->gas_only.m[j]-HALO->gas_only.m[j-1]);
+			x[j-n_eff] = T/T0;
+			y[j-n_eff] = (M/V)/rho0;
+			e[j-n_eff] = y[j-n_eff]/sqrt((M-HALO->gas_only.m[j-1])/SETTINGS->gasMass);
 
-			fprintf(stderr, "%e %e\n", x[j], y[j]);
+			//fprintf(stderr, "T/T0=%e rho/rho0=%e e=%e\n", x[j-n_eff], y[j-n_eff], e[j-n_eff]);
+			//fprintf(stderr, "rho0=%e M=%e V=%e\n", rho0, M, V);
 		}
 			
 			params[0] = a;
@@ -432,23 +497,46 @@ void fit_polytropic_T(struct halo *HALO)
 	
 			y_th = (double*) calloc(N, sizeof(double));
 
-			double ga = 1 + 1./a;
-			F_PRINT("gamma=", ga);
+	//	double ga = 1 + 1./a;
+	//	F_PRINT("********************gamma=", ga);
+	//	F_PRINT("********************A=", A);
 
 		for(j=0; j<N; j++)
 		{
 			y_th[j] = polytropic_T(y[j], a, A);
 		}
 
-	// Various estimators for the goodness of fit
-	chi = chi_square(y_th, y, e, N);
-	gof = goodness_of_fit(y_th, y, N);
-	per = percentage_error(y_th, y, N);
-	
-	chi /= (double) N;
+		// Various estimators for the goodness of fit
+		chi = chi_square(y_th, y, e, N);
+		chi /= (double) N;
+		//gof = goodness_of_fit(y_th, y, N); chi = gof;
+		//per = percentage_error(y_th, y, N);
+		gamma_ply = 1. + 1./a;
 
-	HALO->fit_poly.chi = chi;
-	HALO->fit_poly.gof = gof;
-	HALO->fit_poly.per = per;
+		// Sanity check - remove largely different profiles (inner parts might have been fitted instead of outer)
+		if((gamma_ply > 2) || (gamma_ply < 0.5) || (abs(1-A) > 0.4) || (gamma_ply == 1.6) || (chi > 1e+2))
+		{
+			chi = -1;
+			gamma_ply = -1;
+		}
+		else
+		{
+		//	fprintf(stderr, "%d) A=%f gamma=%f chi=%f\n", N, A, gamma_ply, chi);
+		}
+
+	} // If has less bins
+	else
+	{
+		chi = -1;
+		gamma_ply = -1;
+	}
+
+		HALO->fit_poly.chi = chi;
+		HALO->fit_poly.gamma = gamma_ply;
+		HALO->fit_poly.A = A;
+
+		//HALO->fit_poly.gof = gof;
+		//HALO->fit_poly.per = per;
+
 }
 #endif

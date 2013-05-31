@@ -110,6 +110,8 @@ void default_init()
 	ThMassFunc = malloc(sizeof(struct mass_function));
 	GasFunc = malloc(sizeof(struct mass_function));
 	NoGasFunc = malloc(sizeof(struct mass_function));
+	DarkFunc = malloc(sizeof(struct mass_function));
+	TempFunc = malloc(sizeof(struct mass_function));
 	HaloProperties = malloc(sizeof(struct halo_properties));
 
 	Cosmo.H_0=Cosmo.h*100;

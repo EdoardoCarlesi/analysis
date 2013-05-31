@@ -17,6 +17,7 @@
 #include "math.h"
 
 
+
 double get_interpolated_value(double x_array[], double y_array[], int npts, double A)
 {
 	double V; 
@@ -78,14 +79,26 @@ double* log_stepper(double a_0, double a_1, int num)
 
 
 
+double remove_outliers(double* vec,int size,int index)
+{
+	//TODO
+	return 1;
+}
+
+
+
 double maximum(double *array, int size)
 {
 	int i=0;
+	int index=0;
 	double max=array[0];
 
 		for(i=0;i<size;i++) 
-			if(array[i]>max) 
+			if(array[i]>max)
+			{ 
 				max = array[i];
+				index=i;
+			}
 
 //	fprintf(stderr, "size=%d, max=%e\n", size, max);
 
@@ -147,7 +160,8 @@ double minimum(double *array, int size)
 	double min=array[0];
  
 			for(i=0;i<size;i++) 
-				if(array[i]<min) min = array[i];
+				if(array[i]<min) 
+					min = array[i];
 	return min;
 }
 
@@ -167,13 +181,23 @@ double nonzero_minimum(double *array, int size)
 
 double average(double *array, int size)
 {
-	int i=0; 
+	int i=0, true_size; 
 	double avg=0; 
+	true_size = size;
 
 		for (i=0; i<size; i++) 
-				avg += array[i];
-
-	return avg/(double) size;
+		{
+				if(array[i] != array[i])
+				{
+					true_size--;
+				}
+				else
+				{
+					avg += array[i];
+				}
+		}
+	
+	return avg/(double) true_size;
 }	
 
 

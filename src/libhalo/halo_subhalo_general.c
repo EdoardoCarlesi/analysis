@@ -40,7 +40,6 @@ void find_substructure()
 	SubStructure.sub = calloc(1, sizeof(struct sub_halo));
 	SubStructure.host = calloc(1, sizeof(struct host_halo));
 
-	//nHaloes = n_haloes_per_criterion();
 	nHaloes = Settings.n_haloes;
 	
 	// First read in host haloes
@@ -53,10 +52,9 @@ void find_substructure()
 			SubStructure.host[SubStructure.N_host].id = Haloes[i].id;
 			SubStructure.host[SubStructure.N_host].index = i;
 
-			SubStructure.host[SubStructure.N_host].n_sub = 0; //-1; //Haloes[i].n_satellites;
+			SubStructure.host[SubStructure.N_host].n_sub = 0; 
 			SubStructure.host[SubStructure.N_host].sub_index = calloc(Haloes[i].n_satellites, sizeof(int));
-		//	fprintf(stderr, "j=%d - %d) Host id=%llu, index=%d, nsub=%d\n", 
-		//		j, i, Haloes[i].id, i, Haloes[i].n_satellites);
+			Haloes[i].Msub = 0;  // Init the total subhalo mass fraction to zero
 			j++;
 		}
 	 }
@@ -75,19 +73,16 @@ void find_substructure()
 
 			SubStructure.sub[SubStructure.N_sub].host_id = Haloes[i].host;
 			SubStructure.sub[SubStructure.N_sub].host_index = host;
+			Haloes[host].Msub += Haloes[i].Mvir;
 
 			SubStructure.host[host].n_sub++;
 			SubStructure.host[host].sub_index[SubStructure.host[host].n_sub-1] = i;
-			//realloc(SubStructure.host[host].sub_index, (SubStructure.host[host].n_sub+1) * sizeof(int));
-			//SubStructure.host[host].sub_index[SubStructure.host[host].n_sub] = i;
 
 			if(halo_condition(i) == 1)
 				Settings.n_sub_threshold++;
 
 			if(Haloes[i].n_satellites > Settings.n_bins)
 				Settings.n_sub_min++;
-			//fprintf(stderr, "%d) Sub id=%llu, index=%d, host_id=%llu, host_index=%d halo_index=%d\n", 
-			//	i, Haloes[i].id, i, Haloes[i].host, host, SubStructure.host[host].index);
 		}
 	}
 
@@ -195,6 +190,23 @@ void initialize_halo_properties_structure()
 		HaloProperties[HALO_INDEX].fit_nfw.per = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].fit_nfw.gof = (double*) calloc(nBins, sizeof(double));
 #ifdef GAS
+		HaloProperties[HALO_INDEX].dM_hydro = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].dM_hydro_bin = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].gamma = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].gamma_bin = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].shape_dM = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].shape_g = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].shape_dM_hydro = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].shape_gamma = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].triax_g = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].triax_dM = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].triax_dM_hydro = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].triax_gamma = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].sub_g = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].sub_dM = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].sub_dM_hydro = (double*) calloc(nBins, sizeof(double));
+		HaloProperties[HALO_INDEX].sub_gamma = (double*) calloc(nBins, sizeof(double));
+
 		HaloProperties[HALO_INDEX].T = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].n_T = (double*) calloc(nBins, sizeof(double));
 		HaloProperties[HALO_INDEX].cm = (double*) calloc(nBins, sizeof(double));

@@ -180,7 +180,7 @@ void set_additional_halo_properties(int n)
 
 #ifdef EXTRA_GAS
 		// Mass-weighter Temperature
-		HALO[n].gas_only.T_mw = u2T(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
+		HALO[n].gas_only.T_mw = u2TkeV(HALO[n].gas_only.Cum_u) / HALO[n].gas.N;
 
 		for(i=0; i<3; i++)
 		{
