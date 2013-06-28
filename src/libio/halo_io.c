@@ -44,7 +44,7 @@ void determine_simulation_settings()
 #ifdef GAS
 	if(NTask > 1)
 	{
-		SETTINGS->dmMass  = HALO[1].dm.M/(double)HALO[1].dm.N;
+		SETTINGS->dmMass = HALO[1].dm.M/(double)HALO[1].dm.N;
 		SETTINGS->gasMass = HALO[1].gas.M/(double)HALO[1].gas.N; 
 		SETTINGS->rho_dm = SETTINGS->dmMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
 		SETTINGS->rho_b = SETTINGS->gasMass*pow3(Settings.n_part_1D)*(1./pow3(Settings.box_size));
@@ -82,6 +82,7 @@ void determine_simulation_settings()
 		}
 #endif
 	
+	if(ThisTask==0)
 		fprintf(stdout, "\nTask=%d has %d haloes over the %e mass threshold of which:\n\
 					- %d virialized\n\
 					- %d with the right concentration\n\
@@ -94,6 +95,7 @@ void determine_simulation_settings()
 					SETTINGS->n_spin,
 					SETTINGS->n_all);
 
+	if(ThisTask==0)
 		fprintf(stdout, "\nTask=%d has box edges:\n \t\tX=%lf  |  %lf\n \t\tY=%lf  |  %lf\n \t\tZ=%lf  |  %lf\n", 
 					ThisTask,
 					SETTINGS->box.X[0][0], SETTINGS->box.X[0][1], 
@@ -213,8 +215,8 @@ void get_halo_files_urls()
 
 	struct internal_urls *URLS;
 
-
 #ifdef WITH_MPI
+	if(ThisTask == 0)
 	TASK_INFO_MSG(ThisTask, "reading halo file urls...");
 	URLS = &pUrls[ThisTask];
 #else
@@ -368,6 +370,7 @@ void read_halo_file()
 		} else {
 
 #ifdef WITH_MPI
+	if(ThisTask == 0)
 			fprintf(stdout, "Task=%d is reading from halo file:%s\n", 
 				ThisTask, URLS->halo_file);
 #else
@@ -377,6 +380,7 @@ void read_halo_file()
 
 
 #ifdef WITH_MPI
+	if(ThisTask == 0)
 	fprintf(stdout, "\nTask=%d is allocating memory for %d haloes...\n",
 			ThisTask, SETTINGS->n_haloes);
 #else
@@ -600,7 +604,7 @@ void read_profiles_file()
 
 		if(p_file==NULL)
 			ERROR("Profiles file not found", URLS->profiles_file);
-		else
+		else if(ThisTask == 0)
 			fprintf(stdout, "Task=%d has found profiles file:%s\n", ThisTask, URLS->profiles_file);
 
 		if(ThisTask==0)

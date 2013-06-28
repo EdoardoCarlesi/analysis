@@ -32,6 +32,7 @@ void generate_url_for_tasks()
 		sprintf(profile_list_task, "%s.%s",Urls.profile_list, cpu[ThisTask].name);
 		sprintf(subhalo_list_task, "%s.%s",Urls.subhalo_list, cpu[ThisTask].name);
 
+	if(ThisTask == 0)
 		TASK_INFO_MSG(ThisTask, "reading halo, profiles and substructure files lists...");
 	
 		sprintf(command, "%s s/%s/%s/ <%s >%s", 
@@ -55,6 +56,7 @@ void generate_url_for_tasks()
 	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].subhalo_list, subhalo_list_task);
 
+	if(ThisTask == 0)
 		TASK_INFO_MSG(ThisTask, "has generated halo, profiles and substructure files lists.");
 }
 
@@ -91,7 +93,9 @@ void init_cpu_struct()
 
 void free_comm_structures()
 {
+	if(ThisTask==0)
 	TASK_INFO_MSG(ThisTask, "freeing memory allocated for communication");
+
 	free(pSettings);
 	free(pHaloes);
 	free(pUrls);

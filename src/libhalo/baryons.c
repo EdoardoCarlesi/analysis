@@ -68,6 +68,7 @@ void fit_and_store_gas_parameters(void)
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
 	nHaloes = pSettings[ThisTask].n_threshold;
+	if(ThisTask == 0)
 	TASK_INFO_MSG(ThisTask, "Fitting gas profiles");
 #else 
 	HALO = Haloes;

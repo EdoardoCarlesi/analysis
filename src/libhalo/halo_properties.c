@@ -695,10 +695,12 @@ void sort_lambda_and_concentration()
 			}
 		}
 
+			nHaloesCut = m;
 			lMax = F_MAX*maximum(lambda, nHaloesCut);  
 			lMin = F_MIN*minimum(lambda, nHaloesCut);
-			delta_l = (lMax-lMin)/nBins; 
-			l_norm = (delta_l*nHaloesCut);
+			//delta_l = (lMax-lMin)/(nBins-1); 
+			//l_norm = (delta_l/nHaloesCut);
+			l_norm = 1./(double) nHaloesCut;
 
 #ifdef USE_MAXIMA
 			cMax = concentration_max;
@@ -864,7 +866,7 @@ void sort_nfw_parameters()
 
 void sort_mass_relations()
 {
-	int i=0, m=0, *n_mass, nBins, nHaloesCut, nHaloes; 
+	int i=0, m=0, mc=0, *n_mass, nBins, nHaloesCut, nHaloes; 
 	double mMax, mMin;
 
 	double *mass, *mass_bin; 
@@ -946,7 +948,11 @@ void sort_mass_relations()
 				triax[m] = Haloes[i].triax;
 				shape[m] = Haloes[i].shape;
 #ifdef SKIP_SOFT
-				conc[m] = Haloes[i].fit_nfw.c;
+				if(Haloes[i].fit_nfw.c < 100.)
+				{	
+					conc[mc] = Haloes[i].fit_nfw.c;
+					mc++;
+				}
 #else
 				conc[m] = Haloes[i].c_nfw;
 				if(conc[m] == -1) 
@@ -965,11 +971,13 @@ void sort_mass_relations()
 
 			average_bin(mass, vel, mass_bin, vel_bin, vel_err, nBins, nHaloesCut);
 			average_bin(mass, vir, mass_bin, vir_bin, vir_err, nBins, nHaloesCut);
-			average_bin(mass, conc, mass_bin, conc_bin, conc_err, nBins, nHaloesCut);
+			//average_bin(mass, conc, mass_bin, conc_bin, conc_err, nBins, mc);
+			median_bin(mass, conc, mass_bin, conc_bin, conc_err, nBins, mc);
 			average_bin(mass, avg_sub, mass_bin, avg_sub_bin, avg_sub_err, nBins, nHaloesCut);
 			average_bin(mass, triax, mass_bin, triax_bin, triax_err, nBins, nHaloesCut);
 			average_bin(mass, shape, mass_bin, shape_bin, shape_err, nBins, nHaloesCut);
-			average_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
+			//average_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
+			median_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
 			average_bin(mass, per, mass_bin, per_bin, per_err, nBins, nHaloesCut);
 			average_bin(mass, gof, mass_bin, gof_bin, gof_err, nBins, nHaloesCut);
 			average_bin(mass, chi, mass_bin, chi_bin, chi_err, nBins, nHaloesCut);

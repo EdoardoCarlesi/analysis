@@ -418,7 +418,7 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].c[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_c[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.l[i]);
-				fprintf(out_file, "\t%e", HaloProperties[HALO_INDEX].halo.p_l[i]);
+				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.p_l[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.t[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.p_t[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.s[i]);
@@ -596,7 +596,7 @@ void print_halo_profile(int m)
 	int skip = HALO[m].neg_r_bins;
 	nTot = HALO[m].n_bins - HALO[m].neg_r_bins;
 
-	DUMP_MSG("Dumping halo density profile", out_url);
+	DUMP_MSG("halo density profile", out_url);
 
 		fprintf(out_file, "#");
 		FILE_HEADER(out_file, "r      ", count);
@@ -638,6 +638,62 @@ void print_halo_profile(int m)
 
 	fclose(out_file);
 }
+
+
+
+void print_sub_per_host(int index, int bins, int Nsub, double *r, int *r_n, int *r_n_c, double *r_v, double *r_m, 
+	double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi)
+{
+	count = 1;
+	sprintf(out_url, "%shalo.%07d_%s", Urls.output_prefix, index, "distribution.dat");
+	out_file = fopen(out_url, "w");
+	nTot = bins-1;
+	struct halo * HALO;
+
+	HALO = Haloes;
+
+	DUMP_MSG("satellite distribution in host halo", out_url);
+
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "r/Rv   ", count);
+		FILE_HEADER(out_file, "N_sub  ", count);
+		FILE_HEADER(out_file, "N_sub_c", count);
+		FILE_HEADER(out_file, "V_sub  ", count);
+		FILE_HEADER(out_file, "M_sub  ", count);
+		FILE_HEADER(out_file, "M_sub_c", count);
+		FILE_HEADER(out_file, "costh  ", count);
+		FILE_HEADER(out_file, "P(cth) ", count);
+		FILE_HEADER(out_file, "cosphi ", count);
+		FILE_HEADER(out_file, "P(cphi)", count);
+		fprintf(out_file, "\n");
+		fprintf(out_file, "#Host\t");
+		fprintf(out_file, "Nsub=%d\t", Nsub);
+		fprintf(out_file, "M=%e\t", HALO[index].Mvir);
+		fprintf(out_file, "R=%f\t", HALO[index].Rvir);
+		fprintf(out_file, "X=%f\t", HALO[index].X[0]);
+		fprintf(out_file, "Y=%f\t", HALO[index].X[1]);
+		fprintf(out_file, "Z=%f\t", HALO[index].X[2]);
+		fprintf(out_file, "\n");
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++)
+			{
+				fprintf(out_file, "%f", r[i]);
+				fprintf(out_file, "\t%d\t", r_n[i]); 
+				fprintf(out_file, "\t%lf", (float)r_n_c[i]/(float)Nsub); 
+				fprintf(out_file, "\t%lf", r_v[i]);
+				fprintf(out_file, "\t%lf", r_m[i]);
+				fprintf(out_file, "\t%lf", r_m_c[i]);
+				fprintf(out_file, "\t%lf", costh[i]);
+				fprintf(out_file, "\t%lf", (float)p_costh[i]/(float)Nsub);
+				fprintf(out_file, "\t%e ", cosphi[i]);
+				fprintf(out_file, "\t%e ", (float)p_cosphi[i]/(float)Nsub);
+				fprintf(out_file, "\n");
+			}
+
+	fclose(out_file);
+}
+
 
 
 void print_halo_best_fit_results()

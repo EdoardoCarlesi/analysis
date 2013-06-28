@@ -7,29 +7,29 @@
 #define D_PRINT(str, num) fprintf(stdout, "%s %d.\n", str, num)
 
 	// How to bin the cosmic web
-#define BIN_SIZE 15
+#define BIN_SIZE 80
 	// Factors that modify the binning
 #define F_MAX 1.0001
 #define F_MIN 0.9999
 	// Number of bins for subhaloes is multiplied by this
-#define F_SUB 0.8
+#define F_SUB 1.0
 	// Subhalo distribution parameters
 #define SUB_MIN 5
 #define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 15
+#define BIN_PROFILE 18
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.005
 	// How many megaparsec should we ignore when looking at halo profiles
-#define soft_fac 0.025
+#define soft_fac 0.034
 	// Haloes with gas less than this will be considered dark
-#define dark_gas_frac 0.05 
+#define dark_gas_frac 0.01 
 	// Fix maxima when gathering functions to remove outliers
 #define USE_MAXIMA
 #define concentration_max 20
 #define	gof_nfw_max 0.9
-#define concentration_halomass_max 3.e+14
+#define concentration_halomass_max 5.e+14
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)

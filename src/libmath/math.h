@@ -53,8 +53,10 @@ double* log_stepper(double, double, int);
 double* lin_stepper(double, double, int);
 
 void cum_bin(int*, int*, int);
+void double_cum_bin(double*, double*, int);
 void lin_bin(double*, double*, int, int, int*);
 void average_bin(double*, double*, double *, double*, double*, int, int);
+void median_bin(double*, double*, double *, double*, double*, int, int);
 
 double get_interpolated_value(double*, double*, int, double);
 

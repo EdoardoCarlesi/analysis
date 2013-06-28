@@ -47,6 +47,7 @@ void fit_and_store_nfw_parameters()
 #ifdef WITH_MPI
 	HALO = pHaloes[ThisTask];
 	nHaloes = pSettings[ThisTask].n_threshold;
+	if(ThisTask == 0)
 	TASK_INFO_MSG(ThisTask, "fitting halo densities to NFW profiles");
 #else 
 	HALO = Haloes;

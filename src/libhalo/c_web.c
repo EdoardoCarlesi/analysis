@@ -28,7 +28,9 @@ struct c_web
 	int type;
 	float dens;
 	float temp;
+
 	float lambda[3];
+
 } *VWeb, *TWeb;
 
 
@@ -43,6 +45,9 @@ struct web_info
 	float volume[4]; // Volume fraction in node type
 	float mass[4];	 // Mass fraction in node type
 
+		// Node type statistics
+	float l[3][BIN_SIZE];
+	float P_l[3][BIN_SIZE];
 		// Overdensity values
 	int N_dm[5][BIN_SIZE];
 	int N_dm_cum[5][BIN_SIZE];
@@ -59,7 +64,7 @@ struct web_info
 
 
 int compute_node_type(struct c_web *);
-
+int eigenvalue_statistics(void);
 
 
 /*
@@ -211,6 +216,62 @@ void read_t_web()
 
 
 
+int eigenvalue_statistics()
+{
+	unsigned int i=0, j=0, Nweb=0, Nodes=0, l_bin_int[3][BIN_SIZE+1];
+	double *l[3], lMin, lMax;
+	double *l_bin[3]; 
+
+	INFO_MSG("Computing eigenvalue statistics");
+
+	Nweb = Settings.c_web_size;
+	Nodes = pow3(Nweb);
+
+	l[0] = (double*) calloc(Nodes, sizeof(double));
+	l[1] = (double*) calloc(Nodes, sizeof(double));
+	l[2] = (double*) calloc(Nodes, sizeof(double));
+	l_bin[0] = (double*) calloc(BIN_SIZE+1, sizeof(double));
+	l_bin[1] = (double*) calloc(BIN_SIZE+1, sizeof(double));
+	l_bin[2] = (double*) calloc(BIN_SIZE+1, sizeof(double));
+
+	
+#	pragma omp parallel for					\
+	private(i) shared(l, VWeb, Nodes)
+		for(i=0; i<Nodes; i++)
+		{
+			l[0][i] = VWeb[i].lambda[0];
+			l[1][i] = VWeb[i].lambda[1];
+			l[2][i] = VWeb[i].lambda[2];
+	//		fprintf(stderr, "l[0][%d]=%f, V=%f\n", i, l[0][i], VWeb[i].lambda[0]);
+		}
+
+			lMin = -1.01; //minimum(l[j],Nodes);
+			lMax = +2.01; //maximum(l[j],Nodes);
+
+		for(j=0; j<3; j++)
+		{
+			//fprintf(stderr, "lMin=%f, lMax=%f\n", lMin, lMax);
+			l_bin[j] = lin_stepper(lMin, lMax, BIN_SIZE+1);
+			lin_bin(l[j], l_bin[j], BIN_SIZE+1, Nodes, l_bin_int[j]);
+		}
+
+		//or(j=0; j<BIN_SIZE+1; j++)
+		//fprintf(stderr, "lbin[0][%d]=%f, entry=%d\n", j, l_bin[0][j], l_bin_int[0][j]);
+
+		for(i=0; i<BIN_SIZE; i++)
+	for(j=0; j<3; j++)
+	{
+			WebInfoDm.l[j][i] = 0.5 * (l_bin[j][i] + l_bin[j][i+1]);
+			WebInfoDm.P_l[j][i] = ((float) l_bin_int[j][i] / (float) Nodes);
+	}
+	
+	INFO_MSG("Computed eigenvalue statistics");
+
+	return 0;		
+}
+
+
+
 void assign_haloes_to_web()
 {
 	int i=0, j=0, m=0, index, ix, iy, iz, nHaloes, NWeb;
@@ -307,6 +368,9 @@ void sort_web_statistics()
 	w_dm = 1 - w_gas;
 	Ns = 5;
 
+	// Do a general statistics of the eigenvalue-types
+	eigenvalue_statistics();
+
 	// Now sort statistics per node type
 	// i = 0 is the global statistics
 	for(i=0; i<5; i++)
@@ -367,8 +431,8 @@ void sort_web_statistics()
 	}	
 
 			// Now bin into histograms
-			dmMin = 0.999 * nonzero_minimum(delta_dm, NType);
-			dmMax = 1.001 * maximum(delta_dm, NType);
+			dmMin = F_MIN * nonzero_minimum(delta_dm, NType);
+			dmMax = F_MAX * maximum(delta_dm, NType);
 	
 		//fprintf(stderr, "min=%f, max=%f, dm[1]=%f\n", dmMin, dmMax, delta_dm[1]);
 
@@ -468,7 +532,13 @@ void print_web_statistics()
 		{
 			fprintf(file_out,"n(dDM) t=%d (%d)\t", j, count++);
 			fprintf(file_out,"n(>dDM)t=%d (%d)\t", j, count++);
-		}		
+		}
+		
+		for(j=0; j<3; j++)
+		{
+			fprintf(file_out,"l_%d    (%d)    \t", j, count++);
+			fprintf(file_out,"P(l_%d) (%d)    \t", j, count++);
+		}
 			fprintf(file_out,"\n");
 
 		//for(j=0; j<5; j++)
@@ -488,6 +558,14 @@ void print_web_statistics()
 				{
 					fprintf(file_out, "%d       \t", WebInfoDm.N_dm[j][i]);
 					fprintf(file_out, "%d       \t", WebInfoDm.N_dm_cum[j][i]);
+				}
+
+				for(j=0; j<3; j++)
+				{
+					fprintf(file_out, "%f\t", WebInfoDm.l[j][i]);
+					fprintf(file_out, "%f\t", WebInfoDm.P_l[j][i]);
+					//fprintf(stderr, "%f       \t", WebInfoDm.l[j][i]);
+					//fprintf(stderr, "%f       \t\n", WebInfoDm.P_l[j][i]);
 				}
 
 				fprintf(file_out,"\n");

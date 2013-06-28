@@ -5,6 +5,7 @@
 
 #include "../libmath/math.h"
 #include "../libcosmo/cosmo.h"
+#include "../libio/io.h"
 #include "../general_def.h"
 
 #include "halo.h"
@@ -15,6 +16,8 @@
 void n_r_subhalo(void);
 void sort_velocity_distribution(void);
 void sort_host_axis_alignment_and_spatial_anisotropy(void);
+void sub_properties_per_host_halo(void);
+
 
 // FIXME
 void sort_eccentricity(void);
@@ -120,6 +123,142 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 	free(costh_bin);
 	free(costh_bin_y);
 }
+
+
+
+void sub_properties_per_host_halo(void)
+{
+	int i=0, j=0, k=0, l=0, m=0, totHost=0, Nsub=0, nBins=0;
+	int *costh_bin_y, *cosphi_bin_y, *r_sub_bin_y, *n_sub_cum_bin;
+	double rMin, rMax, R, V, M, Rvir, Vhost;
+	double sum, cMax, cMin, cpMax, cpMin, ct=0, anis=0;
+	double *costh, *costh_bin, *cosphi, *cosphi_bin, *err; 
+	double *r_sub, *r_sub_bin, *v_sub, *v_sub_bin, *m_sub, *m_sub_bin, *m_sub_cum_bin;
+
+	INFO_MSG("Computing sub properties per each halo");
+
+	totHost = SubStructure.N_host;
+	nBins = (int) (F_SUB * Settings.n_bins); 
+
+		for(i=0; i<totHost; i++)
+		{
+			k = SubStructure.host[i].index;
+		        Nsub = SubStructure.host[i].n_sub;
+		//	fprintf(stderr, "computing properties for halo %d, nsub %d, M=%e\n", k, Nsub,
+		//		Settings.Mprint);
+
+				cosphi = (double*) calloc(Nsub, sizeof(double));
+				costh = (double*) calloc(Nsub, sizeof(double));
+				r_sub = (double*) calloc(Nsub, sizeof(double));
+				v_sub = (double*) calloc(Nsub, sizeof(double));
+				m_sub = (double*) calloc(Nsub, sizeof(double));
+
+				r_sub_bin = (double*) calloc(nBins, sizeof(double));
+				cosphi_bin = (double*) calloc(nBins, sizeof(double));
+				costh_bin = (double*) calloc(nBins, sizeof(double));
+
+				err = (double*) calloc(nBins-1, sizeof(double));
+				v_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+				m_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+				m_sub_cum_bin = (double*) calloc(nBins-1, sizeof(double));
+				r_sub_bin_y = (int*) calloc(nBins-1, sizeof(int));
+				n_sub_cum_bin = (int*) calloc(nBins-1, sizeof(int));
+				cosphi_bin_y = (int*) calloc(nBins-1, sizeof(int));
+				costh_bin_y = (int*) calloc(nBins-1, sizeof(int));
+
+				Rvir = Haloes[k].Rvir;
+				Vhost = sqrt(pow2(Haloes[k].V[0])+pow2(Haloes[k].V[1])+pow2(Haloes[k].V[2]));
+
+			if(Haloes[k].Mvir > Settings.Mprint)
+			for(j=0; j<Nsub; j++)			 
+			{
+				//fprintf(stderr, "computing properties for halo %d\n", k);
+
+				sum = 0; ct = 0; R = 0; anis = 0; V=0; 
+
+				l = SubStructure.host[i].sub_index[j];
+
+				// Center of mass distance host-satellite 
+				for(m=0; m<3; m++)
+				{	
+					sum += pow2(Haloes[l].X[m] - Haloes[k].X[m]);
+				}
+
+				R = sqrt(sum);
+				r_sub[j] = R/Rvir;
+				
+				// Fraction of subhalo mass
+				m_sub[j] = Haloes[l].Mvir / Haloes[k].Mvir;
+
+				sum = 0;
+				// Center of mass velocity difference host vs. sub
+				for(m=0; m<3; m++)
+				{
+					sum += pow2(Haloes[l].V[m] - Haloes[k].V[m]);
+				}
+
+				V = sqrt(sum);
+				v_sub[j] = V/Vhost;
+
+				// SubHalo axis alignment to the halo center
+				for(m=0; m<3; m++)
+				{
+					ct += Haloes[l].Ea[m]*(Haloes[l].X[m] - Haloes[k].X[m]);
+				}
+
+				ct = ct / R; 
+				costh[j] = sqrt(ct*ct);
+
+				// Alignment of subhaloes wrt the host major axis
+				for(m=0; m<3; m++)
+					anis += Haloes[k].Ea[m]*(Haloes[l].X[m] - Haloes[k].X[m]);
+				anis = anis / R;
+				cosphi[j] = sqrt(anis*anis); 
+			} // End loop on the host
+	
+			// Now gather and print for each halo
+			cMax = F_MAX * maximum(costh, Nsub); 
+			cMin = F_MIN * minimum(costh, Nsub); 
+
+			cpMax = F_MAX * maximum(cosphi, Nsub); 
+			cpMin = F_MIN * minimum(cosphi, Nsub);
+				
+			rMin = F_MIN * minimum(r_sub, Nsub);
+			rMax = F_MAX * maximum(r_sub, Nsub);
+
+			r_sub_bin = lin_stepper(rMin, rMax, nBins);
+			lin_bin(r_sub, r_sub_bin, nBins, Nsub, r_sub_bin_y);
+
+			average_bin(r_sub, v_sub, r_sub_bin, v_sub_bin, err, nBins, Nsub);
+			average_bin(r_sub, m_sub, r_sub_bin, m_sub_bin, err, nBins, Nsub);
+
+			costh_bin = lin_stepper(cMin, cMax, nBins);
+			lin_bin(costh, costh_bin, nBins, Nsub, costh_bin_y);
+
+		        cosphi_bin = lin_stepper(cpMin, cpMax, nBins);
+			lin_bin(cosphi, cosphi_bin, nBins, Nsub, cosphi_bin_y);
+
+			double_cum_bin(m_sub_bin, m_sub_cum_bin, nBins);
+			cum_bin(r_sub_bin_y, n_sub_cum_bin, nBins);
+
+#ifdef PRINT_HALO
+		if(Haloes[k].Mvir > Settings.Mprint)
+			print_sub_per_host(k, nBins, Nsub, r_sub_bin, r_sub_bin_y, n_sub_cum_bin, 
+				v_sub_bin, m_sub_bin, m_sub_cum_bin, costh_bin, costh_bin_y, cosphi_bin, cosphi_bin_y);
+#endif
+
+		free(costh);
+		free(cosphi);
+		free(costh_bin);
+		free(cosphi_bin);
+		free(r_sub);
+		free(v_sub);
+		free(m_sub);
+		free(err);
+
+	}
+}
+
 
 
 // Number of sub haloes per r-bin
@@ -465,6 +604,7 @@ void compute_subhalo_properties()
 {
 	fprintf(stdout,"\nComputing subhalo properties.\n");
 
+		sub_properties_per_host_halo();
 		sort_host_axis_alignment_and_spatial_anisotropy();
 		sort_velocity_distribution();
 		n_r_subhalo();

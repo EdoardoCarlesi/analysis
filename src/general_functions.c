@@ -26,10 +26,12 @@ void default_init(void);
  */
 void initialize_internal_variables(char **argv){
 
-	INFO_MSG("Initializing internal variables");
+//	if(ThisTask == 0)
+//INFO_MSG("Initializing internal variables");
 	
 #ifdef PRINT_INFO
 	int kk=0;
+	if(ThisTask == 0)
  	INFO_MSG("Printing info");
 	for(kk=1; kk<39; kk++) 
 		fprintf(stdout, "argv[%d]: %s \n", kk, argv[kk]);
@@ -301,26 +303,26 @@ void set_halo_selection_criterion()
 	{	
 		case 1:
 			Settings.use_mass = 1;
-			INFO_MSG("Using halo mass/particle number selection criterion");
+			//INFO_MSG("Using halo mass/particle number selection criterion");
 				break;	
 		case 2:
 			Settings.use_vir = 1;
-			INFO_MSG("Using halo virialization selection criterion");
+			//INFO_MSG("Using halo virialization selection criterion");
 				break;	
 	
 		case 3:
 			Settings.use_spin = 1;
-			INFO_MSG("Using halo spin selection criterion");
+			//INFO_MSG("Using halo spin selection criterion");
 				break;	
 	
 		case 4:
 			Settings.use_conc = 1;
-			INFO_MSG("Using halo concentration selection criterion");
+			//INFO_MSG("Using halo concentration selection criterion");
 				break;	
 	
 		case 5:
 			Settings.use_all = 1;
-			INFO_MSG("Using all halo combined selection criteria");
+			//INFO_MSG("Using all halo combined selection criteria");
 				break;	
 
 		default:

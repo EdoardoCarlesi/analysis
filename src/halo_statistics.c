@@ -15,12 +15,12 @@
 
 int main(int argc, char **argv)
 {
-	INFO_MSG("Computing halo statistical properties at fixed z");
-
 	initialize_internal_variables(argv);
 	initialize_halo_storage();
 
-#ifdef WITH_MPI
+	char base_out[200]; 
+	sprintf(base_out, "%s", Urls.output_prefix);
+
 	MPI_Init(&argc, &argv);
 	MPI_Comm_rank(MPI_COMM_WORLD, &ThisTask);
 	MPI_Comm_size(MPI_COMM_WORLD, &NTask);
@@ -31,23 +31,20 @@ int main(int argc, char **argv)
 	MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
 		
 	generate_url_for_tasks();	
-#endif	
-			get_halo_files_urls();
-			
-			set_halo_url();
 
-			read_halo_file();
+		get_halo_files_urls();
+		
+		set_halo_url();
 
-			read_profiles_file();
-	
-			fit_and_store_nfw_parameters();
-			
+		read_halo_file();
+
+		read_profiles_file();
+
+		fit_and_store_nfw_parameters();
 #ifdef GAS
-			fit_and_store_gas_parameters();
+		fit_and_store_gas_parameters();
 #endif
-			free_halo_profiles();
-
-#ifdef WITH_MPI
+		free_halo_profiles();
 
 		MPI_Barrier(MPI_COMM_WORLD);
 
@@ -56,17 +53,15 @@ int main(int argc, char **argv)
 		MPI_Finalize();
 
 		free_comm_structures();
-#endif
 	
 	if(ThisTask == 0)
 	{
-	
-		omp_set_num_threads(OMP_THREADS);	
-	
 		HALO_INDEX=0;
 		MF_INDEX=0;
 		PK_INDEX=0;
 
+		omp_set_num_threads(OMP_THREADS);	
+	
 		initialize_halo_properties_structure();
 
 		compute_halo_properties();
@@ -77,12 +72,13 @@ int main(int argc, char **argv)
 
 	//	sort_axis_alignment();
 	//	print_axis_alignment();
+
 		print_average_profiles();
 		print_halo_best_fit_results();
 		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
 	//	print_all_haloes();
-
+#ifndef NO_WEB
 		read_v_web();
 		read_t_web();
 
@@ -94,8 +90,6 @@ int main(int argc, char **argv)
 
 			// Assign halo to nodes
 			int i=0;
-			char base_out[200]; 
-			sprintf(base_out, "%s", Urls.output_prefix);
 
 			Settings.use_sub = 0;
 			Settings.use_web = 1;
@@ -120,11 +114,12 @@ int main(int argc, char **argv)
 			}
 
 		Settings.use_web = 0;
-
+#endif
 		// Now select subhaloes
 		find_substructure();
 
 		Settings.use_sub = 1;
+
 		sprintf(Urls.output_prefix, "%s%s", base_out, "substructure_");			
 		compute_subhalo_properties();
 		compute_halo_properties();
@@ -142,18 +137,9 @@ int main(int argc, char **argv)
 
 	//	free_halo_properties();
 
-	INFO_MSG("Computed halo statistical properties at fixed z");
+	  INFO_MSG("Computed halo statistical properties at fixed z");
 
 	}
-
-	//MPI_Barrier(MPI_COMM_WORLD);
-
-	//if(ThisTask == 0)
-//#endif
-
-//#ifdef WITH_MPI
-//	MPI_Finalize();
-//#endif
 
 return 0;
 }

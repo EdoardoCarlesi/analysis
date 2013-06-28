@@ -179,6 +179,23 @@ double nonzero_minimum(double *array, int size)
 
 
 
+double median(double *array, int size)
+{
+	int i=0, half_size; 
+	double *avg, med; 
+
+	half_size = (int) size / 2;
+	avg = (double *) calloc(size, sizeof(double));
+	avg = shellsort(array, size);
+	
+	med = array[half_size];
+	
+	return med;
+}
+	
+
+
+
 double average(double *array, int size)
 {
 	int i=0, true_size; 
@@ -279,12 +296,56 @@ void lin_bin(double* array, double* bins, int bin_size, int array_size, int* bin
 			binned_array[j] = (int) h->bin[j];
 
 	gsl_histogram_free(h);
-	fprintf(stdout, "done.\n");
 }
 
 
-		/* Average entry per array bin */
-void average_bin (double* array_x, double* array_y, double* bins, double* binned_array, double *error_array, int bin_size, int array_size)
+
+void median_bin (double* array_x, double* array_y, 
+	double* bins, double* binned_array, double *error_array, int bin_size, int array_size)
+{
+#ifdef PRINT_INFO
+	fprintf(stdout, "\nBinning and taking the median of %d bins an array of size:%d...", bin_size, array_size);
+#endif
+	int i=0, j=0, half, *n_bins; 
+	double **y_bins;
+	
+	y_bins = (double**) calloc(bin_size, sizeof(double*)) ;
+	n_bins = (int*) calloc(bin_size, sizeof(int)) ;
+
+#	pragma omp parallel for \
+	private(j,i) shared(bin_size, array_size, y_bins, n_bins, array_x, array_y)
+	for(j=0; j<bin_size-1; j++)
+	{
+		y_bins[j] = (double*) calloc(1, sizeof(double));
+		n_bins[j] = 0;
+
+		for(i=0; i<array_size; i++)
+		{
+			if(array_x[i] >= bins[j] && array_x[i] < bins[j+1])
+			{
+				n_bins[j]++;
+				y_bins[j] = (double *) realloc(y_bins[j], (n_bins[j]+1)*sizeof(double));
+				y_bins[j][n_bins[j]-1] = array_y[i];
+			}
+		}
+	}
+
+	for(j=0; j<bin_size-1; j++)
+	{
+		binned_array[j] = median(y_bins[j], n_bins[j]);
+	}
+
+	for(j=0; j<bin_size; j++)
+		free(y_bins[j]);
+
+	free(y_bins);
+	free(n_bins);
+}
+
+
+
+void average_bin(double* array_x, double* array_y, double* bins, 
+	double* binned_array, double *error_array, int bin_size, int array_size)
 {
 #ifdef PRINT_INFO
 	fprintf(stdout, "\nBinning and averaging into %d bins an array of size:%d...", bin_size, array_size);
@@ -313,6 +374,22 @@ void average_bin (double* array_x, double* array_y, double* bins, double* binned
 	gsl_histogram_free(g);
 }
 
+
+void double_cum_bin(double *n, double *nCum, int size)
+{
+	int i=0;
+	
+	nCum[size-1] = n[size-1];		
+
+	for(i=1; i<size; i++)
+		nCum[size-i-1] = n[size-i-1] + nCum[size-i];
+/*
+	for(i=0; i<size; i++)
+	{
+		fprintf(stdout, "Cumulative:%d, bin:%d\n", nCum[i], n[i]);
+	}
+*/
+}
 
 
 void cum_bin(int *n, int *nCum, int size)

@@ -51,7 +51,6 @@ void find_substructure()
 			SubStructure.host = realloc(SubStructure.host, (SubStructure.N_host+1)*sizeof(struct host_halo));
 			SubStructure.host[SubStructure.N_host].id = Haloes[i].id;
 			SubStructure.host[SubStructure.N_host].index = i;
-
 			SubStructure.host[SubStructure.N_host].n_sub = 0; 
 			SubStructure.host[SubStructure.N_host].sub_index = calloc(Haloes[i].n_satellites, sizeof(int));
 			Haloes[i].Msub = 0;  // Init the total subhalo mass fraction to zero
@@ -310,6 +309,7 @@ void free_halo_profiles()
 	struct halo *HALO;
 	struct general_settings *SETTINGS;	
 
+	if(ThisTask == 0)
 	INFO_MSG("Freeing halo profiles");
 
 #ifdef WITH_MPI
