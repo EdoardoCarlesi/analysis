@@ -30,6 +30,8 @@
 #define concentration_max 20
 #define	gof_nfw_max 0.9
 #define concentration_halomass_max 5.e+14
+	// Minimum number of subhalo particles
+#define N_SUB_MIN 40
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)

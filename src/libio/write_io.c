@@ -641,16 +641,17 @@ void print_halo_profile(int m)
 
 
 
-void print_sub_per_host(int index, int bins, int Nsub, double *r, int *r_n, int *r_n_c, double *r_v, double *r_m, 
-	double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi)
+void print_sub_per_host(int index, int bins, int NsubTh, double *r, int *r_n, int *r_n_c, double *r_v, double *r_m, 
+	double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi, double *all_r, double *all_m, double *all_v, double *all_cosphi)
 {
 	count = 1;
-	sprintf(out_url, "%shalo.%07d_%s", Urls.output_prefix, index, "distribution.dat");
+	sprintf(out_url, "%shalo.%02d_%s", Urls.output_prefix, index, "distribution.dat");
 	out_file = fopen(out_url, "w");
 	nTot = bins-1;
 	struct halo * HALO;
 
 	HALO = Haloes;
+	int Nsub = r_n_c[0];
 
 	DUMP_MSG("satellite distribution in host halo", out_url);
 
@@ -667,7 +668,7 @@ void print_sub_per_host(int index, int bins, int Nsub, double *r, int *r_n, int 
 		FILE_HEADER(out_file, "P(cphi)", count);
 		fprintf(out_file, "\n");
 		fprintf(out_file, "#Host\t");
-		fprintf(out_file, "Nsub=%d\t", Nsub);
+		fprintf(out_file, "Nsub=%d\t", NsubTh);
 		fprintf(out_file, "M=%e\t", HALO[index].Mvir);
 		fprintf(out_file, "R=%f\t", HALO[index].Rvir);
 		fprintf(out_file, "X=%f\t", HALO[index].X[0]);
@@ -680,17 +681,37 @@ void print_sub_per_host(int index, int bins, int Nsub, double *r, int *r_n, int 
 			{
 				fprintf(out_file, "%f", r[i]);
 				fprintf(out_file, "\t%d\t", r_n[i]); 
-				fprintf(out_file, "\t%lf", (float)r_n_c[i]/(float)Nsub); 
+				fprintf(out_file, "\t%d\t", r_n_c[i]); 
 				fprintf(out_file, "\t%lf", r_v[i]);
 				fprintf(out_file, "\t%lf", r_m[i]);
 				fprintf(out_file, "\t%lf", r_m_c[i]);
 				fprintf(out_file, "\t%lf", costh[i]);
-				fprintf(out_file, "\t%lf", (float)p_costh[i]/(float)Nsub);
+				fprintf(out_file, "\t%lf", (float)p_costh[i]/(float)NsubTh);
 				fprintf(out_file, "\t%e ", cosphi[i]);
-				fprintf(out_file, "\t%e ", (float)p_cosphi[i]/(float)Nsub);
+				fprintf(out_file, "\t%e ", (float)p_cosphi[i]/(float)r_n_c[0]); 
 				fprintf(out_file, "\n");
 			}
+	
+	sprintf(out_url, "%shalo.all_%02d_%s", Urls.output_prefix, index, "distribution.dat");
+	out_file = fopen(out_url, "w");
+	nTot = Nsub;
 
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "r/Rv   ", count);
+		FILE_HEADER(out_file, "M_sub  ", count);
+		FILE_HEADER(out_file, "V_sub  ", count);
+		FILE_HEADER(out_file, "costh  ", count);
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++)
+			{
+				fprintf(out_file, "%f", all_r[i]);
+				fprintf(out_file, "\t%lf", all_m[i]);
+				fprintf(out_file, "\t%lf", all_v[i]);
+				fprintf(out_file, "\t%lf", all_cosphi[i]);
+				fprintf(out_file, "\n");
+			}
+	
 	fclose(out_file);
 }
 

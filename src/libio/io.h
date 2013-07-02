@@ -11,7 +11,7 @@ void read_profiles_file(void);
 void read_pk_snapshots(void);
 void init_pks(void);
 
-void print_sub_per_host(int,int,int,double*,int*,int*,double*,double*,double*,double*,int*,double*,int*);
+void print_sub_per_host(int,int,int,double*,int*,int*,double*,double*,double*,double*,int*,double*,int*,double*,double*,double*,double*);
 
 void print_axis_alignment(void);
 

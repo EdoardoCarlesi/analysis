@@ -128,7 +128,7 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 
 void sub_properties_per_host_halo(void)
 {
-	int i=0, j=0, k=0, l=0, m=0, totHost=0, Nsub=0, nBins=0;
+	int i=0, j=0, k=0, l=0, m=0, nHost=0, totHost=0, Nsub=0, NsubTh=1, nBins=0;
 	int *costh_bin_y, *cosphi_bin_y, *r_sub_bin_y, *n_sub_cum_bin;
 	double rMin, rMax, R, V, M, Rvir, Vhost;
 	double sum, cMax, cMin, cpMax, cpMin, ct=0, anis=0;
@@ -148,7 +148,7 @@ void sub_properties_per_host_halo(void)
 		//		Settings.Mprint);
 
 				cosphi = (double*) calloc(Nsub, sizeof(double));
-				costh = (double*) calloc(Nsub, sizeof(double));
+				costh = (double*) calloc(NsubTh, sizeof(double));
 				r_sub = (double*) calloc(Nsub, sizeof(double));
 				v_sub = (double*) calloc(Nsub, sizeof(double));
 				m_sub = (double*) calloc(Nsub, sizeof(double));
@@ -168,8 +168,11 @@ void sub_properties_per_host_halo(void)
 
 				Rvir = Haloes[k].Rvir;
 				Vhost = sqrt(pow2(Haloes[k].V[0])+pow2(Haloes[k].V[1])+pow2(Haloes[k].V[2]));
+				NsubTh = 0;
 
 			if(Haloes[k].Mvir > Settings.Mprint)
+			{
+				nHost++;
 			for(j=0; j<Nsub; j++)			 
 			{
 				//fprintf(stderr, "computing properties for halo %d\n", k);
@@ -206,25 +209,32 @@ void sub_properties_per_host_halo(void)
 					ct += Haloes[l].Ea[m]*(Haloes[l].X[m] - Haloes[k].X[m]);
 				}
 
-				ct = ct / R; 
-				costh[j] = sqrt(ct*ct);
+				if(Haloes[l].n_part > N_SUB_MIN)
+				{
+					ct = ct / R;
+					NsubTh++;
+					costh = realloc(costh, NsubTh * sizeof(double)); 
+					costh[NsubTh-1] = sqrt(ct*ct);
+				}
 
 				// Alignment of subhaloes wrt the host major axis
 				for(m=0; m<3; m++)
 					anis += Haloes[k].Ea[m]*(Haloes[l].X[m] - Haloes[k].X[m]);
-				anis = anis / R;
+					anis = anis / R;
+
 				cosphi[j] = sqrt(anis*anis); 
 			} // End loop on the host
-	
-			// Now gather and print for each halo
-			cMax = F_MAX * maximum(costh, Nsub); 
-			cMin = F_MIN * minimum(costh, Nsub); 
+			} // end if
 
-			cpMax = F_MAX * maximum(cosphi, Nsub); 
-			cpMin = F_MIN * minimum(cosphi, Nsub);
+			// Now gather and print for each halo
+			cMax = 0; //F_MAX * maximum(costh, NsubTh); 
+			cMin = 1; //F_MIN * minimum(costh, NsubTh); 
+
+			cpMax = 0; //F_MAX * maximum(cosphi, Nsub); 
+			cpMin = 1; //F_MIN * minimum(cosphi, Nsub);
 				
-			rMin = F_MIN * minimum(r_sub, Nsub);
-			rMax = F_MAX * maximum(r_sub, Nsub);
+			rMin = 0.1; //F_MIN * minimum(r_sub, Nsub);
+			rMax = 1.1; //F_MAX * maximum(r_sub, Nsub);
 
 			r_sub_bin = lin_stepper(rMin, rMax, nBins);
 			lin_bin(r_sub, r_sub_bin, nBins, Nsub, r_sub_bin_y);
@@ -233,7 +243,7 @@ void sub_properties_per_host_halo(void)
 			average_bin(r_sub, m_sub, r_sub_bin, m_sub_bin, err, nBins, Nsub);
 
 			costh_bin = lin_stepper(cMin, cMax, nBins);
-			lin_bin(costh, costh_bin, nBins, Nsub, costh_bin_y);
+			lin_bin(costh, costh_bin, nBins, NsubTh, costh_bin_y);
 
 		        cosphi_bin = lin_stepper(cpMin, cpMax, nBins);
 			lin_bin(cosphi, cosphi_bin, nBins, Nsub, cosphi_bin_y);
@@ -243,10 +253,13 @@ void sub_properties_per_host_halo(void)
 
 #ifdef PRINT_HALO
 		if(Haloes[k].Mvir > Settings.Mprint)
-			print_sub_per_host(k, nBins, Nsub, r_sub_bin, r_sub_bin_y, n_sub_cum_bin, 
-				v_sub_bin, m_sub_bin, m_sub_cum_bin, costh_bin, costh_bin_y, cosphi_bin, cosphi_bin_y);
+			print_sub_per_host(nHost, nBins, NsubTh, r_sub_bin, r_sub_bin_y, n_sub_cum_bin, 
+				v_sub_bin, m_sub_bin, m_sub_cum_bin, costh_bin, costh_bin_y, cosphi_bin, cosphi_bin_y, 
+				r_sub, m_sub, v_sub, cosphi);
 #endif
 
+	// FIXME some segfault
+/*
 		free(costh);
 		free(cosphi);
 		free(costh_bin);
@@ -255,7 +268,7 @@ void sub_properties_per_host_halo(void)
 		free(v_sub);
 		free(m_sub);
 		free(err);
-
+*/
 	}
 }
 

@@ -12,16 +12,15 @@
 #					- 10 (theoretical_mass_function)
 #					- 11 (test)
 # MPI Settings - if using MPI
-use_mpi=$2
-n_procs=$3
-use_multiple_cat=$4
-
-if [ $use_mpi -eq 1 ] ; then 
+use_mpi=1
+n_procs=256
 use_multiple_cat=1
-fi
+use_model=$2
+use_th_mass=$3
+use_bins=$4
 
 # Model and simulation ettings
-model1='cde000'
+model1=$use_model
 model2='nothing'
 box_size=250
 particle_number=1024
@@ -33,7 +32,7 @@ catalogue_z=0
 catalogue_number=61
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=15
+n_bins=$use_bins
 n_bins_th=200
 r_bins=11
 
@@ -49,16 +48,16 @@ m_min=1.e+9
 m_max=1.e+15
 
 # Mass threshold for printing halo profiles
-m_print=3.e+14
+m_print=4.e+14
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=1.e+12
+m_th=$use_th_mass
 virial=1.5
 spin=0.15
 
 # Minimum eigenvalue for the velocity shear tensor
-l_web=0.1
+l_web=0.2
 
 # use_n_min = 1 means we use particle number instead of mass as threshold criterion 
 use_n_min=0
