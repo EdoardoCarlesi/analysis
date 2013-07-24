@@ -128,56 +128,110 @@ void sort_host_axis_alignment_and_spatial_anisotropy()
 
 void sub_properties_per_host_halo(void)
 {
-	int i=0, j=0, k=0, l=0, m=0, nHost=0, totHost=0, Nsub=0, NsubTh=1, nBins=0;
-	int *costh_bin_y, *cosphi_bin_y, *r_sub_bin_y, *n_sub_cum_bin;
+	int i=0, j=0, k=0, l=0, m=0, nHost=0, totHost=0, Nsub=0, NsubTh=1, nBins=0, NsubTot=0, NsubTotTh=0;
+	int *costh_bin_y, *cosphi_bin_y, *r_sub_bin_y, *n_sub_cum_bin, *all_n_bin;
 	double rMin, rMax, R, V, M, Rvir, Vhost;
 	double sum, cMax, cMin, cpMax, cpMin, ct=0, anis=0;
 	double *costh, *costh_bin, *cosphi, *cosphi_bin, *err; 
 	double *r_sub, *r_sub_bin, *v_sub, *v_sub_bin, *m_sub, *m_sub_bin, *m_sub_cum_bin;
+	double *all_r_sub, *all_n_sub, *all_v_sub, *all_m_sub, *all_phi_sub, *all_theta_sub;
+	double *all_n_sub_bin, *all_v_sub_bin, *all_m_sub_bin; 
+	double *all_n_c_sub_bin, *all_m_c_sub_bin; 
+	int *all_p_phi_sub_bin, *all_p_theta_sub_bin;
 
 	INFO_MSG("Computing sub properties per each halo");
 
 	totHost = SubStructure.N_host;
 	nBins = (int) (F_SUB * Settings.n_bins); 
+	
+	all_phi_sub = (double*) calloc(1, sizeof(double));
+	all_theta_sub = (double*) calloc(1, sizeof(double));
+	all_r_sub = (double*) calloc(1, sizeof(double));
+	all_n_sub = (double*) calloc(1, sizeof(double));
+	all_v_sub = (double*) calloc(1, sizeof(double));
+	all_m_sub = (double*) calloc(1, sizeof(double));
 
+	all_v_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+	all_n_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+	all_m_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+	all_n_c_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+	all_m_c_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+	all_p_phi_sub_bin = (int*) calloc(nBins-1, sizeof(int));
+	all_p_theta_sub_bin = (int*) calloc(nBins-1, sizeof(int));
+	all_n_bin = (int*) calloc(nBins-1, sizeof(int));
+
+		r_sub_bin = (double*) calloc(nBins, sizeof(double));
+		cosphi_bin = (double*) calloc(nBins, sizeof(double));
+		costh_bin = (double*) calloc(nBins, sizeof(double));
+		err = (double*) calloc(nBins-1, sizeof(double));
+
+			v_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+			m_sub_bin = (double*) calloc(nBins-1, sizeof(double));
+			r_sub_bin_y = (int*) calloc(nBins-1, sizeof(int));
+			cosphi_bin_y = (int*) calloc(nBins-1, sizeof(int));
+			costh_bin_y = (int*) calloc(nBins-1, sizeof(int));
+
+			// Allocate different bins
+			cMax = 1; //F_MAX * maximum(costh, NsubTh); 
+			cMin = 0; //F_MIN * minimum(costh, NsubTh); 
+
+			cpMax = 1; //F_MAX * maximum(cosphi, Nsub); 
+			cpMin = 0; //F_MIN * minimum(cosphi, Nsub);
+				
+			rMin = 0.1; //F_MIN * minimum(r_sub, Nsub);
+			rMax = 1.1; //F_MAX * maximum(r_sub, Nsub);
+
+			r_sub_bin = lin_stepper(rMin, rMax, nBins);
+			costh_bin = lin_stepper(cMin, cMax, nBins);
+		        cosphi_bin = lin_stepper(cpMin, cpMax, nBins);
+
+#ifdef CROSS_CORRELATION
+		for(i=0; i<totHost; i++)
+		{
+			int id = -1;
+			k = SubStructure.host[i].index;
+			id = find_cross_correlated_halo(k);
+
+			if(Haloes[k].Mvir > Settings.Mprint && id > 0)
+#else
 		for(i=0; i<totHost; i++)
 		{
 			k = SubStructure.host[i].index;
-		        Nsub = SubStructure.host[i].n_sub;
 		//	fprintf(stderr, "computing properties for halo %d, nsub %d, M=%e\n", k, Nsub,
 		//		Settings.Mprint);
-
-				cosphi = (double*) calloc(Nsub, sizeof(double));
-				costh = (double*) calloc(NsubTh, sizeof(double));
-				r_sub = (double*) calloc(Nsub, sizeof(double));
-				v_sub = (double*) calloc(Nsub, sizeof(double));
-				m_sub = (double*) calloc(Nsub, sizeof(double));
-
-				r_sub_bin = (double*) calloc(nBins, sizeof(double));
-				cosphi_bin = (double*) calloc(nBins, sizeof(double));
-				costh_bin = (double*) calloc(nBins, sizeof(double));
-
-				err = (double*) calloc(nBins-1, sizeof(double));
-				v_sub_bin = (double*) calloc(nBins-1, sizeof(double));
-				m_sub_bin = (double*) calloc(nBins-1, sizeof(double));
-				m_sub_cum_bin = (double*) calloc(nBins-1, sizeof(double));
-				r_sub_bin_y = (int*) calloc(nBins-1, sizeof(int));
-				n_sub_cum_bin = (int*) calloc(nBins-1, sizeof(int));
-				cosphi_bin_y = (int*) calloc(nBins-1, sizeof(int));
-				costh_bin_y = (int*) calloc(nBins-1, sizeof(int));
-
+			if(Haloes[k].Mvir > Settings.Mprint)
+#endif
+			{
+			        Nsub = SubStructure.host[i].n_sub;
+	
 				Rvir = Haloes[k].Rvir;
 				Vhost = sqrt(pow2(Haloes[k].V[0])+pow2(Haloes[k].V[1])+pow2(Haloes[k].V[2]));
 				NsubTh = 0;
 
-			if(Haloes[k].Mvir > Settings.Mprint)
-			{
+				m_sub_cum_bin = (double*) calloc(nBins-1, sizeof(double));
+				n_sub_cum_bin = (int*) calloc(nBins-1, sizeof(int));
+
+				costh = (double*) calloc(1, sizeof(double));
+				cosphi = (double*) calloc(Nsub, sizeof(double));
+				r_sub = (double*) calloc(Nsub, sizeof(double));
+				v_sub = (double*) calloc(Nsub, sizeof(double));
+				m_sub = (double*) calloc(Nsub, sizeof(double));
+
 				nHost++;
+
 			for(j=0; j<Nsub; j++)			 
 			{
+
 				//fprintf(stderr, "computing properties for halo %d\n", k);
 
 				sum = 0; ct = 0; R = 0; anis = 0; V=0; 
+				NsubTot++;
+
+				all_phi_sub = realloc(all_phi_sub, NsubTot * sizeof(double));
+				all_r_sub = realloc(all_r_sub, NsubTot * sizeof(double));
+				all_v_sub = realloc(all_v_sub, NsubTot * sizeof(double));
+				all_m_sub = realloc(all_m_sub, NsubTot * sizeof(double));
+				all_n_sub = realloc(all_n_sub, NsubTot * sizeof(double));
 
 				l = SubStructure.host[i].sub_index[j];
 
@@ -189,9 +243,12 @@ void sub_properties_per_host_halo(void)
 
 				R = sqrt(sum);
 				r_sub[j] = R/Rvir;
-				
+				all_r_sub[NsubTot-1] = R/Rvir;
+				all_n_sub[NsubTot-1] = 1./(float) Nsub;
+
 				// Fraction of subhalo mass
 				m_sub[j] = Haloes[l].Mvir / Haloes[k].Mvir;
+				all_m_sub[NsubTot-1] = Haloes[l].Mvir / Haloes[k].Mvir;
 
 				sum = 0;
 				// Center of mass velocity difference host vs. sub
@@ -202,6 +259,7 @@ void sub_properties_per_host_halo(void)
 
 				V = sqrt(sum);
 				v_sub[j] = V/Vhost;
+				all_v_sub[NsubTot-1] = V/Vhost;
 
 				// SubHalo axis alignment to the halo center
 				for(m=0; m<3; m++)
@@ -213,8 +271,12 @@ void sub_properties_per_host_halo(void)
 				{
 					ct = ct / R;
 					NsubTh++;
+					NsubTotTh++;
 					costh = realloc(costh, NsubTh * sizeof(double)); 
+					all_theta_sub = realloc(all_theta_sub, NsubTotTh * sizeof(double)); 
+
 					costh[NsubTh-1] = sqrt(ct*ct);
+					all_theta_sub[NsubTotTh-1] = sqrt(ct*ct); 
 				}
 
 				// Alignment of subhaloes wrt the host major axis
@@ -223,53 +285,82 @@ void sub_properties_per_host_halo(void)
 					anis = anis / R;
 
 				cosphi[j] = sqrt(anis*anis); 
-			} // End loop on the host
-			} // end if
+				all_phi_sub[NsubTot-1] = sqrt(anis*anis); 
+
+			} // End loop on the subhaloes
 
 			// Now gather and print for each halo
-			cMax = 0; //F_MAX * maximum(costh, NsubTh); 
-			cMin = 1; //F_MIN * minimum(costh, NsubTh); 
-
-			cpMax = 0; //F_MAX * maximum(cosphi, Nsub); 
-			cpMin = 1; //F_MIN * minimum(cosphi, Nsub);
-				
-			rMin = 0.1; //F_MIN * minimum(r_sub, Nsub);
-			rMax = 1.1; //F_MAX * maximum(r_sub, Nsub);
-
-			r_sub_bin = lin_stepper(rMin, rMax, nBins);
+			lin_bin(costh, costh_bin, nBins, NsubTh, costh_bin_y);
+			lin_bin(cosphi, cosphi_bin, nBins, Nsub, cosphi_bin_y);
 			lin_bin(r_sub, r_sub_bin, nBins, Nsub, r_sub_bin_y);
 
 			average_bin(r_sub, v_sub, r_sub_bin, v_sub_bin, err, nBins, Nsub);
 			average_bin(r_sub, m_sub, r_sub_bin, m_sub_bin, err, nBins, Nsub);
 
-			costh_bin = lin_stepper(cMin, cMax, nBins);
-			lin_bin(costh, costh_bin, nBins, NsubTh, costh_bin_y);
-
-		        cosphi_bin = lin_stepper(cpMin, cpMax, nBins);
-			lin_bin(cosphi, cosphi_bin, nBins, Nsub, cosphi_bin_y);
-
-			double_cum_bin(m_sub_bin, m_sub_cum_bin, nBins);
-			cum_bin(r_sub_bin_y, n_sub_cum_bin, nBins);
+			double_cum_bin(m_sub_bin, m_sub_cum_bin, nBins-1);
+			cum_bin(r_sub_bin_y, n_sub_cum_bin, nBins-1);
 
 #ifdef PRINT_HALO
 		if(Haloes[k].Mvir > Settings.Mprint)
-			print_sub_per_host(nHost, nBins, NsubTh, r_sub_bin, r_sub_bin_y, n_sub_cum_bin, 
+			print_sub_per_host(k, nBins, NsubTh, nHost, r_sub_bin, r_sub_bin_y, n_sub_cum_bin, 
 				v_sub_bin, m_sub_bin, m_sub_cum_bin, costh_bin, costh_bin_y, cosphi_bin, cosphi_bin_y, 
-				r_sub, m_sub, v_sub, cosphi);
+					r_sub, m_sub, v_sub, cosphi);
 #endif
-
-	// FIXME some segfault
-/*
+	
 		free(costh);
 		free(cosphi);
-		free(costh_bin);
-		free(cosphi_bin);
-		free(r_sub);
 		free(v_sub);
 		free(m_sub);
-		free(err);
-*/
-	}
+		free(r_sub);
+
+		free(m_sub_cum_bin);
+		free(n_sub_cum_bin); 
+		} // End if host > M
+	} // End loop on hosts
+
+			average_bin(all_r_sub, all_n_sub, r_sub_bin, all_n_sub_bin, err, nBins, NsubTot);
+			average_bin(all_r_sub, all_v_sub, r_sub_bin, all_v_sub_bin, err, nBins, NsubTot);
+			average_bin(all_r_sub, all_m_sub, r_sub_bin, all_m_sub_bin, err, nBins, NsubTot);
+
+			lin_bin(all_r_sub, r_sub_bin, nBins, NsubTot, all_n_bin);
+			lin_bin(all_phi_sub, cosphi_bin, nBins, NsubTot, all_p_phi_sub_bin);
+			lin_bin(all_theta_sub, costh_bin, nBins, NsubTotTh, all_p_theta_sub_bin);
+
+			double_cum_bin(all_m_sub_bin, all_m_c_sub_bin, nBins-1);
+			double_cum_bin(all_n_sub_bin, all_n_c_sub_bin, nBins-1);
+
+			print_all_sub_per_host(nBins, NsubTot, NsubTotTh, 
+				all_n_bin, r_sub_bin, all_n_sub_bin, all_n_c_sub_bin,
+					all_v_sub_bin, all_m_sub_bin, all_m_c_sub_bin, 
+						costh_bin, all_p_theta_sub_bin, cosphi_bin, all_p_phi_sub_bin);
+
+		INFO_MSG("Printed sub properties per host halo");
+	
+	free(all_phi_sub);
+	free(all_theta_sub);
+	free(all_r_sub);
+	free(all_n_sub);
+	free(all_v_sub);
+	free(all_m_sub);
+
+	free(all_v_sub_bin); 
+	free(all_n_sub_bin); 
+	free(all_m_sub_bin); 
+	free(all_n_c_sub_bin);
+	free(all_m_c_sub_bin); 
+	free(all_p_phi_sub_bin);
+	free(all_p_theta_sub_bin);
+	free(all_n_bin);
+
+	free(err);
+	free(r_sub_bin);
+	free(cosphi_bin);
+	free(costh_bin);
+	free(v_sub_bin);
+	free(m_sub_bin);
+	free(r_sub_bin_y);
+	free(cosphi_bin_y);
+	free(costh_bin_y);
 }
 
 
@@ -618,9 +709,9 @@ void compute_subhalo_properties()
 	fprintf(stdout,"\nComputing subhalo properties.\n");
 
 		sub_properties_per_host_halo();
-		sort_host_axis_alignment_and_spatial_anisotropy();
-		sort_velocity_distribution();
-		n_r_subhalo();
+	//	sort_host_axis_alignment_and_spatial_anisotropy();
+	//	sort_velocity_distribution();
+	//	n_r_subhalo();
 
 		//n_r_subhalo_subset();
 		//sort_eccentricity();

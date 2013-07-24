@@ -21,7 +21,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde000'
+model1='cde099'
 model2='nothing'
 box_size=250
 particle_number=1024
@@ -49,11 +49,11 @@ m_min=1.e+9
 m_max=1.e+15
 
 # Mass threshold for printing halo profiles
-m_print=3.e+14
+m_print=1.e+14
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=1.e+12
+m_th=9.e+13
 virial=1.5
 spin=0.15
 
@@ -224,6 +224,7 @@ $base_analysis/scripts/mpi_check.sh $base_analysis $use_mpi
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
 execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
+#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
 #execute='mpiexec -n '$n_procs' '$base_analysis
 fi
 

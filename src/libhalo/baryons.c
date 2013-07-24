@@ -146,10 +146,13 @@ void average_gas_profiles(void)
 {
 	int k=0, i=0, m=0; 
 	int nHaloes, nHaloesCut;
-	int f_bin, rho_bin, ix_bin;
+	int f_bin, rho_bin, ix_bin, temp_bin, pressure_bin, hydro_m_bin;
 	double f, f_tot;
 	double rho, rho_tot;
 	double ix, ix_tot;
+	double temp, temp_tot;
+	double hydro_m, hydro_m_tot;
+	double pressure, pressure_tot;
 
 	INFO_MSG("Sorting halo gas profiles");
 
@@ -172,6 +175,9 @@ void average_gas_profiles(void)
 			ix_tot = 0;
 			ix_bin = 0;
 
+			temp_tot = 0;
+			temp_bin = 0;
+
 			for(k=0; k<nHaloes; k++)
 			{
 				if(halo_condition(k) == 1)
@@ -180,6 +186,9 @@ void average_gas_profiles(void)
 					f = Haloes[k].f_gas.y[i];
 					rho = Haloes[k].rho_gas.y[i];
 					ix = Haloes[k].i_x.y[i];
+					temp = Haloes[k].temp.y[i];
+					pressure = Haloes[k].pressure.y[i];
+					hydro_m = Haloes[k].hydro_m.y[i];
 
 						if(isnan(f) == 0 && f>0)
 						{
@@ -198,6 +207,24 @@ void average_gas_profiles(void)
 							ix_tot += ix;
 							ix_bin++;
 						}
+
+						if(isnan(temp) == 0 && temp>0 && temp < 1./0.)
+						{
+							temp_tot += temp;
+							temp_bin++;
+						}
+
+						if(isnan(hydro_m) == 0 && hydro_m>0 && hydro_m < 1./0.)
+						{
+							hydro_m_tot += hydro_m;
+							hydro_m_bin++;
+						}
+						
+						if(isnan(pressure) == 0 && pressure>0 && pressure < 1./0.)
+						{
+							pressure_tot += pressure;
+							pressure_bin++;
+						}
 				}
 		
 			}
@@ -211,6 +238,15 @@ void average_gas_profiles(void)
 			HaloProperties[HALO_INDEX].i_x.x[i] = Haloes[0].i_x.x[i];
 			HaloProperties[HALO_INDEX].i_x.y[i] = ix_tot/ix_bin;
 			HaloProperties[HALO_INDEX].i_x.n[i] = ix_bin;
+			HaloProperties[HALO_INDEX].temp.x[i] = Haloes[0].temp.x[i];
+			HaloProperties[HALO_INDEX].temp.y[i] = temp_tot/temp_bin;
+			HaloProperties[HALO_INDEX].temp.n[i] = temp_bin;
+			HaloProperties[HALO_INDEX].pressure.x[i] = Haloes[0].pressure.x[i];
+			HaloProperties[HALO_INDEX].pressure.y[i] = pressure_tot/pressure_bin;
+			HaloProperties[HALO_INDEX].pressure.n[i] = pressure_bin;
+			HaloProperties[HALO_INDEX].hydro_m.x[i] = Haloes[0].hydro_m.x[i];
+			HaloProperties[HALO_INDEX].hydro_m.y[i] = hydro_m_tot/hydro_m_bin;
+			HaloProperties[HALO_INDEX].hydro_m.n[i] = hydro_m_bin;
 
 			if(Haloes[0].rho_gas.x[i]==0)
 			{
@@ -240,8 +276,8 @@ double I_X(double r, double rc, double beta, double rho0)
 void fit_I_X(struct halo *HALO)
 {
 	double rc, Np=0, u=0, T=0, A=0, a=0, rho, rho0, ix0; 
-	double *r, *x, *y, *e, *y_th, *params; 
-	double rMax, rMin, *x_bin, *y_bin, *e_bin;
+	double *r, *x, *y, *m, *p, *e, *y_th, *params; 
+	double rMax, rMin, *x_bin, *y_bin, *e_bin, *m_bin, *p_bin;
 	double beta, chi, per, gof, R, V;
 
 	int bins, skip, j=0, N=0, M=0;
@@ -265,6 +301,8 @@ void fit_I_X(struct halo *HALO)
 		params = (double*) calloc(2, sizeof(double));
 		x = (double*) calloc(1, sizeof(double));
 		y = (double*) calloc(1, sizeof(double));
+		m = (double*) calloc(1, sizeof(double));
+		p = (double*) calloc(1, sizeof(double));
 		e = (double*) calloc(1, sizeof(double));
 		r = (double*) calloc(1, sizeof(double));
 		rc = 0.5 * HALO->r2; // The core radius is half the scale radius
@@ -273,7 +311,7 @@ void fit_I_X(struct halo *HALO)
 		for(j=0; j<bins; j++)
 		{
 			R = HALO->radius[j];
-			//V = 4./3. * M_PI * pow3(R);
+			V = 4./3. * M_PI * pow3(R);
 			rho = (HALO->gas_only.m[j]) / V; //(4./3. * M_PI * pow3(R));
 
 			if(j >= skip)
@@ -283,6 +321,7 @@ void fit_I_X(struct halo *HALO)
 				T += u2TK(HALO->gas_only.u[j]);
 				HALO->gas_only.T[j] = T/Np; //u2T(HALO->gas_only.u[j]);
 				HALO->gas_only.hydro_m[j] = compute_hydrostatic_mass(HALO,j);
+				HALO->gas_only.pressure[j] = (float) pow(rho/rho0, 5./3.);
 				HALO->gas_only.rho[j] = (float) rho / rho0;
 				HALO->gas_only.i_x[j] = (float) ix0 * rho * sqrt(1 + pow2(R / rc));
 				u += HALO->gas_only.u[j];			
@@ -293,13 +332,20 @@ void fit_I_X(struct halo *HALO)
 				N++;
 				x = (double*) realloc(x, N * sizeof(double));
 				y = (double*) realloc(y, N * sizeof(double));
+				m = (double*) realloc(m, N * sizeof(double));
+				p = (double*) realloc(p, N * sizeof(double));
 				e = (double*) realloc(e, N * sizeof(double));
 				r = (double*) realloc(r, N * sizeof(double));
 
 				r[N-1] = R/HALO->Rvir;
-				x[N-1] = 1 + R*R/(rc*rc);
-				y[N-1] = (HALO->gas_only.m[j])/ (4./3. * M_PI * pow3(R)) / rho0;
+				x[N-1] = 1 + (R*R/(rc*rc));
+				y[N-1] = rho / rho0; //(HALO->gas_only.m[j])/ (4./3. * M_PI * pow3(R)) / rho0;
+				m[N-1] = ((HALO->gas_only.hydro_m[j]-HALO->mass_r[j])/HALO->mass_r[j]); 
+				p[N-1] = HALO->gas_only.pressure[j];
 				e[N-1] = y[N-1]/sqrt(HALO->npart[j]);
+
+		//		fprintf(stderr, "hydro=%e, mass=%e, m=%lf\n", HALO->gas_only.hydro_m[j], 
+		//			HALO->mass_r[j], m[N-1]);
 			}
 
 		}
@@ -326,6 +372,8 @@ void fit_I_X(struct halo *HALO)
 
 			x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
 			y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+			m_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+			p_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 			e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 			rMin = 2 * Rvir_frac_min; 
@@ -334,18 +382,25 @@ void fit_I_X(struct halo *HALO)
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
 		average_bin(r, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
+		average_bin(r, p, x_bin, p_bin, e_bin, BIN_PROFILE+1, N);
+		average_bin(r, m, x_bin, m_bin, e_bin, BIN_PROFILE+1, N);
 
 		// Normalize to 1 in the central region	
 		R = 0.5*(x_bin[0]+x_bin[1]);
 		ix0 = 1./sqrt(1 + pow2(R * HALO->Rvir / rc))/y_bin[0];
 
 	for(j=0; j<BIN_PROFILE; j++)
-	{	R = 0.5 * (x_bin[j] + x_bin[j+1]);
+	{
+		R = 0.5 * (x_bin[j] + x_bin[j+1]);
 		HALO->rho_gas.x[j] = R;
-		HALO->rho_gas.y[j] = y_bin[j]/y_bin[0];
+		HALO->rho_gas.y[j] = y_bin[j];
+		HALO->pressure.x[j] = R;
+		HALO->pressure.y[j] = pow(y_bin[j], 1.66666);
+		HALO->hydro_m.x[j] = R;
+		HALO->hydro_m.y[j] = m_bin[j];
 		HALO->i_x.x[j] = R; 
 		HALO->i_x.y[j] = ix0 * y_bin[j] * sqrt(1 + pow2(R * HALO->Rvir / rc));
-		//fprintf(stderr, "%d  %f  %f\n", j, x_bin[j+1], y_bin[j]);
+	//	fprintf(stderr, "%d  %f  mbin = %f\n", j, x_bin[j+1], m_bin[j]);
 	}
 
 	// Various estimators for the goodness of fit
@@ -418,8 +473,9 @@ double polytropic_T(double T, double a, double A)
 void fit_polytropic_T(struct halo *HALO)
 {
 	double T1=0, T2=0, T=0, M=0, Mtot, MT, A=0, a=0, rho0, R, V, T0, V0, R0; 
-	double *x, *y, *e, *y_th, *params; 
-	double chi, per, gof, gamma_ply;
+	double *r, *x, *y, *e, *y_th, *params, *t; 
+	double *x_bin, *y_bin, *e_bin;
+	double rMin, rMax, chi, per, gof, gamma_ply, u_cum, n_part;
 	int bins, skip, n_eff, j=0, N=0;
 	struct general_settings *SETTINGS;
 
@@ -434,10 +490,22 @@ void fit_polytropic_T(struct halo *HALO)
 		
 		bins = HALO->n_bins;
 		skip = HALO->neg_r_bins;
+		t = calloc(bins, sizeof(double));
+		r = calloc(bins, sizeof(double));
+		u_cum = 0;
 
-		for (j=0; j<bins; j++)
-			HALO->gas_only.T[j] = u2TK(HALO->gas_only.u[j]);
+		for (j=1; j<bins; j++)
+		{
+			u_cum = HALO->gas_only.u[j];
+			n_part = (HALO->gas_only.m[j] - HALO->gas_only.m[j-1]) / SETTINGS->gasMass;
+			HALO->gas_only.T[j] = u2TK(u_cum);// / n_part;
+			t[j] = HALO->gas_only.T[j] / n_part;
+			r[j] = HALO->radius[j] / HALO->Rvir;
+		//	fprintf(stderr, "%d) npart=%f, r=%f, T=%e\n", n_part, r[j], t[j]);
+		}
 
+
+/* //TODO fix this mess
 		for (j=0; j<bins-1; j++)
 		{
 			T1 = u2TK(HALO->gas_only.u[j-1]);
@@ -464,9 +532,10 @@ void fit_polytropic_T(struct halo *HALO)
 	//	fprintf(stderr, "%d, T1=%e T=%e T2=%e neff=%d, N=%d\n", j, T1, T, T2, n_eff, N);
 
 	// Fit only with enough bins
-	if(N>3)
+	if(N>2)
 	{
 		params = (double*) calloc(2, sizeof(double));
+		r = (double*) calloc(N, sizeof(double));
 		x = (double*) calloc(N, sizeof(double));
 		y = (double*) calloc(N, sizeof(double));
 		e = (double*) calloc(N, sizeof(double));
@@ -481,6 +550,7 @@ void fit_polytropic_T(struct halo *HALO)
 			T = HALO->gas_only.T[j];
 
 			x[j-n_eff] = T/T0;
+			r[j-n_eff] = R/HALO->Rvir;
 			y[j-n_eff] = (M/V)/rho0;
 			e[j-n_eff] = y[j-n_eff]/sqrt((M-HALO->gas_only.m[j-1])/SETTINGS->gasMass);
 
@@ -535,6 +605,26 @@ void fit_polytropic_T(struct halo *HALO)
 		HALO->fit_poly.chi = chi;
 		HALO->fit_poly.gamma = gamma_ply;
 		HALO->fit_poly.A = A;
+*/
+		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
+		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
+		rMin = 2 * Rvir_frac_min;
+		rMax = F_MAX * 1.01; //R/HALO->Rvir;
+		x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
+	
+		// x is T/T0
+		//average_bin(r, x, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
+		average_bin(r, t, x_bin, y_bin, e_bin, BIN_PROFILE+1, bins);
+
+		T0 = average(y_bin, BIN_PROFILE);
+
+	for(j=0; j<BIN_PROFILE; j++)
+	{
+		//HALO->temp.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
+		HALO->temp.y[j] = y_bin[j]/T0;
+	//	fprintf(stderr, "%d  %f\n", j, y_bin[j]/T0);
+	}
 
 		//HALO->fit_poly.gof = gof;
 		//HALO->fit_poly.per = per;

@@ -1,10 +1,12 @@
 #include "general_def.h"
 
+extern int *cross_correlated_index;
+
 struct general_settings Settings, *pSettings;
 struct internal_urls Urls, *pUrls;
 struct cosmology Cosmo;
 
-struct halo *Haloes, **pHaloes;
+struct halo *Haloes, **pHaloes, *crossHaloes;
 struct halo_properties *HaloProperties, *SubHaloProperties;
 struct sub_structure SubStructure;
 

@@ -650,8 +650,8 @@ void read_profiles_file()
 					alloc_halo_profiles(&HALO[counter], halo_bins);	
 
 					HALO[counter].radius[i] = sqrt(pow2(radius));	
-					//HALO[counter].rho[i] = dens;
-					HALO[counter].rho[i] = overd;
+					HALO[counter].rho[i] = dens;
+					//HALO[counter].rho[i] = overd;
 					HALO[counter].mass_r[i] = mass_r;
 					HALO[counter].npart[i] = npart;
 					HALO[counter].err[i] = dens/sqrt(npart-npart_old); 

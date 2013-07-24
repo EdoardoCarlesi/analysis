@@ -139,6 +139,11 @@ void print_average_profiles()
 	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_avg_profiles.dat");
 	out_file = fopen(out_url,"w");
 
+	double T0 = HaloProperties[HALO_INDEX].temp.y[10];
+	double rho0 = HaloProperties[HALO_INDEX].rho_gas.y[8];
+			//get_interpolated_value(HaloProperties[HALO_INDEX].temp.x, 
+			//HaloProperties[HALO_INDEX].temp.y, 0.25, BIN_PROFILE);
+
 	DUMP_MSG("average profiles", out_url);
 
 		fprintf(out_file,"#");
@@ -147,22 +152,28 @@ void print_average_profiles()
 #ifdef GAS
 		FILE_HEADER(out_file, "rho_gas ", count);
 		FILE_HEADER(out_file, "Ix/Ix0  ", count);
-		//FILE_HEADER(out_file, "R/Rv_fra", count);
 		FILE_HEADER(out_file, "frac_gas", count);
+		FILE_HEADER(out_file, "T/T0    ", count);
+	//	FILE_HEADER(out_file, "hydro_M ", count);
+	//	FILE_HEADER(out_file, "pressure", count);
 #endif
+		FILE_HEADER(out_file, "N_bin   ", count);
 		fprintf(out_file, "\n");
 	
-			for(i=0; i<nTot; i++) 
+			for(i=2; i<nTot; i++) 
 			{
-				fprintf(out_file, "%f", HaloProperties[HALO_INDEX].nfw.x[i]); 
+				fprintf(out_file, "%f",   HaloProperties[HALO_INDEX].nfw.x[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].nfw.y[i]); 
 #ifdef GAS
-				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]); 
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]/rho0); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
-				//fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.x[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].f_gas.y[i]); 
-				fprintf(out_file, "\n");
+				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].temp.y[i]); 
+			//	fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].hydro_m.y[i]); 
+			//	fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].pressure.y[i]); 
 #endif
+				fprintf(out_file, "\t%d", HaloProperties[HALO_INDEX].temp.n[i]); 
+				fprintf(out_file, "\n");
 			}
 
 	fclose(out_file);
@@ -290,8 +301,14 @@ void print_all_haloes()
 
 		fprintf(out_file, "#");
 		FILE_HEADER(out_file, "Mass  ", count);
+		FILE_HEADER(out_file, "Rvir  ", count);
+		FILE_HEADER(out_file, "Msub  ", count);
+		FILE_HEADER(out_file, "n_part", count);
+		FILE_HEADER(out_file, "X     ", count);
+		FILE_HEADER(out_file, "Y     ", count);
+		FILE_HEADER(out_file, "Z     ", count);
 		FILE_HEADER(out_file, "conc  ", count);
-		FILE_HEADER(out_file, "virial", count);
+		FILE_HEADER(out_file, "vir_dm", count);
 		FILE_HEADER(out_file, "lambda", count);
 		FILE_HEADER(out_file, "shape ", count);
 		FILE_HEADER(out_file, "triax ", count);
@@ -307,8 +324,14 @@ void print_all_haloes()
 			if(halo_condition(i)==1)
 			{
 				fprintf(out_file, "%e", Haloes[i].Mvir); 
-				fprintf(out_file, "\t%f", Haloes[i].c);
-				fprintf(out_file, "\t%f", Haloes[i].abs_th_vir);
+				fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
+				fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
+				fprintf(out_file, "\t%d\t", Haloes[i].n_part); 
+				fprintf(out_file, "\t%f", Haloes[i].X[0]);
+				fprintf(out_file, "\t%f", Haloes[i].X[1]);
+				fprintf(out_file, "\t%f", Haloes[i].X[2]);
+				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
+				fprintf(out_file, "\t%f", -2.*Haloes[i].dm.Ekin/Haloes[i].dm.Epot);
 				fprintf(out_file, "\t%f", Haloes[i].lambda);
 				fprintf(out_file, "\t%f", Haloes[i].shape);
 				fprintf(out_file, "\t%f", Haloes[i].triax);
@@ -604,8 +627,8 @@ void print_halo_profile(int m)
 		FILE_HEADER(out_file, "rho_DM ", count);
 #ifdef GAS
 		FILE_HEADER(out_file, "gas_fra", count);
-		FILE_HEADER(out_file, "rho_gas", count);
-		FILE_HEADER(out_file, "I_X    ", count);
+		//FILE_HEADER(out_file, "rho_gas", count);
+		//FILE_HEADER(out_file, "I_X    ", count);
 		FILE_HEADER(out_file, "M(r)   ", count);
 		FILE_HEADER(out_file, "hydro_M", count);
 		FILE_HEADER(out_file, "T      ", count);
@@ -623,12 +646,12 @@ void print_halo_profile(int m)
 			for(i=0; i<nTot; i++)
 			{
 				fprintf(out_file, "%f",   HALO[m].radius[i+skip]);
-				fprintf(out_file, "\t%f",   HALO[m].radius[i+skip]/HALO[m].Rvir);
+				fprintf(out_file, "\t%f",  HALO[m].radius[i+skip]/HALO[m].Rvir);
 				fprintf(out_file, "\t%lf", HALO[m].rho[i+skip]);
 #ifdef GAS
 				fprintf(out_file, "\t%lf", HALO[m].gas_only.frac[i+skip]);
-				fprintf(out_file, "\t%lf", HALO[m].gas_only.rho[i+skip]);
-				fprintf(out_file, "\t%lf", HALO[m].gas_only.i_x[i+skip]);
+				//fprintf(out_file, "\t%lf", HALO[m].gas_only.rho[i+skip]);
+				//fprintf(out_file, "\t%lf", HALO[m].gas_only.i_x[i+skip]);
 				fprintf(out_file, "\t%e", HALO[m].mass_r[i+skip]);
 				fprintf(out_file, "\t%e", HALO[m].gas_only.hydro_m[i+skip]);
 				fprintf(out_file, "\t%e", HALO[m].gas_only.T[i+skip]);
@@ -640,23 +663,88 @@ void print_halo_profile(int m)
 }
 
 
-
-void print_sub_per_host(int index, int bins, int NsubTh, double *r, int *r_n, int *r_n_c, double *r_v, double *r_m, 
-	double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi, double *all_r, double *all_m, double *all_v, double *all_cosphi)
+			/* Averaged distribution of all subhaloes */
+void print_all_sub_per_host(int bins, int NsubTot, int NsubTh, int *n, double *r, double *r_n, double *r_n_c, 
+	double *r_v, double *r_m, double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi)
 {
 	count = 1;
-	sprintf(out_url, "%shalo.%02d_%s", Urls.output_prefix, index, "distribution.dat");
+	sprintf(out_url, "%shalo.bin_%s", Urls.output_prefix, "distribution.dat");
 	out_file = fopen(out_url, "w");
 	nTot = bins-1;
-	struct halo * HALO;
-
-	HALO = Haloes;
-	int Nsub = r_n_c[0];
 
 	DUMP_MSG("satellite distribution in host halo", out_url);
 
 		fprintf(out_file, "#");
 		FILE_HEADER(out_file, "r/Rv   ", count);
+		FILE_HEADER(out_file, "n_bin  ", count);
+		FILE_HEADER(out_file, "N_sub  ", count);
+		FILE_HEADER(out_file, "N_sub_c", count);
+		FILE_HEADER(out_file, "M_sub  ", count);
+		FILE_HEADER(out_file, "M_sub_c", count);
+		FILE_HEADER(out_file, "V_sub  ", count);
+		fprintf(out_file, "\n");
+		fprintf(out_file, "#Nsub=%d\tNsubTh=%d", NsubTot, NsubTh);
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++)
+			{
+				fprintf(out_file, "%lf", r[i]);
+				fprintf(out_file, "\t%d\t",n[i]); 
+				fprintf(out_file, "\t%lf", r_n[i]); 
+				fprintf(out_file, "\t%lf", r_n_c[i]); 
+				fprintf(out_file, "\t%lf", r_m[i]);
+				fprintf(out_file, "\t%lf", r_m_c[i]);
+				fprintf(out_file, "\t%lf", r_v[i]);
+				fprintf(out_file, "\n");
+			}
+	fclose(out_file);
+
+	count = 1;
+	sprintf(out_url, "%shalo.bin_%s", Urls.output_prefix, "angle_distribution.dat");
+	out_file = fopen(out_url, "w");
+	nTot = bins-1;
+
+	fprintf(out_file, "#");
+		FILE_HEADER(out_file, "costh  ", count);
+		FILE_HEADER(out_file, "P(cth) ", count);
+		FILE_HEADER(out_file, "cosphi ", count);
+		FILE_HEADER(out_file, "P(cphi)", count);
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++)
+			{
+				fprintf(out_file, "\t%lf", costh[i]);
+				fprintf(out_file, "\t%lf", (float)p_costh[i]/(float)NsubTh); 
+				fprintf(out_file, "\t%lf", cosphi[i]);
+				fprintf(out_file, "\t%lf", (float)p_cosphi[i]/(float)NsubTot); 
+				fprintf(out_file, "\n");
+			}
+
+
+	fclose(out_file);
+}
+
+
+	/* Subhaloes for individual host */ 
+void print_sub_per_host(int index, int bins, int NsubTh, int host, 
+	double *r, int *r_n, int *r_n_c, double *r_v, double *r_m, 
+	double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi, 
+	double *all_r, double *all_m, double *all_v, double *all_cosphi)
+{
+	count = 1;
+	sprintf(out_url, "%shalo.%02d_%s", Urls.output_prefix, host, "distribution.dat");
+	out_file = fopen(out_url, "w");
+	nTot = bins-1;
+	struct halo * HALO;
+
+	HALO = Haloes;
+	int Nsub = HALO[index].n_satellites;
+
+	DUMP_MSG("satellite distribution in host halo", out_url);
+
+		fprintf(out_file, "#");
+		FILE_HEADER(out_file, "r/Rv   ", count);
+		FILE_HEADER(out_file, "r Mpc  ", count);
 		FILE_HEADER(out_file, "N_sub  ", count);
 		FILE_HEADER(out_file, "N_sub_c", count);
 		FILE_HEADER(out_file, "V_sub  ", count);
@@ -667,19 +755,21 @@ void print_sub_per_host(int index, int bins, int NsubTh, double *r, int *r_n, in
 		FILE_HEADER(out_file, "cosphi ", count);
 		FILE_HEADER(out_file, "P(cphi)", count);
 		fprintf(out_file, "\n");
-		fprintf(out_file, "#Host\t");
-		fprintf(out_file, "Nsub=%d\t", NsubTh);
+
+		fprintf(out_file, "#Host\t\t");
+		fprintf(out_file, "NsubTh=%d\t", NsubTh);
+		fprintf(out_file, "Nsub=%d\t", HALO[index].n_satellites);
 		fprintf(out_file, "M=%e\t", HALO[index].Mvir);
 		fprintf(out_file, "R=%f\t", HALO[index].Rvir);
 		fprintf(out_file, "X=%f\t", HALO[index].X[0]);
 		fprintf(out_file, "Y=%f\t", HALO[index].X[1]);
 		fprintf(out_file, "Z=%f\t", HALO[index].X[2]);
 		fprintf(out_file, "\n");
-		fprintf(out_file, "\n");
 
 			for(i=0; i<nTot; i++)
 			{
-				fprintf(out_file, "%f", r[i]);
+				fprintf(out_file, "%lf", r[i]);
+				fprintf(out_file, "\t%lf", r[i]*HALO[index].Rvir);
 				fprintf(out_file, "\t%d\t", r_n[i]); 
 				fprintf(out_file, "\t%d\t", r_n_c[i]); 
 				fprintf(out_file, "\t%lf", r_v[i]);
@@ -691,9 +781,11 @@ void print_sub_per_host(int index, int bins, int NsubTh, double *r, int *r_n, in
 				fprintf(out_file, "\t%e ", (float)p_cosphi[i]/(float)r_n_c[0]); 
 				fprintf(out_file, "\n");
 			}
-	
-	sprintf(out_url, "%shalo.all_%02d_%s", Urls.output_prefix, index, "distribution.dat");
+	fclose(out_file);
+
+	sprintf(out_url, "%shalo.%02d_all_%s", Urls.output_prefix, host, "distribution.dat");
 	out_file = fopen(out_url, "w");
+	count = 1;
 	nTot = Nsub;
 
 		fprintf(out_file, "#");
@@ -701,6 +793,16 @@ void print_sub_per_host(int index, int bins, int NsubTh, double *r, int *r_n, in
 		FILE_HEADER(out_file, "M_sub  ", count);
 		FILE_HEADER(out_file, "V_sub  ", count);
 		FILE_HEADER(out_file, "costh  ", count);
+		fprintf(out_file, "\n");
+
+		fprintf(out_file, "#Host\t");
+		fprintf(out_file, "Nsub=%d\t", NsubTh);
+		fprintf(out_file, "Nsub=%d\t", HALO[index].n_satellites);
+		fprintf(out_file, "M=%e\t", HALO[index].Mvir);
+		fprintf(out_file, "R=%f\t", HALO[index].Rvir);
+		fprintf(out_file, "X=%f\t", HALO[index].X[0]);
+		fprintf(out_file, "Y=%f\t", HALO[index].X[1]);
+		fprintf(out_file, "Z=%f\t", HALO[index].X[2]);
 		fprintf(out_file, "\n");
 
 			for(i=0; i<nTot; i++)
