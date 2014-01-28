@@ -21,7 +21,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde099'
+model1='cde033'
 model2='nothing'
 box_size=250
 particle_number=1024
@@ -49,11 +49,11 @@ m_min=1.e+9
 m_max=1.e+15
 
 # Mass threshold for printing halo profiles
-m_print=1.e+14
+m_print=1.e+10
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=9.e+13
+m_th=1.e+10
 virial=1.5
 spin=0.15
 
@@ -67,7 +67,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=5
+use_criterion=1
 
 #Computer settings
 swap=0

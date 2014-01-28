@@ -13,14 +13,14 @@ model[4]='lcdm'
 mass[0]=1.e+10
 mass[1]=3.e+11
 mass[2]=1.e+12
-mass[3]=7.e+13
+mass[3]=5.e+13
 mass[4]=1.e+14
 mass[5]=5.e+12
 
 bins[0]=20
 bins[1]=15
 bins[2]=15
-bins[3]=10
+bins[3]=27
 bins[4]=9
 bins[5]=15
 
@@ -48,9 +48,9 @@ echo $all_ex 5 $mod $mass $bin
 
 done
 
-cd $out
-mkdir ${output[$i]}
-mkdir ${output[$i]}/data/
-mv $out*dat $out_dir/data/
+#cd $out
+#mkdir ${output[$i]}
+#mkdir ${output[$i]}/data/
+#mv $out*dat $out_dir/data/
 
 done

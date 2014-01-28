@@ -38,6 +38,7 @@ int main(int argc, char **argv)
 
 		read_halo_file();
 
+#ifndef WEB_ONLY
 		read_profiles_file();
 
 		fit_and_store_nfw_parameters();
@@ -47,6 +48,7 @@ int main(int argc, char **argv)
 		free_halo_profiles();
 
 		MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
 		gather_halo_structures();
 
@@ -64,6 +66,8 @@ int main(int argc, char **argv)
 	
 		initialize_halo_properties_structure();
 
+#ifndef WEB_ONLY
+		read_profiles_file();
 		compute_halo_properties();
 #ifdef GAS
 		average_gas_profiles();
@@ -79,19 +83,21 @@ int main(int argc, char **argv)
 		print_all_halo_properties_to_one_file();
 		
 		print_all_haloes();
+#endif
 #ifndef NO_WEB
 		read_v_web();
-		read_t_web();
-
+		//read_t_web();
+#ifndef WEB_ONLY
 		sort_web_statistics();
 		print_web_statistics();
-
+#endif
 		Settings.use_web = 0;
 		assign_haloes_to_web();
 
 			// Assign halo to nodes
 			int i=0;
 
+#ifndef WEB_ONLY
 			Settings.use_sub = 0;
 			Settings.use_web = 1;
 
@@ -115,7 +121,6 @@ int main(int argc, char **argv)
 			}
 
 		Settings.use_web = 0;
-#endif
 
 		// Now select subhaloes
 		find_substructure();
@@ -139,7 +144,11 @@ int main(int argc, char **argv)
 #endif
 		print_subhalo_only_properties();
 	//	free_halo_properties();
+#endif /* SUBHALO */
 
+#endif /* WEB ONLY */
+		print_all_haloes()
+;
 	  INFO_MSG("Computed halo statistical properties at fixed z");
 
 	}
