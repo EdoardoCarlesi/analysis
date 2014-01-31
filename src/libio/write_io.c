@@ -300,29 +300,49 @@ void print_all_haloes()
 	DUMP_MSG("halo", out_url);
 
 		fprintf(out_file, "#");
+<<<<<<< HEAD
 		FILE_HEADER(out_file, "Mass  ", count);
 		FILE_HEADER(out_file, "Rvir  ", count);
 		FILE_HEADER(out_file, "Msub  ", count);
+=======
+//		FILE_HEADER(out_file, "Mass  ", count);
+//		FILE_HEADER(out_file, "Rvir  ", count);
+//		FILE_HEADER(out_file, "Msub  ", count);
+>>>>>>> 1ab63bdb22a46e04641fe2e39710934ed3e514fc
 		FILE_HEADER(out_file, "n_part", count);
 		FILE_HEADER(out_file, "X     ", count);
 		FILE_HEADER(out_file, "Y     ", count);
 		FILE_HEADER(out_file, "Z     ", count);
+<<<<<<< HEAD
 		FILE_HEADER(out_file, "conc  ", count);
 		FILE_HEADER(out_file, "vir_dm", count);
 		FILE_HEADER(out_file, "lambda", count);
 		FILE_HEADER(out_file, "shape ", count);
 		FILE_HEADER(out_file, "triax ", count);
+=======
+		FILE_HEADER(out_file, "Web   ", count);
+		FILE_HEADER(out_file, "CatNum", count);
+		FILE_HEADER(out_file, "Line  ", count);
+//		FILE_HEADER(out_file, "conc  ", count);
+//		FILE_HEADER(out_file, "vir_dm", count);
+//		FILE_HEADER(out_file, "lambda", count);
+//		FILE_HEADER(out_file, "shape ", count);
+//		FILE_HEADER(out_file, "triax ", count);
+>>>>>>> 1ab63bdb22a46e04641fe2e39710934ed3e514fc
 #ifdef GAS
-		FILE_HEADER(out_file, "gas_T ", count);
-		FILE_HEADER(out_file, "gas_fr", count);
+//		FILE_HEADER(out_file, "gas_fr", count);
+//		FILE_HEADER(out_file, "gasTmw", count);
+//		FILE_HEADER(out_file, "gasTew", count);
+//		FILE_HEADER(out_file, "gasTsl", count);
 #endif
 		fprintf(out_file, "\n");
 
 		for(i=0; i<nTot; i++)	
 		{
-
+ 
 			if(halo_condition(i)==1)
 			{
+<<<<<<< HEAD
 				fprintf(out_file, "%e", Haloes[i].Mvir); 
 				fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
 				fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
@@ -331,15 +351,31 @@ void print_all_haloes()
 				fprintf(out_file, "\t%f", Haloes[i].X[1]);
 				fprintf(out_file, "\t%f", Haloes[i].X[2]);
 				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
+=======
+				//fprintf(out_file, "%e", Haloes[i].Mvir); 
+				//fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
+				//fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
+				fprintf(out_file, "%d\t", Haloes[i].n_part); 
+				fprintf(out_file, "\t%f", Haloes[i].X[0]);
+				fprintf(out_file, "\t%f", Haloes[i].X[1]);
+				fprintf(out_file, "\t%f", Haloes[i].X[2]);
+				fprintf(out_file, "\t%d\t", Haloes[i].c_web);
+				fprintf(out_file, "\t%d\t", Haloes[i].cat_numb);
+				fprintf(out_file, "\t%d\t", Haloes[i].cat_line);
+/*				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
+>>>>>>> 1ab63bdb22a46e04641fe2e39710934ed3e514fc
 				fprintf(out_file, "\t%f", -2.*Haloes[i].dm.Ekin/Haloes[i].dm.Epot);
 				fprintf(out_file, "\t%f", Haloes[i].lambda);
 				fprintf(out_file, "\t%f", Haloes[i].shape);
 				fprintf(out_file, "\t%f", Haloes[i].triax);
 #ifdef GAS
-				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_mw);
 				fprintf(out_file, "\t%f", Haloes[i].gas_only.b_fraction);
-				fprintf(out_file, "\n");
+				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_mw);
+				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_ew);
+				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_sl);
 #endif
+*/
+				fprintf(out_file, "\n");
 			}
 
 		}
@@ -703,6 +739,7 @@ void print_all_sub_per_host(int bins, int NsubTot, int NsubTh, int *n, double *r
 	sprintf(out_url, "%shalo.bin_%s", Urls.output_prefix, "angle_distribution.dat");
 	out_file = fopen(out_url, "w");
 	nTot = bins-1;
+<<<<<<< HEAD
 
 	fprintf(out_file, "#");
 		FILE_HEADER(out_file, "costh  ", count);
@@ -725,6 +762,30 @@ void print_all_sub_per_host(int bins, int NsubTot, int NsubTh, int *n, double *r
 }
 
 
+=======
+
+	fprintf(out_file, "#");
+		FILE_HEADER(out_file, "costh  ", count);
+		FILE_HEADER(out_file, "P(cth) ", count);
+		FILE_HEADER(out_file, "cosphi ", count);
+		FILE_HEADER(out_file, "P(cphi)", count);
+		fprintf(out_file, "\n");
+
+			for(i=0; i<nTot; i++)
+			{
+				fprintf(out_file, "\t%lf", costh[i]);
+				fprintf(out_file, "\t%lf", (float)p_costh[i]/(float)NsubTh); 
+				fprintf(out_file, "\t%lf", cosphi[i]);
+				fprintf(out_file, "\t%lf", (float)p_cosphi[i]/(float)NsubTot); 
+				fprintf(out_file, "\n");
+			}
+
+
+	fclose(out_file);
+}
+
+
+>>>>>>> 1ab63bdb22a46e04641fe2e39710934ed3e514fc
 	/* Subhaloes for individual host */ 
 void print_sub_per_host(int index, int bins, int NsubTh, int host, 
 	double *r, int *r_n, int *r_n_c, double *r_v, double *r_m, 

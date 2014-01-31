@@ -307,6 +307,7 @@ void assign_haloes_to_web()
 					// the nodes in the Web file are already ordered
 				index = VWeb[Node(NWeb, ix, iy, iz)].type;
 				Haloes[j].web_type[index] = 1;
+				Haloes[j].c_web = index;
 				// Prevent race conditions when updating cweb type totals
 #				pragma omp atomic
 				Settings.n_cweb_type[index]++;

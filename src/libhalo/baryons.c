@@ -29,7 +29,8 @@
 #define GN (6.672e-8) // cgs
 #define SOLAR_MASS  1.989e33
 #define CM_PER_MPC  3.085678e24
-#define Tfac 5.38
+//#define Tfac 5.38
+#define Tfac 11.76
 
 /*
  *  Function declaration
@@ -275,12 +276,13 @@ double I_X(double r, double rc, double beta, double rho0)
 	// Fits X-ray surface and beta gas density profile
 void fit_I_X(struct halo *HALO)
 {
-	double rc, Np=0, u=0, T=0, A=0, a=0, rho, rho0, ix0; 
+	double rc, Np=0, u=0, T=0, A=0, a=0, rho, rho0, ix0, r500, *inv_r, *inv_rho, *r_hydro, *m_hydro;
 	double *r, *x, *y, *m, *p, *e, *y_th, *params; 
 	double rMax, rMin, *x_bin, *y_bin, *e_bin, *m_bin, *p_bin;
 	double beta, chi, per, gof, R, V;
+	double T_ew, T_ed, T_sl, T_sd, rho_p;
 
-	int bins, skip, j=0, N=0, M=0;
+	int bins, skip, i=0, j=0, N=0, M=0;
 	struct general_settings *SETTINGS;
 
 #ifdef WITH_MPI
@@ -316,15 +318,23 @@ void fit_I_X(struct halo *HALO)
 
 			if(j >= skip)
 			{
-				// Mass weighted emission
+				// Mass weighted T
 				Np = HALO->gas_only.m[j]/SETTINGS->gasMass;
+				rho_p = (float) rho / rho0;
 				T += u2TK(HALO->gas_only.u[j]);
 				HALO->gas_only.T[j] = T/Np; //u2T(HALO->gas_only.u[j]);
 				HALO->gas_only.hydro_m[j] = compute_hydrostatic_mass(HALO,j);
 				HALO->gas_only.pressure[j] = (float) pow(rho/rho0, 5./3.);
-				HALO->gas_only.rho[j] = (float) rho / rho0;
+				//HALO->gas_only.rho[j] = (float) rho / rho0;
+				HALO->gas_only.rho[j] = rho_p; 
 				HALO->gas_only.i_x[j] = (float) ix0 * rho * sqrt(1 + pow2(R / rc));
 				u += HALO->gas_only.u[j];			
+				// Emission weighted T
+				T_ew  += (T/Np) * sqrt(T/Np);// * rho;
+				T_ed  += sqrt(T/Np);// * rho;
+				// Spectroscopic like T
+				T_sl  += pow(T/Np, 0.25);// * rho;
+				T_sd  += pow(T/Np, -0.75);// * rho;
 			}
 
 			if(R > Rvir_frac_min)
@@ -350,12 +360,33 @@ void fit_I_X(struct halo *HALO)
 
 		}
 		
+#ifdef HYDRO_500
+			int SIZE = 6;
+			inv_rho = calloc (SIZE, sizeof(double));
+			inv_r   = calloc (SIZE, sizeof(double));
+
+			for(i=0; i<SIZE; i++)
+			{
+				inv_rho[i] = HALO->rho[bins-i-1];
+				//inv_r[i]   = HALO->radius[bins-i-1];
+				inv_r[i]   = HALO->gas_only.hydro_m[bins-i-1];
+				//fprintf(stderr, "%d) inv_rho=%f, r=%f\n", i, inv_rho[i], inv_r[i]);
+			}
+
+			//r500 = get_interpolated_value(inv_rho, inv_r, SIZE, 500);
+			//HALO->gas_only.M_hydro = get_interpolated_value(x, HALO->gas_only.hydro_m, bins, r500);
+			//HALO->gas_only.M_hydro = r500;
+			HALO->gas_only.M_hydro = HALO->gas_only.hydro_m[bins-5];
+#else
 			HALO->gas_only.M_hydro = HALO->gas_only.hydro_m[bins-1];
+#endif
 	
 			params[0] = a;
 			params[1] = A;
 
 			HALO->gas_only.T_mw = u2TkeV(u) / HALO->gas.N;	
+			HALO->gas_only.T_ew = T_ew / T_ed / 1e7; 
+			HALO->gas_only.T_sl = T_sl / T_sd / 1e7; 
 		
 			params = best_fit_power_law(x, y, e, N, params);
 	
@@ -504,7 +535,18 @@ void fit_polytropic_T(struct halo *HALO)
 		//	fprintf(stderr, "%d) npart=%f, r=%f, T=%e\n", n_part, r[j], t[j]);
 		}
 
+		for (j=1; j<bins; j++)
+		{
+			u_cum = HALO->gas_only.u[j];
+			n_part = (HALO->gas_only.m[j] - HALO->gas_only.m[j-1]) / SETTINGS->gasMass;
+			HALO->gas_only.T[j] = u2TK(u_cum);// / n_part;
+			t[j] = HALO->gas_only.T[j] / n_part;
+			r[j] = HALO->radius[j] / HALO->Rvir;
+		//	fprintf(stderr, "%d) npart=%f, r=%f, T=%e\n", n_part, r[j], t[j]);
+		}
 
+
+>>>>>>> 1ab63bdb22a46e04641fe2e39710934ed3e514fc
 /* //TODO fix this mess
 		for (j=0; j<bins-1; j++)
 		{

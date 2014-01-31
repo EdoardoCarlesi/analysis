@@ -23,7 +23,7 @@
 #define Rvir_frac_min 0.005
 
 	// Maximum and minimum delta hydrostatic mass
-#define hydro_mass_min -0.6
+#define hydro_mass_min -0.5
 #define hydro_mass_max  0.25
 
 	// How many megaparsec should we ignore when looking at halo profiles
@@ -37,6 +37,10 @@
 #define concentration_halomass_max 5.e+14
 	// Minimum number of subhalo particles
 #define N_SUB_MIN 40
+
+	// Maximum number of haloes to read in per task
+#define USE_N_HALOES
+#define N_HALOES_MAX 2000
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -256,8 +260,13 @@ extern struct halo
         int n_bins;
 	int neg_r_bins;
 
+	// For MPI remember the position in the original file and the catalogue number
+	int cat_line;
+	int cat_numb;
+
 	// 0 void, 1 sheet, 2 filament, 3 node
 	int web_type[4];
+	int c_web;
 
 	// These variables are set to 1 if the halo satisfies the condition
 	int vir;
@@ -363,6 +372,8 @@ extern struct halo
 		float lambdaE;
 		float b_fraction;
 		float T_mw; // Mass-weighted temperature
+		float T_ew; // Mass-weighted temperature
+		float T_sl; // Mass-weighted temperature
 		float T_0; // Central cluster temperature
 		float I_X0; // X ray thermal emission
 		double M_hydro; // Cluster mass by hydrostatic equilibrium

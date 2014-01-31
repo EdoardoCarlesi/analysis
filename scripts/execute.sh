@@ -54,6 +54,7 @@ m_print=1.e+14
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
 m_th=9.e+13
+m_print=1.e+10
 virial=1.5
 spin=0.15
 
@@ -67,7 +68,7 @@ use_n_min=0
 use_n_haloes=0
 
 # use_criterion = 1 use mass/num, 2 use virialization, 3 use spin, 4 use concentration, 5 use all combined
-use_criterion=5
+use_criterion=1
 
 #Computer settings
 swap=0
@@ -226,6 +227,8 @@ if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
 execute='/home/carlesi/bin/mpiexec -n '$n_procs' '$base_analysis
+#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
+#execute='mpiexec -n '$n_procs' '$base_analysis
 fi
 
 if [ $1 -eq 3 ] ; then

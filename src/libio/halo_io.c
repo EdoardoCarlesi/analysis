@@ -353,7 +353,11 @@ void read_halo_file()
 			skip = 0;
 
 		h_file = fopen(URLS->halo_file, "r");
+#ifdef USE_N_HALOES
+		SETTINGS->n_haloes = N_HALOES_MAX; 
+#else
 		SETTINGS->n_haloes = get_lines(h_file, URLS->halo_file) - skip;
+#endif
 
 #ifdef WITH_MPI
 		pHaloes[ThisTask] = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
@@ -380,6 +384,7 @@ void read_halo_file()
 
 
 #ifdef WITH_MPI
+
 	if(ThisTask == 0)
 	fprintf(stdout, "\nTask=%d is allocating memory for %d haloes...\n",
 			ThisTask, SETTINGS->n_haloes);
@@ -463,6 +468,11 @@ void read_halo_file()
 	HALO[n].a[0] = 1.0; 
 #ifdef GAS
 	HALO[n].gas.a[0] = 1.0; 
+#endif
+
+#ifdef WITH_MPI
+	HALO[n].cat_line=j;
+	HALO[n].cat_numb=ThisTask;
 #endif
 
 	if(HALO[n].host > 0)

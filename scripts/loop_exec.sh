@@ -48,9 +48,9 @@ echo $all_ex 5 $mod $mass $bin
 
 done
 
-cd $out
-mkdir ${output[$i]}
-mkdir ${output[$i]}/data/
-mv $out*dat $out_dir/data/
+#cd $out
+#mkdir ${output[$i]}
+#mkdir ${output[$i]}/data/
+#mv $out*dat $out_dir/data/
 
 done
