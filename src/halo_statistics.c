@@ -72,12 +72,13 @@ int main(int argc, char **argv)
 
 	//	sort_axis_alignment();
 	//	print_axis_alignment();
-
+		
 		print_average_profiles();
 		print_halo_best_fit_results();
-		print_numerical_mass_function();
+		//print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
-	//	print_all_haloes();
+		
+		print_all_haloes();
 #ifndef NO_WEB
 		read_v_web();
 		read_t_web();
@@ -115,11 +116,15 @@ int main(int argc, char **argv)
 
 		Settings.use_web = 0;
 #endif
+
 		// Now select subhaloes
 		find_substructure();
+#ifdef CROSS_CORRELATION
+		cross_correlation("/home/carlesi/Analysis/output/CC/lcdm-250-1024-z0.000_tot_haloes.dat");
+#endif
 
+#ifdef SUBHALO
 		Settings.use_sub = 1;
-
 		sprintf(Urls.output_prefix, "%s%s", base_out, "substructure_");			
 		compute_subhalo_properties();
 		compute_halo_properties();
@@ -127,14 +132,12 @@ int main(int argc, char **argv)
 #ifdef GAS
 		average_gas_profiles();
 #endif
-	
 		print_average_profiles();
 		print_halo_best_fit_results();
 		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
-
+#endif
 		print_subhalo_only_properties();
-
 	//	free_halo_properties();
 
 	  INFO_MSG("Computed halo statistical properties at fixed z");

@@ -821,6 +821,7 @@ void sort_nfw_parameters()
 				if(Haloes[i].fit_nfw.gof > 0)
 				{
 					nfw_gof[m] = Haloes[i].fit_nfw.gof;
+					//nfw_gof[m] = 1e3*Haloes[i].fit_nfw.rs;
 					m++;
 				}
 			}
@@ -839,7 +840,6 @@ void sort_nfw_parameters()
 
 			gbin_x = log_stepper(gMin, gMax, nBins);
 			lin_bin(nfw_gof, gbin_x, nBins, nHaloesCut, nfw_gof_int_y);	
-
 
 			ghalfstep=(gbin_x[1]-gbin_x[0])*0.5;
 
@@ -1319,7 +1319,7 @@ void sort_alignment_and_displacement()
 		{
 			if(halo_condition(i) == 1)
 			{
-				array_costh[m] = Haloes[i].gas_only.gas_dm_costh;
+				array_costh[m] = sqrt(pow2(Haloes[i].gas_only.gas_dm_costh));
 				array_diff_cm[m] = Haloes[i].gas_only.diff.cm;
 				m++;
 			}
@@ -1463,8 +1463,8 @@ void sort_hydro_mass_and_gamma_for_triaxiality_and_shape()
 			norm_gamma = 1./ (double) j;
 
 #ifdef USE_MAXIMA
-			dMin = -0.9; 
-			dMax = 0.35; 
+			dMin = hydro_mass_min; 
+			dMax = hydro_mass_max; 
 #else
 			dMin = F_MIN * minimum(dmass, m); 
 			dMax = F_MAX * maximum(dmass, m); 

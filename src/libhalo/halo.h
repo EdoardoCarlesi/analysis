@@ -40,6 +40,10 @@ void sort_web_statistics(void);
 void print_web_statistics(void);
 void assign_haloes_to_web(void);
 
+// Cross correlation
+void cross_correlation(char*);
+int find_cross_correlated_halo(int);
+
 void free_halo_profiles(void);
 void free_subhalo_properties(void);
 void free_halo_properties(void);

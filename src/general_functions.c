@@ -360,6 +360,7 @@ void alloc_halo_profiles(struct halo *HALO, int Size)
 	HALO->gas_only.rho = (float *) calloc(Size,sizeof(float));
 	HALO->gas_only.i_x = (float *) calloc(Size,sizeof(float));
 	HALO->gas_only.T = (float *) calloc(Size,sizeof(float));
-	HALO->gas_only.hydro_m = (float *) calloc(Size,sizeof(float));
+	HALO->gas_only.hydro_m = (double *) calloc(Size,sizeof(double));
+	HALO->gas_only.pressure = (float *) calloc(Size,sizeof(float));
 #endif
 }

@@ -18,15 +18,20 @@
 #define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 18
+#define BIN_PROFILE 25
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.005
+
+	// Maximum and minimum delta hydrostatic mass
+#define hydro_mass_min -0.6
+#define hydro_mass_max  0.25
+
 	// How many megaparsec should we ignore when looking at halo profiles
 #define soft_fac 0.034
 	// Haloes with gas less than this will be considered dark
 #define dark_gas_frac 0.01 
 	// Fix maxima when gathering functions to remove outliers
-#define USE_MAXIMA
+//#define USE_MAXIMA
 #define concentration_max 20
 #define	gof_nfw_max 0.9
 #define concentration_halomass_max 5.e+14
@@ -48,6 +53,8 @@ void check_condition_consistency(void);
 
 int n_haloes_per_criterion(void);
 int halo_condition(int);
+
+int *cross_correlated_index;
 
 
 extern struct power_spectrum 
@@ -324,7 +331,7 @@ extern struct halo
 	{
 		float x[BIN_PROFILE];
 		float y[BIN_PROFILE];
-	} f_gas, nfw, rho_gas, i_x, hydro_m, T;
+	} f_gas, nfw, rho_gas, i_x, hydro_m, pressure, temp;
 
 	int *npart;
 	float *radius;
@@ -379,12 +386,13 @@ extern struct halo
 		float *rho;
 		float *frac;
 		float *i_x;
-		float *hydro_m;
+		double *hydro_m;
+		float *pressure;
 		float *T;
 	} gas_only;
 
 #endif  // GAS
-} *Haloes, **pHaloes;
+} *Haloes, *crossHaloes, **pHaloes;
 
 
 extern struct sub_structure
@@ -506,7 +514,7 @@ extern struct halo_properties
 		double x[BIN_PROFILE];
 		double y[BIN_PROFILE];
 
-	} f_gas, nfw, rho_gas, i_x;
+	} f_gas, nfw, rho_gas, i_x, temp, hydro_m, pressure;
 
 	// Distributions
 	double *c;

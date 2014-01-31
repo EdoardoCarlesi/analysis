@@ -13,25 +13,25 @@ model[4]='lcdm'
 mass[0]=1.e+10
 mass[1]=3.e+11
 mass[2]=1.e+12
-mass[3]=1.e+13
-mass[4]=7.e+13
+mass[3]=7.e+13
+mass[4]=1.e+14
 mass[5]=5.e+12
 
 bins[0]=20
 bins[1]=15
 bins[2]=15
-bins[3]=12
-bins[4]=10
+bins[3]=10
+bins[4]=9
 bins[5]=15
 
 output[0]='1e10/'
 output[1]='3e11/'
 output[2]='1e12/'
-output[3]='1e13/'
-output[4]='7e13/'
+output[3]='7e13/'
+output[4]='1e14/'
 output[5]='5e12/'
 
-for (( i=4; i<5; i++ ))
+for (( i=3; i<4; i++ ))
 do
 
 mass=${mass[$i]}
