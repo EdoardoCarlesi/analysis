@@ -39,7 +39,7 @@
 #define N_SUB_MIN 40
 
 	// Maximum number of haloes to read in per task
-#define USE_N_HALOES
+//#define USE_N_HALOES
 #define N_HALOES_MAX 2000
 
 #ifdef WITH_MPI
@@ -59,7 +59,6 @@ int n_haloes_per_criterion(void);
 int halo_condition(int);
 
 int *cross_correlated_index;
-
 
 extern struct power_spectrum 
 {
@@ -113,6 +112,7 @@ extern struct general_settings
 	int cat_number;
 	int use_cat;
 	int c_web_size;
+	int tot_files;
 
 	double totGasMassInHalo;
 	double totHaloMass;
@@ -128,6 +128,7 @@ extern struct general_settings
 	int n_spin;
 	int n_all;
 	int n_haloes;
+	int n_haloes_step; // When reading several files per task, this keeps track of the previous step in the loop
 	int n_haloes_size; // Used for MPI communication
 	int n_cweb_type[4];
 
@@ -403,7 +404,7 @@ extern struct halo
 	} gas_only;
 
 #endif  // GAS
-} *Haloes, *crossHaloes, **pHaloes;
+} *Haloes, *crossHaloes, **pHaloes, *tempHaloes;
 
 
 extern struct sub_structure
@@ -625,5 +626,6 @@ extern struct halo_properties
 } *HaloProperties;
 
 
+void realloc_haloes(void);
 void alloc_mass_function(struct mass_function *, int);
 void alloc_halo_profiles(struct halo *, int);

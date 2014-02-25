@@ -354,13 +354,14 @@ void read_halo_file()
 
 		h_file = fopen(URLS->halo_file, "r");
 #ifdef USE_N_HALOES
-		SETTINGS->n_haloes = N_HALOES_MAX; 
+		SETTINGS->n_haloes += N_HALOES_MAX; 
 #else
-		SETTINGS->n_haloes = get_lines(h_file, URLS->halo_file) - skip;
+		SETTINGS->n_haloes += get_lines(h_file, URLS->halo_file) - skip;
 #endif
 
 #ifdef WITH_MPI
 		pHaloes[ThisTask] = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
+		tempHaloes = (struct halo*) calloc(1, sizeof(struct halo));
 		HALO = pHaloes[ThisTask];
 #else
 		Haloes = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
@@ -569,11 +570,11 @@ void read_halo_file()
 	}
 } // Finished counting haloes over threshold conditions
 
-		SETTINGS->n_threshold=thr;
-		SETTINGS->n_virialized=vir;
-		SETTINGS->n_concentration=conc;
-		SETTINGS->n_spin=spin;
-		SETTINGS->n_all=all;
+		SETTINGS->n_threshold+=thr;
+		SETTINGS->n_virialized+=vir;
+		SETTINGS->n_concentration+=conc;
+		SETTINGS->n_spin+=spin;
+		SETTINGS->n_all+=all;
 	
 	determine_simulation_settings();	
 		

@@ -38,7 +38,8 @@ void initialize_internal_variables(char **argv){
 #endif
 
 	int count=1;
-
+  
+		Settings.tot_files = atoi(argv[count++]);
 		// Basic working file urls
 		Urls.a_outputs = argv[count++];
 		Urls.halo_file = argv[count++];
@@ -115,6 +116,7 @@ void default_init()
 	DarkFunc = malloc(sizeof(struct mass_function));
 	TempFunc = malloc(sizeof(struct mass_function));
 	HaloProperties = malloc(sizeof(struct halo_properties));
+	tempHaloes = malloc(sizeof(struct halo));
 
 	Cosmo.H_0=Cosmo.h*100;
 	Cosmo.G=6.672e-8;
@@ -134,7 +136,9 @@ void default_init()
 
 	Settings.totHaloMass = 0;
 	Settings.totSubMass = 0;
-	
+	Settings.n_haloes = 0;	
+	Settings.n_haloes_step = 0;	
+
 	// Init some commonly used structures to default values
 	GrowthFac.z = (double *) calloc(1, sizeof(double));
 	GrowthFac.a = (double *) calloc(1, sizeof(double));
@@ -344,6 +348,32 @@ void alloc_mass_function(struct mass_function *MF, int Size)
 	MF->err_dn = (double*) calloc(Size-1, sizeof(double));
 }
 
+
+#ifdef WITH_MPI
+void realloc_haloes()
+{
+	int ihalo, nhalo, nhalo_step;
+	
+	nhalo = pSettings[ThisTask].n_haloes;
+	nhalo_step = pSettings[ThisTask].n_haloes_step;
+	tempHaloes = (struct halo *) realloc(&tempHaloes[0], (nhalo_step + nhalo) * sizeof(struct halo));
+
+	fprintf(stderr, "Realloc haloes on task %d, before %d after %d\n", ThisTask, nhalo_step, nhalo+nhalo_step );
+
+	for(ihalo = 0; ihalo < nhalo; ihalo++)
+		tempHaloes[nhalo_step+ihalo] = pHaloes[ThisTask][ihalo];
+
+	pSettings[ThisTask].n_haloes_step += nhalo;
+	pSettings[ThisTask].n_haloes = 0;
+	free(pHaloes[ThisTask]);
+	pHaloes[ThisTask] = malloc(sizeof(struct halo));
+}
+#else
+void realloc_haloes()
+{
+	// VOID FUNCION
+}
+#endif
 
 
 void alloc_halo_profiles(struct halo *HALO, int Size)

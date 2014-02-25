@@ -12,17 +12,18 @@
 #					- 10 (theoretical_mass_function)
 #					- 11 (test)
 # MPI Settings - if using MPI
+analysis_type=$1
 use_mpi=$2
 n_procs=$3
-use_multiple_cat=$4
+n_files=$4
+use_multiple_cat=$5
 
 if [ $use_mpi -eq 1 ] ; then 
 use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde099'
-model2='nothing'
+model1='lcdm'
 box_size=250
 particle_number=1024
 web_size=256
@@ -99,11 +100,11 @@ base_analysis=${HOME}/Analysis/
 base_out=$base_analysis/output/
 base_temp=$base_analysis/temp/
 
-dir_ahf=ahf
-dir_snaps=snaps
-dir_pk=pk
-dir_halo=catalogues
-dir_web=vweb
+dir_ahf='ahf'
+dir_snaps='snaps'
+dir_pk='pk'
+dir_halo='catalogues/'$model1
+dir_web='vweb'
 
 # General file prefixes 
 prefix=$base_out$model1'-'$box_size'-'$particle_number'-'
@@ -133,24 +134,19 @@ if [ $particle_number -eq 1024 ] ; then
 outputs=$base_data/$particle_number/$box_size/outputs_new.txt
 fi
 
-DATA1=$base_data/$particle_number/$box_size/$model1/
-DATA2=$base_data/$particle_number/$box_size/$model2/
+DATA1=$base_data/$particle_number/$box_size/
 
 snaps_dir1=$DATA1$dir_snaps/
-snaps_dir2=$DATA2$dir_snaps/
 halo_dir1=$DATA1$dir_halo/
-halo_dir2=$DATA2$dir_halo/
 halo_dir_ahf1=$DATA1$dir_ahf/
-halo_dir_ahf2=$DATA2$dir_ahf/
 pk_dir1=$DATA1$dir_pk/
-pk_dir2=$DATA2$dir_pk/
 web_dir1=$DATA1$dir_web/
 
 zzzz='.z'
 cat_zero='00'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='0000.z'
+zzzz='z0.065'
 #zzzz='0000'
 fi
 
@@ -159,15 +155,12 @@ cat_zero='0'
 fi
 
 cd $halo_dir1
-halo_name1=`ls *$cat_zero$catalogue_number*$zzzz*_halos`
-halo_name2=`ls *$cat_zero$catalogue_number*$zzzz*_halos`
+halo_name1=`ls *$cat_zero$zzzz*_halos`
 
 cd $halo_dir1
-profile_name1=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
-profile_name2=`ls *$cat_zero$catalogue_number*$zzzz*_profiles`
+profile_name1=`ls *$cat_zero$zzzz*_profiles`
 
 pk_file1=`ls $pk_dir1*snap*$catalogue_number`
-pk_file2=`ls $pk_dir2*snap*$catalogue_number`
 echo pk_file1=`ls $pk_dir1*snap*$catalogue_number`
 echo 'pk file 1'$pk_file1'*'
 
@@ -190,11 +183,9 @@ echo 'web gas file 1' $web_gas_file1
 fi
 
 halo_file1=$halo_dir1/$halo_name1
-halo_file2=$halo_dir2/$halo_name2
 profile_file1=$halo_dir1/$profile_name1
-profile_file2=$halo_dir2/$profile_name2
 
-# File where the output Pks list is printed
+# File where the output lists are printed
 pk_list=$base_temp/pk.list
 halo_list=$base_temp/halo.list
 profile_list=$base_temp/profile.list
@@ -202,20 +193,22 @@ subhalo_list=$base_temp/subhalo.list
 
 ls -r $snaps_dir1/Pk* > $pk_list 
 ls -r $halo_dir1/*$zzzz*halos > $halo_list 
+#ls -r $halo_dir1/*$zzzz*halos 
 ls -r $halo_dir1/*$zzzz*profiles > $profile_list
 ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
 
 cd $base_analysis/src/
 make clean
 
-url_var=$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
+url_var=$n_files' '$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
+#echo url_var=$n_files' '$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
 set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
 set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion' '$m_print
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
 evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
 halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$snaps_dir2' '$halo_dir2
 
-all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$prefix' '$evolution_var' '
+all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$prefix' '$evolution_var
 
 execute=$base_analysis
 
@@ -226,7 +219,7 @@ if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
-execute='/home/carlesi/bin/mpiexec -n '$n_procs' '$base_analysis
+execute='mpiexec.openmpi -n '$n_procs' '$base_analysis
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
 #execute='mpiexec -n '$n_procs' '$base_analysis
 fi
@@ -257,6 +250,7 @@ $execute/bin/mass_function $all_variables
 fi
 
 if [ $1 -eq 5 ] ; then
+echo OK
 make halo_statistics
 $execute/bin/halo_statistics $all_variables
 fi

@@ -18,6 +18,7 @@ int main(int argc, char **argv)
 	initialize_internal_variables(argv);
 	initialize_halo_storage();
 
+	int ifile=0, locFileNumber=0, totFilesPerTask=0, filesPerTask=0, extraFilesPerTask=0;
 	char base_out[200]; 
 	sprintf(base_out, "%s", Urls.output_prefix);
 
@@ -30,7 +31,26 @@ int main(int argc, char **argv)
 
 	MPI_Bcast(&Settings, sizeof(struct general_settings), MPI_BYTE, 0, MPI_COMM_WORLD);
 		
-	generate_url_for_tasks();	
+        if(ThisTask == 0)
+	  fprintf(stderr, "Total Number Of Files = %d, Total Number Of Tasks = %d\n", Settings.tot_files, NTask);
+
+	filesPerTask = Settings.tot_files / NTask;
+	extraFilesPerTask = Settings.tot_files % NTask;
+
+	if(ThisTask < extraFilesPerTask)
+	  totFilesPerTask = filesPerTask + 1;
+	else
+	  totFilesPerTask = filesPerTask;
+
+	fprintf(stderr, "Task=%d will read %d files\n", ThisTask, totFilesPerTask);
+
+	// Loop over files' chunks
+	for(ifile = 0; ifile < totFilesPerTask; ifile++)
+        {
+		locFileNumber = ThisTask + ifile * NTask;
+		fprintf(stderr, "LocNum=%d Task=%d\n", locFileNumber, ThisTask);
+
+		generate_url_for_tasks(locFileNumber);	
 
 		get_halo_files_urls();
 		
@@ -49,12 +69,17 @@ int main(int argc, char **argv)
 
 		MPI_Barrier(MPI_COMM_WORLD);
 #endif
+		realloc_haloes();
+	}
+	
+	pHaloes[ThisTask] = tempHaloes;
+	pSettings[ThisTask].n_haloes = pSettings[ThisTask].n_haloes_step;
 
-		gather_halo_structures();
+	gather_halo_structures();
 
-		MPI_Finalize();
+	MPI_Finalize();
 
-		free_comm_structures();
+	free_comm_structures();
 	
 	if(ThisTask == 0)
 	{
@@ -87,14 +112,14 @@ int main(int argc, char **argv)
 
 #ifndef NO_WEB
 		read_v_web();
-		//read_t_web();
 #ifndef WEB_ONLY
+		read_t_web();
 		sort_web_statistics();
 		print_web_statistics();
 #endif
 		Settings.use_web = 0;
 		assign_haloes_to_web();
-
+#endif
 			// Assign halo to nodes
 			int i=0;
 
@@ -122,7 +147,6 @@ int main(int argc, char **argv)
 			}
 
 		Settings.use_web = 0;
-#endif
 
 		// Now select subhaloes
 		find_substructure();
@@ -143,7 +167,6 @@ int main(int argc, char **argv)
 		print_halo_best_fit_results();
 		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
-#endif
 		print_subhalo_only_properties();
 	//	free_halo_properties();
 #endif /* SUBHALO */

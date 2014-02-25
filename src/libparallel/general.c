@@ -21,30 +21,32 @@ int *SizeHaloesStructHalo;
 struct Cpu *cpu;
 
 
-void generate_url_for_tasks()
+void generate_url_for_tasks(int FileNumber)
 {
 	char halo_list_task[200];
 	char profile_list_task[200];
 	char subhalo_list_task[200];
-	char command[250];	
+	char command[350];	
 
-		sprintf(halo_list_task, "%s.%s",Urls.halo_list, cpu[ThisTask].name);
-		sprintf(profile_list_task, "%s.%s",Urls.profile_list, cpu[ThisTask].name);
-		sprintf(subhalo_list_task, "%s.%s",Urls.subhalo_list, cpu[ThisTask].name);
+		sprintf(halo_list_task, "%s.%04d",Urls.halo_list, FileNumber);
+		sprintf(profile_list_task, "%s.%04d",Urls.profile_list, FileNumber);
+		sprintf(subhalo_list_task, "%s.%04d",Urls.subhalo_list, FileNumber);
 
 	if(ThisTask == 0)
 		TASK_INFO_MSG(ThisTask, "reading halo, profiles and substructure files lists...");
-	
-		sprintf(command, "%s s/%s/%s/ <%s >%s", 
-			"sed ", "0000", cpu[ThisTask].name, Urls.halo_list, halo_list_task);
+
+		fprintf(stderr, "Task=%d is reading the list from %s to %s\n", ThisTask, Urls.halo_list, halo_list_task);
+
+		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
+			"sed ", "0000", FileNumber, Urls.halo_list, halo_list_task);
 				system(command);
 
-		sprintf(command, "%s s/%s/%s/ <%s >%s", 
-			"sed ", "0000", cpu[ThisTask].name, Urls.profile_list, profile_list_task);
+		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
+			"sed ", "0000", FileNumber, Urls.profile_list, profile_list_task);
 				system(command);
 
-		sprintf(command, "%s s/%s/%s/ <%s >%s", 
-			"sed ", "0000", cpu[ThisTask].name, Urls.subhalo_list, subhalo_list_task);
+		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
+			"sed ", "0000", FileNumber, Urls.subhalo_list, subhalo_list_task);
 				system(command);
 
 	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)+1, sizeof(char));
@@ -77,6 +79,12 @@ void init_comm_structures()
 	pSettings[ThisTask].box.X[1][1] = 0;
 	pSettings[ThisTask].box.X[2][0] = 1e+5;
 	pSettings[ThisTask].box.X[2][1] = 0;
+
+	pSettings[ThisTask].n_threshold = 0;
+	pSettings[ThisTask].n_virialized = 0;
+	pSettings[ThisTask].n_concentration = 0;
+	pSettings[ThisTask].n_spin = 0;
+	pSettings[ThisTask].n_all = 0;
 }
 
 

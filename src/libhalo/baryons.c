@@ -545,8 +545,6 @@ void fit_polytropic_T(struct halo *HALO)
 		//	fprintf(stderr, "%d) npart=%f, r=%f, T=%e\n", n_part, r[j], t[j]);
 		}
 
-
->>>>>>> 1ab63bdb22a46e04641fe2e39710934ed3e514fc
 /* //TODO fix this mess
 		for (j=0; j<bins-1; j++)
 		{
