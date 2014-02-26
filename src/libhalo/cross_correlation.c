@@ -49,8 +49,10 @@ void read_cross_halo(char *cross_url)
 				fscanf(cross_file, "%f\t", &crossHaloes[N-1].lambda);
 				fscanf(cross_file, "%f\t", &crossHaloes[N-1].shape);
 				fscanf(cross_file, "%f\t", &crossHaloes[N-1].triax);
+#ifdef GAS
 				fscanf(cross_file, "%f\t", &crossHaloes[N-1].gas_only.T_mw);
 				fscanf(cross_file, "%f\t", &crossHaloes[N-1].gas_only.b_fraction);
+#endif
 			}
 		}
 
@@ -126,17 +128,20 @@ int find_ratios()
 					ratio[count++] = Haloes[i].Mvir / crossHaloes[index].Mvir;
 					ratio[count++] = 0.0; //Haloes[i].Msub / crossHaloes[index].Msub;
 					ratio[count++] = Haloes[i].Rvir / crossHaloes[index].Rvir;
+#ifndef NO_PROFILES
 					ratio[count++] = Haloes[i].fit_nfw.c / crossHaloes[index].c_nfw;
+#endif
 					ratio[count++] = Haloes[i].lambda / crossHaloes[index].lambda;
 					ratio[count++] = Haloes[i].shape / crossHaloes[index].shape;
 					ratio[count++] = Haloes[i].triax / crossHaloes[index].triax;
+#ifdef GAS
 					ratio[count++] = (-2*Haloes[i].dm.Ekin/Haloes[i].dm.Epot)
 								/ crossHaloes[index].abs_th_vir;
 					ratio[count++] = Haloes[i].gas_only.T_mw 
 								/ crossHaloes[index].gas_only.T_mw;
 					ratio[count++] = Haloes[i].gas_only.b_fraction 
 								/ crossHaloes[index].gas_only.b_fraction;
-					
+#endif					
 					check = 0;
 
 					for(j=0; j<colTot; j++)

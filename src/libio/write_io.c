@@ -23,7 +23,6 @@
 static int i;
 static int count;
 static int nTot;
-static double z;
 static double M;
 static char out_url[200];
 static FILE *out_file;
@@ -62,8 +61,7 @@ void print_subhalo_only_properties()
 {
 	count = 1;
 	nTot = (int) (F_SUB * HaloProperties[HALO_INDEX].n_bins) - 1;
-	z = GrowthFac.z[Settings.use_cat];
- 	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_sub_only_statistics.dat");
+ 	sprintf(out_url, "%s%s", Urls.output_prefix, "_sub_only_statistics.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("subhalo properties", out_url);
@@ -106,8 +104,7 @@ void print_theoretical_mass_function()
 {
 	count = 1;
 	nTot = ThMassFunc[MF_INDEX].bins-1;
-	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.2f%s", Urls.output_prefix, z, "_theoretical_mass_function.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_theoretical_mass_function.dat");
 	out_file = fopen(out_url, "w");
 
 	DUMP_MSG("theoretical mass function", out_url);
@@ -135,8 +132,7 @@ void print_average_profiles()
 {
 	count = 1;
 	nTot = BIN_PROFILE;
-	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_avg_profiles.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_avg_profiles.dat");
 	out_file = fopen(out_url,"w");
 
 	double T0 = HaloProperties[HALO_INDEX].temp.y[10];
@@ -186,8 +182,7 @@ void print_correlation_function()
 {
 	count = 1;
 	nTot = Xi.npts;
-	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_correlation_function.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_correlation_function.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("correlation function", out_url);
@@ -293,8 +288,7 @@ void print_all_haloes()
 {
 	count = 1;
 	nTot = Settings.n_haloes;
-	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_tot_haloes.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_tot_haloes.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("halo", out_url);
@@ -307,7 +301,9 @@ void print_all_haloes()
 		FILE_HEADER(out_file, "X     ", count);
 		FILE_HEADER(out_file, "Y     ", count);
 		FILE_HEADER(out_file, "Z     ", count);
+#ifndef NO_PROFILES
 		FILE_HEADER(out_file, "conc  ", count);
+#endif
 		FILE_HEADER(out_file, "vir_dm", count);
 		FILE_HEADER(out_file, "lambda", count);
 		FILE_HEADER(out_file, "shape ", count);
@@ -321,10 +317,10 @@ void print_all_haloes()
 //		FILE_HEADER(out_file, "shape ", count);
 //		FILE_HEADER(out_file, "triax ", count);
 #ifdef GAS
-//		FILE_HEADER(out_file, "gas_fr", count);
-//		FILE_HEADER(out_file, "gasTmw", count);
-//		FILE_HEADER(out_file, "gasTew", count);
-//		FILE_HEADER(out_file, "gasTsl", count);
+		FILE_HEADER(out_file, "gas_fr", count);
+	      	FILE_HEADER(out_file, "gasTmw", count);
+		FILE_HEADER(out_file, "gasTew", count);
+		FILE_HEADER(out_file, "gasTsl", count);
 #endif
 		fprintf(out_file, "\n");
 
@@ -340,7 +336,9 @@ void print_all_haloes()
 				fprintf(out_file, "\t%f", Haloes[i].X[0]);
 				fprintf(out_file, "\t%f", Haloes[i].X[1]);
 				fprintf(out_file, "\t%f", Haloes[i].X[2]);
+#ifndef NO_PROFILES
 				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
+#endif
 				//fprintf(out_file, "%e", Haloes[i].Mvir); 
 				//fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
 				//fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
@@ -348,7 +346,9 @@ void print_all_haloes()
 				fprintf(out_file, "\t%f", Haloes[i].X[0]);
 				fprintf(out_file, "\t%f", Haloes[i].X[1]);
 				fprintf(out_file, "\t%f", Haloes[i].X[2]);
+#ifndef NO_WEB
 				fprintf(out_file, "\t%d\t", Haloes[i].c_web);
+#endif
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_numb);
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_line);
 /*				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
@@ -378,8 +378,7 @@ void print_all_halo_properties_to_one_file()
 {
 	count = 1;
 	nTot = HaloProperties[HALO_INDEX].n_bins;
-	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_all_halo_statistical_properties.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_all_halo_statistical_properties.dat");
 	out_file = fopen(out_url,"w");
 
 	DUMP_MSG("halo properties", out_url);
@@ -394,8 +393,10 @@ void print_all_halo_properties_to_one_file()
 		//FILE_HEADER(out_file, "shape ", count);
 		//FILE_HEADER(out_file, "triax ", count);
 		//FILE_HEADER(out_file, "gofnfw", count);
+#ifndef NO_PROFILES
 		FILE_HEADER(out_file, "g_nfw ", count);
 		FILE_HEADER(out_file, "pg_nfw", count);
+#endif
 		FILE_HEADER(out_file, "c     ", count);
 		FILE_HEADER(out_file, "P(c)  ", count);
 		FILE_HEADER(out_file, "l     ", count);
@@ -429,6 +430,7 @@ void print_all_halo_properties_to_one_file()
 		FILE_HEADER(out_file, "dmvir ", count);
 		//FILE_HEADER(out_file, "g_coth", count);
 		//FILE_HEADER(out_file, "g_diff", count);
+#ifndef NO_PROFILES
 		FILE_HEADER(out_file, "mhydro", count);
 		FILE_HEADER(out_file, "n_mhyd", count);
 		FILE_HEADER(out_file, "s_mhyd", count);
@@ -437,6 +439,7 @@ void print_all_halo_properties_to_one_file()
 		FILE_HEADER(out_file, "n_gamm", count);
 		FILE_HEADER(out_file, "s_gamm", count);
 		FILE_HEADER(out_file, "t_gamm", count);
+#endif
 		//FILE_HEADER(out_file, "n_s_mh", count);
 		//FILE_HEADER(out_file, "n_t_mh", count);
 		//FILE_HEADER(out_file, "sub_mh", count);
@@ -460,8 +463,10 @@ void print_all_halo_properties_to_one_file()
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.shape[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.triax[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].fit_nfw.gof[i]);
+#ifndef NO_PROFILES
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.gof[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_fit_nfw.p_gof[i]);
+#endif
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].c[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].p_c[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].halo.l[i]);
@@ -497,6 +502,7 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].dm.virial[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_dm_costh[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gas_diff_cm[i]);
+#ifndef NO_PROFILES
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].dM_hydro[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].dM_hydro_bin[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].shape_dM[i]);
@@ -505,6 +511,7 @@ void print_all_halo_properties_to_one_file()
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].gamma_bin[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].shape_g[i]);
 				fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].triax_g[i]);
+#endif
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].shape_dM_hydro[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].triax_dM_hydro[i]);
 				//fprintf(out_file, "\t%lf", HaloProperties[HALO_INDEX].sub_dM[i]);
@@ -526,8 +533,7 @@ void print_axis_alignment()
 {
 	count = 1;
 	nTot = HaloProperties[HALO_INDEX].r_bins-1;
-	z = GrowthFac.z[Settings.use_cat];
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_axis_alignement.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_axis_alignement.dat");
 	out_file = fopen(out_url, "w");
 
 	DUMP_MSG("axis alignment", out_url);
@@ -559,7 +565,7 @@ void print_numerical_mass_function()
 {
 	count = 1;
 	nTot = MassFunc[MF_INDEX].bins-1;
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_numerical_mass_function.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_numerical_mass_function.dat");
 	out_file = fopen(out_url, "w");
 
 	DUMP_MSG("numerical mass function", out_url);
@@ -578,6 +584,7 @@ void print_numerical_mass_function()
 		FILE_HEADER(out_file, "dn   ", count);
 		FILE_HEADER(out_file, "n_bin", count);
 		FILE_HEADER(out_file, "n_tot", count);
+#ifdef GAS
 		FILE_HEADER(out_file, "Mgas ", count);
 		FILE_HEADER(out_file, "n    ", count);
 		FILE_HEADER(out_file, "n_tot", count);
@@ -590,6 +597,7 @@ void print_numerical_mass_function()
 		FILE_HEADER(out_file, "Temp ", count);
 		FILE_HEADER(out_file, "n(>T)", count);
 		FILE_HEADER(out_file, "N(>T)", count);
+#endif
 		fprintf(out_file,"\n");
 
 			for(i=0; i<nTot; i++) 
@@ -607,6 +615,7 @@ void print_numerical_mass_function()
 				fprintf(out_file, "\t%e", VelFunc[MF_INDEX].dn[i]);
 				fprintf(out_file, "\t%d\t", VelFunc[MF_INDEX].n_bin[i]);
 				fprintf(out_file, "\t%d\t", VelFunc[MF_INDEX].n_tot[i]);
+#ifdef GAS
 				fprintf(out_file, "\t%e", GasFunc[MF_INDEX].mass[i]);
 				fprintf(out_file, "\t%e", GasFunc[MF_INDEX].n[i]);
 				fprintf(out_file, "\t%d\t", GasFunc[MF_INDEX].n_tot[i]);
@@ -619,6 +628,7 @@ void print_numerical_mass_function()
 				fprintf(out_file, "\t%e", TempFunc[MF_INDEX].mass[i]);
 				fprintf(out_file, "\t%e", TempFunc[MF_INDEX].n[i]);
 				fprintf(out_file, "\t%d\t", TempFunc[MF_INDEX].n_tot[i]);
+#endif
 				fprintf(out_file,"\n");
 			}
 
@@ -626,7 +636,7 @@ void print_numerical_mass_function()
 }
 
 
-
+#ifndef NO_PROFILES
 void print_halo_profile(int m)
 {
 	count = 1;
@@ -685,8 +695,12 @@ void print_halo_profile(int m)
 
 	fclose(out_file);
 }
-
-
+#else
+void print_halo_profile(int m)
+{
+	// DO nothing
+}
+#endif
 			/* Averaged distribution of all subhaloes */
 void print_all_sub_per_host(int bins, int NsubTot, int NsubTh, int *n, double *r, double *r_n, double *r_n_c, 
 	double *r_v, double *r_m, double *r_m_c, double *costh, int *p_costh, double *cosphi, int *p_cosphi)
@@ -863,7 +877,7 @@ void print_sub_per_host(int index, int bins, int NsubTh, int host,
 
 void print_halo_best_fit_results()
 {
-	sprintf(out_url, "%sz%.3f%s", Urls.output_prefix, z, "_halo_best_fit.dat");
+	sprintf(out_url, "%s%s", Urls.output_prefix, "_halo_best_fit.dat");
 	DUMP_MSG("best fit", out_url);
 	out_file=fopen(out_url,"w");
 

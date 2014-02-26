@@ -90,6 +90,7 @@ void initialize_internal_variables(char **argv){
 		Urls.subhalo_list = argv[count++];
 		Urls.pk_list = argv[count++];
 		Urls.nCatalogueFiles = atoi(argv[count++]);
+		Urls.z_snap = argv[count++];
 
 	set_halo_selection_criterion();
 	
@@ -241,7 +242,7 @@ int halo_condition(int i)
 				condition = 0;
 			}
 		}
-
+#ifndef NO_WEB
 	// Again check when using cosmic web criteria
 	if(Settings.use_web == 1)
 	{
@@ -250,7 +251,7 @@ int halo_condition(int i)
 		else 
 			condition = 0;
 	}
-
+#endif
 	//	if(Settings.use_sub == 1 && Haloes[i].host >0)
 	//	D_PRINT("Condition=", condition);
 	return condition;
@@ -352,20 +353,22 @@ void alloc_mass_function(struct mass_function *MF, int Size)
 #ifdef WITH_MPI
 void realloc_haloes()
 {
-	int ihalo, nhalo, nhalo_step;
+	int ihalo=0, nhalo, nhalo_step;
 	
 	nhalo = pSettings[ThisTask].n_haloes;
 	nhalo_step = pSettings[ThisTask].n_haloes_step;
-	tempHaloes = (struct halo *) realloc(&tempHaloes[0], (nhalo_step + nhalo) * sizeof(struct halo));
+	tempHaloes = (struct halo *) realloc(tempHaloes, (nhalo+nhalo_step) * sizeof(struct halo));
 
-	fprintf(stderr, "Realloc haloes on task %d, before %d after %d\n", ThisTask, nhalo_step, nhalo+nhalo_step );
+	fprintf(stderr, "Realloc haloes on task %d, before %zd MB (halo=%d), after %zd MB (halo=%d)\n", ThisTask, 
+		nhalo_step * sizeof(struct halo) / 1024 / 1024, nhalo_step,
+		(nhalo+nhalo_step) * sizeof(struct halo) / 1024 / 1024, nhalo+nhalo_step);
 
-	for(ihalo = 0; ihalo < nhalo; ihalo++)
-		tempHaloes[nhalo_step+ihalo] = pHaloes[ThisTask][ihalo];
+	  		memcpy(&tempHaloes[nhalo_step], &pHaloes[ThisTask][ihalo], nhalo * sizeof(struct halo));
 
-	pSettings[ThisTask].n_haloes_step += nhalo;
-	pSettings[ThisTask].n_haloes = 0;
-	free(pHaloes[ThisTask]);
+			pSettings[ThisTask].n_haloes_step += nhalo;
+			pSettings[ThisTask].n_haloes = 0;
+
+		free(pHaloes[ThisTask]);
 	pHaloes[ThisTask] = malloc(sizeof(struct halo));
 }
 #else
@@ -375,7 +378,7 @@ void realloc_haloes()
 }
 #endif
 
-
+#ifndef NO_PROFILES
 void alloc_halo_profiles(struct halo *HALO, int Size)
 {
 	HALO->radius = (float *) calloc(Size,sizeof(float));
@@ -394,3 +397,8 @@ void alloc_halo_profiles(struct halo *HALO, int Size)
 	HALO->gas_only.pressure = (float *) calloc(Size,sizeof(float));
 #endif
 }
+#else
+void alloc_halo_profiles(struct halo *HALO, int Size)
+{
+}
+#endif

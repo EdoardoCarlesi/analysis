@@ -35,11 +35,13 @@ void generate_url_for_tasks(int FileNumber)
 	if(ThisTask == 0)
 		TASK_INFO_MSG(ThisTask, "reading halo, profiles and substructure files lists...");
 
-		fprintf(stderr, "Task=%d is reading the list from %s to %s\n", ThisTask, Urls.halo_list, halo_list_task);
+//		fprintf(stderr, "Task=%d is reading the list from %s to %s\n", ThisTask, Urls.halo_list, halo_list_task);
 
-		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
+		sprintf(command, "%s s/%s/%04d/ <%s | tail -1 >%s", 
 			"sed ", "0000", FileNumber, Urls.halo_list, halo_list_task);
-				system(command);
+
+//		fprintf(stderr, "COMMAND = %s\n", command);
+//				system(command);
 
 		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
 			"sed ", "0000", FileNumber, Urls.profile_list, profile_list_task);

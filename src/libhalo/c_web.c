@@ -23,6 +23,7 @@
  */
 #define Node(N, x, y, z) (x + N*y + N*N*z)
 
+#ifndef NO_WEB
 struct c_web
 {
 	int type;
@@ -408,10 +409,12 @@ void sort_web_statistics()
 		if(i == 0)
 		{
 			delta_dm[j] =  VWeb[j].dens;	
+#ifdef GAS
 			delta_gas[j] = TWeb[j].dens;	
 			delta_tot[j] = w_gas * TWeb[j].dens + w_dm * VWeb[j].dens;	
+
 			T_gas[j] = u2TK(TWeb[j].temp);
-	
+#endif	
 			if(delta_dm[j]!=0.0)
 				alpha_dm[j] = T_gas[j] / delta_dm[j];
 
@@ -421,10 +424,11 @@ void sort_web_statistics()
 			k = WebInfoDm.ids[i-1][j];
 
 			delta_dm[j] = VWeb[k].dens;	
+#ifdef GAS
 			delta_gas[j] = TWeb[k].dens;	
 			delta_tot[j] = w_gas * TWeb[k].dens + w_dm * VWeb[k].dens;	
 			T_gas[j] = u2TK(TWeb[k].temp);
-
+#endif
 			if(delta_dm[j]!=0.0)
 				alpha_dm[j] = T_gas[j] / delta_dm[j];	
 
@@ -576,3 +580,6 @@ void print_web_statistics()
 
 	fclose(file_out);
 }
+#else
+
+#endif

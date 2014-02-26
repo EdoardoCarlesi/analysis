@@ -361,7 +361,6 @@ void read_halo_file()
 
 #ifdef WITH_MPI
 		pHaloes[ThisTask] = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
-		tempHaloes = (struct halo*) calloc(1, sizeof(struct halo));
 		HALO = pHaloes[ThisTask];
 #else
 		Haloes = (struct halo*) calloc(SETTINGS->n_haloes, sizeof(struct halo));
@@ -582,7 +581,7 @@ void read_halo_file()
 }
 
 
-
+#ifndef NO_PROFILES
 void read_profiles_file()
 {
 	int skip=0, i=0, j=0, k=0; 
@@ -704,3 +703,9 @@ void read_profiles_file()
 
 	fclose(p_file);
 }
+#else
+void read_profiles_file()
+{
+	// VOID FUNCTION
+}
+#endif

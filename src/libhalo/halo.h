@@ -1,8 +1,11 @@
 extern int HALO_INDEX;
 
+#ifndef NO_PROFILES
 void fit_and_store_nfw_parameters(void);
 void average_nfw_profile(void);
 double nfw(double, double, double);
+void free_halo_profiles(void);
+#endif
 
 #ifdef GAS
 double u2TK(double);
@@ -33,18 +36,18 @@ void initialize_halo_properties_structure(void);
 void find_substructure(void);
 void list_halo_sample(int*);
 
+#ifndef NO_WEB
 // Cosmic Web Functions
 void read_v_web(void);
 void read_t_web(void);
 void sort_web_statistics(void);
 void print_web_statistics(void);
 void assign_haloes_to_web(void);
+#endif
 
 // Cross correlation
 void cross_correlation(char*);
 int find_cross_correlated_halo(int);
 
-void free_halo_profiles(void);
 void free_subhalo_properties(void);
 void free_halo_properties(void);
-void free_halo_profiles(void);

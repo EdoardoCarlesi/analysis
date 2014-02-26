@@ -48,7 +48,6 @@ int main(int argc, char **argv)
 	for(ifile = 0; ifile < totFilesPerTask; ifile++)
         {
 		locFileNumber = ThisTask + ifile * NTask;
-		fprintf(stderr, "LocNum=%d Task=%d\n", locFileNumber, ThisTask);
 
 		generate_url_for_tasks(locFileNumber);	
 
@@ -58,7 +57,7 @@ int main(int argc, char **argv)
 
 		read_halo_file();
 
-#ifndef WEB_ONLY
+#ifndef NO_PROFILES
 		read_profiles_file();
 
 		fit_and_store_nfw_parameters();
@@ -80,6 +79,7 @@ int main(int argc, char **argv)
 	MPI_Finalize();
 
 	free_comm_structures();
+
 	
 	if(ThisTask == 0)
 	{
@@ -92,23 +92,27 @@ int main(int argc, char **argv)
 		initialize_halo_properties_structure();
 
 #ifndef WEB_ONLY
-		read_profiles_file();
 		compute_halo_properties();
 #ifdef GAS
 		average_gas_profiles();
 #endif
-		average_nfw_profile();
 
+#ifndef NO_PROFILES
+		average_nfw_profile();
+		print_average_profiles();
+#endif
 	//	sort_axis_alignment();
 	//	print_axis_alignment();
 		
-		print_average_profiles();
-		print_halo_best_fit_results();
-		//print_numerical_mass_function();
+		//print_halo_best_fit_results();
+		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
 		
-		print_all_haloes();
-#endif
+		//print_all_haloes();
+
+#endif /* WEB_ONLY */
+
+		/* If NO_WEB is not selected, the above analysis is repeated for every environment */ 
 
 #ifndef NO_WEB
 		read_v_web();
@@ -126,7 +130,7 @@ int main(int argc, char **argv)
 #ifndef WEB_ONLY
 			Settings.use_sub = 0;
 			Settings.use_web = 1;
-
+#ifndef NO_WEB
 			for(i=0; i<4; i++)
 			{
 				Settings.use_web_type = i;
@@ -134,6 +138,7 @@ int main(int argc, char **argv)
 				fprintf(stderr, "Sorting halo properties for web type=%d, using %d haloes.\n", 
 						i, n_haloes_per_criterion());				
 				compute_halo_properties();
+#ifndef NO_PROFILES
 				average_nfw_profile();
 #ifdef GAS
 				average_gas_profiles();
@@ -141,20 +146,23 @@ int main(int argc, char **argv)
 				// Print files
 				print_average_profiles();
 				print_halo_best_fit_results();
+#endif
 				print_numerical_mass_function();
 				print_all_halo_properties_to_one_file();
 				fprintf(stderr, "Done sorting properties for type %d.\n", i);
 			}
 
 		Settings.use_web = 0;
+#endif /* NO_WEB */
 
-		// Now select subhaloes
-		find_substructure();
 #ifdef CROSS_CORRELATION
 		cross_correlation("/home/carlesi/Analysis/output/CC/lcdm-250-1024-z0.000_tot_haloes.dat");
 #endif
 
 #ifdef SUBHALO
+		// Now select subhaloes
+		find_substructure();
+
 		Settings.use_sub = 1;
 		sprintf(Urls.output_prefix, "%s%s", base_out, "substructure_");			
 		compute_subhalo_properties();
@@ -163,21 +171,22 @@ int main(int argc, char **argv)
 #ifdef GAS
 		average_gas_profiles();
 #endif
+
+#ifndef NO_PROFILES
 		print_average_profiles();
+#endif
 		print_halo_best_fit_results();
 		print_numerical_mass_function();
 		print_all_halo_properties_to_one_file();
 		print_subhalo_only_properties();
-	//	free_halo_properties();
+		free_halo_properties();
 #endif /* SUBHALO */
 
 #endif /* WEB ONLY */
-		print_all_haloes()
-;
-	  INFO_MSG("Computed halo statistical properties at fixed z");
 
+	  INFO_MSG("Computed halo statistical properties at fixed z");
 	}
 
-return 0;
+  return 0;
 }
 

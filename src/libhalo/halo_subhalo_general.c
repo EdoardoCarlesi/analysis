@@ -319,6 +319,8 @@ void free_halo_profiles()
 		HALO = Haloes;
 		SETTINGS = &Settings;
 #endif
+
+#ifndef NO_PROFILES
 		for(i=0; i<SETTINGS->n_haloes; i++)
 		{
 			free(HALO[i].radius);
@@ -334,4 +336,5 @@ void free_halo_profiles()
 			free(HALO[i].gas_only.i_x);
 #endif
 		}
+#endif
 }

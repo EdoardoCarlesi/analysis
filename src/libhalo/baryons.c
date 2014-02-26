@@ -35,11 +35,17 @@
 /*
  *  Function declaration
  */
+#ifndef NO_PROFILES
 void fit_polytropic_T(struct halo *HALO);
 void sort_f_gas_profile(struct halo *HALO);
 void fit_I_X(struct halo *HALO);
 
 double compute_hydrostatic_mass(struct halo *HALO, int);
+#else
+void average_gas_profiles()
+{
+}
+#endif
 
 /*
  *  Function implementations
@@ -58,7 +64,7 @@ double u2TkeV(double u)
 }
 
 
-
+#ifndef NO_PROFILES
 void fit_and_store_gas_parameters(void)
 {	
 	int k=0; 
@@ -670,4 +676,5 @@ void fit_polytropic_T(struct halo *HALO)
 		//HALO->fit_poly.per = per;
 
 }
+#endif // NO_PROFILES
 #endif

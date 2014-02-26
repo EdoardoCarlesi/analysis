@@ -177,15 +177,17 @@ void sort_numerical_mass_function(void)
 	int *n_mass, *cum_n_mass;
 	double *vel, *vel_bin; 
 	int *n_vel, *cum_n_vel;
+	double totMass; 
+
+#ifdef GAS
 	double *gas, *gas_bin; 
 	int *n_gas, *cum_n_gas;
 	double *nogas, *nogas_bin; 
 	int *n_nogas, *cum_n_nogas;
 	double *dark, *dark_bin; 
 	int *n_dark, *cum_n_dark;
-	double totMass, totDm, totGas;
-
-	nBins = Settings.n_bins; 
+	double totDm, totGas;
+#endif
 
 	nBins = Settings.n_bins; 
 	nHaloes = Settings.n_haloes; 
@@ -221,7 +223,7 @@ void sort_numerical_mass_function(void)
 		vel_bin = (double*) calloc(nBins, sizeof(double));
 		n_vel = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_vel = (int*) calloc(nBins-1, sizeof(int));
-
+#ifdef GAS
 		gas = (double*) calloc(nHaloesCut, sizeof(double));
 		gas_bin = (double*) calloc(nBins, sizeof(double));
 		n_gas = (int*) calloc(nBins-1, sizeof(int));
@@ -236,13 +238,14 @@ void sort_numerical_mass_function(void)
 		dark_bin = (double*) calloc(nBins, sizeof(double));
 		n_dark = (int*) calloc(nBins-1, sizeof(int));
 		cum_n_dark = (int*) calloc(nBins-1, sizeof(int));
-
+#endif
 		alloc_mass_function(&MassFunc[MF_INDEX], nBins);
 		alloc_mass_function(&VelFunc[MF_INDEX], nBins);
+#ifdef GAS
 		alloc_mass_function(&GasFunc[MF_INDEX], nBins);
 		alloc_mass_function(&NoGasFunc[MF_INDEX], nBins);
 		alloc_mass_function(&DarkFunc[MF_INDEX], nBins);
-
+#endif
 		for(i=0; i<nHaloes; i++)
 		{	
 			if(Settings.use_sub == 1) 
@@ -252,7 +255,7 @@ void sort_numerical_mass_function(void)
 					Settings.totHaloMass += Haloes[i].Mvir;
 					mass[j] = Haloes[i].Mvir;
 					j++;
-
+#ifdef GAS
 					if(Haloes[i].gas.M > 0)
 					{	
 						Settings.totGasMassInHalo += Haloes[i].gas.M;
@@ -271,7 +274,7 @@ void sort_numerical_mass_function(void)
 						dark[n] = Haloes[i].Mvir;
 						n++;
 					}
-
+#endif
 					// Vmax function is computed for well resolved haloes only
 					if(halo_condition(i) == 1)
 					{
@@ -282,6 +285,7 @@ void sort_numerical_mass_function(void)
 			}
 			else if (Settings.use_sub == 0) 
 			{
+#ifndef NO_WEB
 				if(Settings.use_web == 1) 
 				{
 					if(Haloes[i].web_type[Settings.use_web_type] == 1)
@@ -289,7 +293,7 @@ void sort_numerical_mass_function(void)
 						Settings.totHaloMass += Haloes[i].Mvir;
 						mass[j] = Haloes[i].Mvir;
 						j++;
-					
+#ifdef GAS					
 						if(Haloes[i].gas.M > 0)
 						{
 							Settings.totGasMassInHalo += Haloes[i].gas.M;
@@ -308,7 +312,7 @@ void sort_numerical_mass_function(void)
 							dark[n] = Haloes[i].Mvir;
 							n++;
 						}
-
+#endif
 						if(halo_condition(i) == 1)
 						{
 							vel[m]  = Haloes[i].Vmax;
@@ -318,8 +322,9 @@ void sort_numerical_mass_function(void)
 					}
 				}
 				else 
+#endif
 				{
-			
+#ifdef GAS			
 					if(Haloes[i].gas.M > 0)
 					{
 						Settings.totGasMassInHalo += Haloes[i].gas.M;
@@ -338,7 +343,7 @@ void sort_numerical_mass_function(void)
 						dark[n] = Haloes[i].Mvir;
 						n++;
 					}
-
+#endif
 					if(halo_condition(i) == 1)
 					{
 						vel[m]  = Haloes[i].Vmax;
@@ -347,12 +352,14 @@ void sort_numerical_mass_function(void)
 
 					Settings.totHaloMass += Haloes[i].Mvir;
 					mass[i] = Haloes[i].Mvir;			
+	//				if(mass[i] < 1.) fprintf(stderr, "ERROR! Halo %d has zero mass\n", i);
+					//fprintf(stderr, "n=%d, M=%e\n", i, mass[i]);
 				}
 			}
 		}
 
 	//	fprintf(stderr, "\nBinned\n");
-
+#ifdef GAS
 		totDm = Settings.dmMass * pow3(Settings.n_part_1D);		
 		totGas = Settings.gasMass * pow3(Settings.n_part_1D);		
 		totMass = totDm + totGas;
@@ -360,13 +367,14 @@ void sort_numerical_mass_function(void)
 		Settings.totGasMassInHalo /= totGas;
 		Settings.totHaloMass /= totMass;
 		Settings.totDarkMass /= totMass;
+#endif
 
-		mMin = F_MIN * minimum(mass, nHaloesCut);
+		mMin = F_MIN * nonzero_minimum(mass, nHaloesCut);
 		mMax = F_MAX * maximum(mass, nHaloesCut);
 
 		vMin = F_MIN * minimum(vel, m); 
 		vMax = F_MAX * maximum(vel, m);
-	
+#ifdef GAS	
 		gMin = F_MIN * minimum(gas, k);	
 		gMax = F_MAX * maximum(gas, k);	
 	
@@ -375,19 +383,23 @@ void sort_numerical_mass_function(void)
 	
 		dMin = F_MIN * minimum(dark, n);	
 		dMax = F_MAX * maximum(dark, n);	
+#endif
+		fprintf(stderr, "mMin=%e, mMax=%e\n", mMin, mMax);
 
 		mass_bin = log_stepper(mMin, mMax, nBins);
 		vel_bin = log_stepper(vMin, vMax, nBins);
+#ifdef GAS	
 		gas_bin = log_stepper(gMin, gMax, nBins);
 		nogas_bin = log_stepper(ngMin, ngMax, nBins);
 		dark_bin = log_stepper(dMin, dMax, nBins);
-	
+#endif	
 		lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
 		cum_bin(n_mass, cum_n_mass, nBins-1);
 	
 		lin_bin(vel, vel_bin, nBins, nHaloesCut, n_vel);	
 		cum_bin(n_vel, cum_n_vel, nBins-1);
 	
+#ifdef GAS	
 		lin_bin(gas, gas_bin, nBins, k, n_gas);	
 		cum_bin(n_gas, cum_n_gas, nBins-1);
 	
@@ -396,9 +408,9 @@ void sort_numerical_mass_function(void)
 	
 		lin_bin(dark, dark_bin, nBins, n, n_dark);	
 		cum_bin(n_dark, cum_n_dark, nBins-1);
+#endif
 
 		volume=Settings.box_size*Settings.box_size*Settings.box_size;
-
 
 		for(i=0; i<nBins-1; i++)
 		{
@@ -421,7 +433,8 @@ void sort_numerical_mass_function(void)
 			VelFunc[MF_INDEX].dn[i] = n_vel[i]/volume/dV;
 			VelFunc[MF_INDEX].n_bin[i] = n_vel[i];
 			VelFunc[MF_INDEX].n_tot[i] = cum_n_vel[i];
-	
+
+#ifdef GAS
 			GasFunc[MF_INDEX].mass[i] = 0.5 * (gas_bin[i] + gas_bin[i+1]);
 			GasFunc[MF_INDEX].n[i] = cum_n_gas[i]/volume;
 			GasFunc[MF_INDEX].n_tot[i] = cum_n_gas[i];
@@ -433,6 +446,7 @@ void sort_numerical_mass_function(void)
 			DarkFunc[MF_INDEX].mass[i] = 0.5 * (dark_bin[i] + dark_bin[i+1]);
 			DarkFunc[MF_INDEX].n[i] = cum_n_dark[i]/volume;
 			DarkFunc[MF_INDEX].n_tot[i] = cum_n_dark[i];
+#endif
 		}
 	
 	free(cum_n_mass);
@@ -443,6 +457,7 @@ void sort_numerical_mass_function(void)
 	free(vel_bin); 
 	free(n_vel); 
 	free(vel); 
+#ifdef GAS
 	free(cum_n_gas);
 	free(gas_bin); 
 	free(n_gas); 
@@ -454,6 +469,7 @@ void sort_numerical_mass_function(void)
 	free(dark_bin); 
 	free(n_dark); 
 	free(dark); 
+#endif
 }
 
 
@@ -682,12 +698,14 @@ void sort_lambda_and_concentration()
 				lambda[m] = Haloes[i].lambda;
 				avg_sub[m] = (double) Haloes[i].n_satellites;
 #ifdef SKIP_SOFT
+#ifndef NO_PROFILES
 				conc[m] = Haloes[i].fit_nfw.c;
 				if(conc[m] == 0) 
 					conc[m] = Haloes[i].c;
 #else
 				conc[m] = Haloes[i].c_nfw;
 				if(conc[m] == -1) 
+#endif
 					conc[m] = Haloes[i].c;
 #endif
 			//	fprintf(stderr, "c[%d]=%f\n", m, conc[m]);
@@ -786,7 +804,7 @@ void sort_lambda_and_concentration()
 }
 
 
-
+#ifndef NO_PROFILES
 void sort_nfw_parameters()
 {
 	int nBins, nHaloesCut, nHaloes, i=0, m=0; 
@@ -861,7 +879,11 @@ void sort_nfw_parameters()
 	free(nfw_gof);
 	free(gbin_x);
 }
-
+#else
+void sort_nfw_parameters()
+{
+}
+#endif
 
 
 void sort_mass_relations()
@@ -939,15 +961,18 @@ void sort_mass_relations()
 			{
 				vel[m] = Haloes[i].Vmax;
 				vir[m] = Haloes[i].abs_th_vir;
+#ifndef NO_PROFILES
 				chi[m] = Haloes[i].fit_nfw.chi;
 				gof[m] = Haloes[i].fit_nfw.gof;
 				per[m] = Haloes[i].fit_nfw.per;
+#endif
 				mass[m] = Haloes[i].Mvir; 
 				avg_sub[m] = (double) Haloes[i].n_satellites;
 				lambda[m] = Haloes[i].lambda;
 				triax[m] = Haloes[i].triax;
 				shape[m] = Haloes[i].shape;
 #ifdef SKIP_SOFT
+#ifndef NO_PROFILES
 				if(Haloes[i].fit_nfw.c < 100.)
 				{	
 					conc[mc] = Haloes[i].fit_nfw.c;
@@ -956,6 +981,7 @@ void sort_mass_relations()
 #else
 				conc[m] = Haloes[i].c_nfw;
 				if(conc[m] == -1) 
+#endif
 					conc[m] = Haloes[i].c;
 #endif
 				m++;
@@ -978,9 +1004,11 @@ void sort_mass_relations()
 			average_bin(mass, shape, mass_bin, shape_bin, shape_err, nBins, nHaloesCut);
 			//average_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
 			median_bin(mass, lambda, mass_bin, lambda_bin, lambda_err, nBins, nHaloesCut);
+#ifndef NO_PROFILES
 			average_bin(mass, per, mass_bin, per_bin, per_err, nBins, nHaloesCut);
 			average_bin(mass, gof, mass_bin, gof_bin, gof_err, nBins, nHaloesCut);
 			average_bin(mass, chi, mass_bin, chi_bin, chi_err, nBins, nHaloesCut);
+#endif
 			lin_bin(mass, mass_bin, nBins, nHaloesCut, n_mass);	
 
 			for(i=0; i<nBins-1; i++)	
@@ -994,9 +1022,11 @@ void sort_mass_relations()
 				HaloProperties[HALO_INDEX].halo.lambda[i]=lambda_bin[i];
 				HaloProperties[HALO_INDEX].halo.shape[i]=shape_bin[i];
 				HaloProperties[HALO_INDEX].halo.triax[i]=triax_bin[i];
+#ifndef NO_PROFILES
 				HaloProperties[HALO_INDEX].fit_nfw.chi[i]=chi_bin[i];
 				HaloProperties[HALO_INDEX].fit_nfw.per[i]=per_bin[i];
 				HaloProperties[HALO_INDEX].fit_nfw.gof[i]=gof_bin[i];
+#endif
 			}
 
 			INFO_MSG("Fitting Mass-Concentration relation to a power law");
@@ -1186,7 +1216,9 @@ void sort_gas_relations()
 				gas_fraction[m] = Haloes[i].gas_only.b_fraction;
 				lambda[m] = Haloes[i].gas_only.lambda;
 				costh[m] = Haloes[i].gas_only.gas_dm_costh;
+#ifndef NO_PROFILES
 				beta[m] = Haloes[i].fit_beta.beta;
+#endif
 				temperature[m] = Haloes[i].gas_only.T_mw;
 				gas_ekin[m] = Haloes[i].gas.Ekin;
 				gas_virial[m] = Haloes[i].gas.vir;
@@ -1439,6 +1471,7 @@ void sort_hydro_mass_and_gamma_for_triaxiality_and_shape()
 					l++;
 				}
 			*/
+#ifndef NO_PROFILES
 				if(Haloes[i].fit_poly.chi > 0)
 				{
 					shape_g[j] = Haloes[i].shape;
@@ -1455,6 +1488,7 @@ void sort_hydro_mass_and_gamma_for_triaxiality_and_shape()
 					}
 			*/
 				}
+#endif
 			}
 		}
 

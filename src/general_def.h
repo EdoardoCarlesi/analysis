@@ -39,8 +39,7 @@
 #define N_SUB_MIN 40
 
 	// Maximum number of haloes to read in per task
-//#define USE_N_HALOES
-#define N_HALOES_MAX 2000
+#define N_HALOES_MAX 100
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -264,11 +263,11 @@ extern struct halo
 	// For MPI remember the position in the original file and the catalogue number
 	int cat_line;
 	int cat_numb;
-
+#ifndef NO_WEB
 	// 0 void, 1 sheet, 2 filament, 3 node
 	int web_type[4];
 	int c_web;
-
+#endif
 	// These variables are set to 1 if the halo satisfies the condition
 	int vir;
 	int spin;
@@ -310,6 +309,7 @@ extern struct halo
 	float rho0_nfw;
 	float rs_nfw;
 	
+#ifndef NO_PROFILES
 	struct
 	{
 		union
@@ -348,6 +348,7 @@ extern struct halo
 	double *mass_r;
 	float *rho;
 	float *err;
+#endif
 
 #ifdef GAS
 	struct
@@ -436,6 +437,7 @@ extern struct internal_urls
 	int nCatalogueFiles;
 	int nPkFiles;
 
+	char *z_snap;
 	char *a_outputs;
 	char *output_prefix;
 	char *hubble_file;

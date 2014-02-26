@@ -18,12 +18,22 @@ n_procs=$3
 n_files=$4
 use_multiple_cat=$5
 
+#sys='taurus'
+sys='comodo'
+
+# Analyze catalog at a given redshift
+zzzz='.z'
+if [ $use_multiple_cat -eq 1 ] ; then
+zzzz='z0.241'
+#zzzz='0000'
+fi
+
 if [ $use_mpi -eq 1 ] ; then 
 use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='lcdm'
+model1='cde000'
 box_size=250
 particle_number=1024
 web_size=256
@@ -49,12 +59,12 @@ mf_skip=1
 m_min=1.e+9
 m_max=1.e+15
 
-# Mass threshold for printing halo profiles
+# Mass threshold for printing individual halo profiles
 m_print=1.e+14
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=9.e+13
+m_th=9.e+11
 m_print=1.e+10
 virial=1.5
 spin=0.15
@@ -107,7 +117,7 @@ dir_halo='catalogues/'$model1
 dir_web='vweb'
 
 # General file prefixes 
-prefix=$base_out$model1'-'$box_size'-'$particle_number'-'
+prefix=$base_out$model1'-'$box_size'-'$particle_number'-'$zzzz
 
 # Where the output redshift file for the snapshot is
 if [ $particle_number -eq 32 ] ; then
@@ -142,13 +152,7 @@ halo_dir_ahf1=$DATA1$dir_ahf/
 pk_dir1=$DATA1$dir_pk/
 web_dir1=$DATA1$dir_web/
 
-zzzz='.z'
 cat_zero='00'
-
-if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='z0.065'
-#zzzz='0000'
-fi
 
 if [ $catalogue_number -gt 9 ] ; then
 cat_zero='0'
@@ -201,12 +205,10 @@ cd $base_analysis/src/
 make clean
 
 url_var=$n_files' '$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
-#echo url_var=$n_files' '$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
 set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
 set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion' '$m_print
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
-evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps
-halo2_var=$pk_file2' '$halo_file2' '$profile_file2' '$snaps_dir2' '$halo_dir2
+evolution_var=$halo_list' '$profile_list' '$subhalo_list' '$pk_list' '$tot_snaps' '$zzzz
 
 all_variables=$url_var' '$set_var1' '$set_var2' '$cosmo_var' '$prefix' '$evolution_var
 
@@ -218,10 +220,15 @@ $base_analysis/scripts/mpi_check.sh $base_analysis $use_mpi
 if [ $use_mpi -eq 1 ] ; then
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
+
+if [ "$sys" == "taurus" ] ; then
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
 execute='mpiexec.openmpi -n '$n_procs' '$base_analysis
-#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
-#execute='mpiexec -n '$n_procs' '$base_analysis
+fi
+
+if [ "$sys" == "comodo" ] ; then
+execute='mpiexec -n '$n_procs' '$base_analysis
+fi
 fi
 
 if [ $1 -eq 3 ] ; then

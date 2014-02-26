@@ -19,7 +19,7 @@
 #include "../libparallel/general.h"
 #endif
 
-
+#ifndef NO_PROFILES
 /*
  *  Function declaration
  */
@@ -344,3 +344,4 @@ void best_fit_nfw(double *rho0, double *rs, int nBins, double *array_data_x, dou
 		*rs = gsl_vector_get(par.fitted_p,0);
 		*rho0 = gsl_vector_get(par.fitted_p,1);
 }
+#endif
