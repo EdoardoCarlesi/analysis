@@ -33,7 +33,7 @@ void initialize_internal_variables(char **argv){
 	int kk=0;
 	if(ThisTask == 0)
  	INFO_MSG("Printing info");
-	for(kk=1; kk<39; kk++) 
+	for(kk=1; kk<45; kk++) 
 		fprintf(stdout, "argv[%d]: %s \n", kk, argv[kk]);
 #endif
 
@@ -48,7 +48,7 @@ void initialize_internal_variables(char **argv){
 		Urls.c_web_file = argv[count++];
 		Urls.c_web_gas_file = argv[count++];
 
-		// Basic simulation and analysis settings
+		// Basic simulation and analysis settings [7]
 		Settings.box_size = atof(argv[count++]); 
 		Settings.n_part_1D = atoi(argv[count++]); 
 		Settings.c_web_size = atoi(argv[count++]); 
@@ -72,7 +72,7 @@ void initialize_internal_variables(char **argv){
 		Settings.use_criterion = atoi(argv[count++]); 
 		Settings.Mprint = atof(argv[count++]); 
 	
-		// Cosmological parameters
+		// Cosmological parameters [29]
 		Cosmo.h = atof(argv[count++]);
 		Cosmo.sigma8 = atof(argv[count++]);
 		Cosmo.OmegaM = atof(argv[count++]);

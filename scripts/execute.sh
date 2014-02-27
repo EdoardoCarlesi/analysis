@@ -11,20 +11,22 @@
 #					- 9
 #					- 10 (theoretical_mass_function)
 #					- 11 (test)
+# Input parameters
+n_procs=$1
+n_files=$2
+
 # MPI Settings - if using MPI
-analysis_type=$1
-use_mpi=$2
-n_procs=$3
-n_files=$4
-use_multiple_cat=$5
+use_multiple_cat='1'
+use_mpi='1'
 
 #sys='taurus'
 sys='comodo'
 
 # Analyze catalog at a given redshift
 zzzz='.z'
+
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='z0.241'
+zzzz='z0.503'
 #zzzz='0000'
 fi
 
@@ -33,7 +35,7 @@ use_multiple_cat=1
 fi
 
 # Model and simulation ettings
-model1='cde000'
+model1='lcdm'
 box_size=250
 particle_number=1024
 web_size=256
@@ -44,7 +46,7 @@ catalogue_z=0
 catalogue_number=61
 
 # Number of bins for general distributions and for the radial alignment
-n_bins=15
+n_bins=50
 n_bins_th=200
 r_bins=11
 
@@ -110,47 +112,19 @@ base_analysis=${HOME}/Analysis/
 base_out=$base_analysis/output/
 base_temp=$base_analysis/temp/
 
-dir_ahf='ahf'
-dir_snaps='snaps'
-dir_pk='pk'
-dir_halo='catalogues/'$model1
-dir_web='vweb'
+DATA=$base_data/$particle_number/$box_size/
+
+ahf_dir=$DATA'ahf/'$model1'/'
+snaps_dir=$DATA'snaps/'$model1'/'
+pk_dir=$DATA'pk/'$model1'/'
+halo_dir=$DATA'catalogues/'$model1'/'
+web_dir=$DATA'vweb/'$model1'/'
 
 # General file prefixes 
 prefix=$base_out$model1'-'$box_size'-'$particle_number'-'$zzzz
 
-# Where the output redshift file for the snapshot is
-if [ $particle_number -eq 32 ] ; then
-outputs=$base_data/output_z20.txt
-fi
-
-if [ $particle_number -eq 64 ] ; then
-outputs=$base_data/output_z30.txt
-fi
-
-if [ $particle_number -eq 128 ] ; then
-outputs=$base_data/output_z40.txt
-fi
-
-if [ $particle_number -eq 256 ] ; then
-outputs=$base_data/$particle_number/$box_size/outputs_lcdm_gas.txt
-fi
-
-if [ $particle_number -eq 512 ] ; then
+# Expansion factor outputs
 outputs=$base_data/$particle_number/$box_size/outputs_new.txt
-fi
-
-if [ $particle_number -eq 1024 ] ; then
-outputs=$base_data/$particle_number/$box_size/outputs_new.txt
-fi
-
-DATA1=$base_data/$particle_number/$box_size/
-
-snaps_dir1=$DATA1$dir_snaps/
-halo_dir1=$DATA1$dir_halo/
-halo_dir_ahf1=$DATA1$dir_ahf/
-pk_dir1=$DATA1$dir_pk/
-web_dir1=$DATA1$dir_web/
 
 cat_zero='00'
 
@@ -158,36 +132,38 @@ if [ $catalogue_number -gt 9 ] ; then
 cat_zero='0'
 fi
 
-cd $halo_dir1
-halo_name1=`ls *$cat_zero$zzzz*_halos`
+halo_name=`ls $halo_dir*$zzzz*_halos`
+profile_name=`ls $halo_dir*$zzzz*_profiles`
 
-cd $halo_dir1
-profile_name1=`ls *$cat_zero$zzzz*_profiles`
-
-pk_file1=`ls $pk_dir1*snap*$catalogue_number`
-echo pk_file1=`ls $pk_dir1*snap*$catalogue_number`
-echo 'pk file 1'$pk_file1'*'
-
-if [ -z $pk_file1 ] ; then
-pk_file1='pk_not_found.dummy'
-echo 'pk file 1' $pk_file1
+if [ $use_mpi -eq 1 ] ; then 
+halo_name=`ls $halo_dir*0000*$zzzz*_halos`
+profile_name=`ls $halo_dir*0000*$zzzz*_profiles`
 fi
 
-web_dm_file1=`ls $web_dir1*_dm*$web_size*ascii`
-web_gas_file1=`ls $web_dir1*_gas*$web_size*ascii`
+pk_file=`ls $pk_dir*snap*$catalogue_number`
 
-if [ -z $web_dm_file1 ] ; then
-web_dm_file1='web_not_found.dummy'
-echo 'web dm file 1' $web_dm_file1
+echo pk_file=`ls $pk_dir*$catalogue_number`
+
+if [ -z $pk_file ] ; then
+pk_file='pk_not_found.dummy'
+echo 'pk file ' $pk_file
 fi
 
-if [ -z $web_gas_file1 ] ; then
-web_gas_file1='web_not_found.dummy'
-echo 'web gas file 1' $web_gas_file1
+web_dm_file=`ls $web_dir*_dm*$web_size*ascii`
+web_gas_file=`ls $web_dir*_gas*$web_size*ascii`
+
+if [ -z $web_dm_file ] ; then
+web_dm_file='web_not_found.dummy'
+echo 'web dm file' $web_dm_file
 fi
 
-halo_file1=$halo_dir1/$halo_name1
-profile_file1=$halo_dir1/$profile_name1
+if [ -z $web_gas_file ] ; then
+web_gas_file='web_not_found.dummy'
+echo 'web gas file' $web_gas_file
+fi
+
+halo_file=$halo_dir/$halo_name
+profile_file=$halo_dir/$profile_name
 
 # File where the output lists are printed
 pk_list=$base_temp/pk.list
@@ -195,16 +171,15 @@ halo_list=$base_temp/halo.list
 profile_list=$base_temp/profile.list
 subhalo_list=$base_temp/subhalo.list
 
-ls -r $snaps_dir1/Pk* > $pk_list 
-ls -r $halo_dir1/*$zzzz*halos > $halo_list 
-#ls -r $halo_dir1/*$zzzz*halos 
-ls -r $halo_dir1/*$zzzz*profiles > $profile_list
-ls -r $halo_dir1/*$zzzz*substructure > $subhalo_list
+ls -r $snaps_dir/Pk* > $pk_list 
+ls -r $halo_dir/*$zzzz*halos > $halo_list 
+ls -r $halo_dir/*$zzzz*profiles > $profile_list
+ls -r $halo_dir/*$zzzz*substructure > $subhalo_list
 
 cd $base_analysis/src/
 make clean
 
-url_var=$n_files' '$outputs' '$halo_file1' '$profile_file1' '$pk_file1' '$web_dm_file1' '$web_gas_file1
+url_var=$n_files' '$outputs' '$halo_file' '$profile_file' '$pk_file' '$web_dm_file' '$web_gas_file
 set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
 set_var2=$fit' '$catalogue_z' '$m_th' '$m_min' '$m_max' '$r_min' '$r_max' '$l_web' '$n_min' '$use_n_min' '$use_n_haloes' '$use_criterion' '$m_print
 cosmo_var=$h' '$s8' '$om' '$ol' '$dc' '$spin' '$virial' '$k' '$zMax
@@ -218,76 +193,22 @@ execute=$base_analysis
 $base_analysis/scripts/mpi_check.sh $base_analysis $use_mpi
 
 if [ $use_mpi -eq 1 ] ; then
+
 #execute='mpiexec -n '$n_procs' valgrind -v '$base_analysis
 #execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' '$base_analysis
+#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
 
 if [ "$sys" == "taurus" ] ; then
-#execute='mpiexec -mca opal_set_max_sys_limits 1 -n '$n_procs' valgrind -v '$base_analysis
 execute='mpiexec.openmpi -n '$n_procs' '$base_analysis
 fi
 
 if [ "$sys" == "comodo" ] ; then
 execute='mpiexec -n '$n_procs' '$base_analysis
 fi
-fi
 
-if [ $1 -eq 3 ] ; then
-execute=$base_analysis
-fi
+fi 
 
-if [ $1 -eq 1 ] ; then
-make fit_nfw
-$execute/bin/fit_nfw $all_variables
-fi
+# Finally execute the program
 
-if [ $1 -eq 2 ] ; then
-echo $execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 0 $tot_snaps $particle_number
-$execute/scripts/make_pk.sh $swap $base_ahf $snaps_dir1 0 $tot_snaps $particle_number
-fi
-
-if [ $1 -eq 3 ] ; then
-find $snaps_dir1'/Pk-'$particle_number* -print > $list_file
-make growth_factor
-$execute/bin/growth_factor $all_variables
-fi
-
-if [ $1 -eq 4 ] ; then
-make mass_function
-$execute/bin/mass_function $all_variables
-fi
-
-if [ $1 -eq 5 ] ; then
-echo OK
 make halo_statistics
 $execute/bin/halo_statistics $all_variables
-fi
-
-if [ $1 -eq 6 ] ; then
-make number_density
-$execute/bin/number_density $all_variables
-fi
-
-if [ $1 -eq 7 ] ; then
-make halo_evolution
-$execute/bin/halo_evolution $all_variables
-fi
-
-if [ $1 -eq 8 ] ; then
-make halo_comparison
-$execute/bin/halo_comparison $all_variables
-fi
-
-if [ $1 -eq 9 ] ; then
-make subhalo_statistics 
-$execute/bin/subhalo_statistics $all_variables
-fi
-
-if [ $1 -eq 10 ] ; then
-make theoretical_mass_function
-$execute/bin/theoretical_mass_function  $all_variables
-fi
-
-if [ $1 -eq 11 ] ; then
-make test
-$execute/bin/test  $all_variables
-fi
