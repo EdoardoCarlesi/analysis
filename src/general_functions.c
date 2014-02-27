@@ -83,7 +83,7 @@ void initialize_internal_variables(char **argv){
 		GrowthFac.scale_k = atof(argv[count++]);
 		NumDen.zMax = atof(argv[count++]);
 
-		// Other urls related parameters
+		// Other urls related parameters [38]
 		Urls.output_prefix = argv[count++];
 		Urls.halo_list = argv[count++];
 		Urls.profile_list = argv[count++];

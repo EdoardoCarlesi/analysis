@@ -102,7 +102,7 @@ void fit_and_store_gas_parameters(void)
 
 void sort_f_gas_profile(struct halo *HALO)
 {
-	double h, R, rMax, rMin; 
+	double h, R, rMax, rMin, x_loc, y_loc; 
 	double *x, *y, *x_bin, *y_bin, *e_bin; 
 	double chi, per, gof;
 	int N, bins, skip, j=0;
@@ -141,9 +141,16 @@ void sort_f_gas_profile(struct halo *HALO)
 
 	for(j=0; j<BIN_PROFILE; j++)
 	{
+		x_loc = 0.5 * (x_bin[j] + x_bin[j+1]);
 		HALO->f_gas.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
-		HALO->f_gas.y[j] = y_bin[j];
-		//fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
+#ifdef USE_BIN_INTERP
+		if(j==BIN_PROFILE-1) x_loc = x_bin[j];
+		y_loc = get_interpolated_value(x,y,N,x_loc);
+#else
+		y_loc = abs(y_bin[j]);
+#endif
+		HALO->f_gas.y[j] = y_loc;
+		fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
 	}
 }
 

@@ -65,6 +65,7 @@ void fit_halo_profile(struct halo *HALO)
 {
 	double c=0, r=0, rho0, rho0_halo, rs, chi, gof, per; 
 	double *x, *y, *e, *R, *y_th, *x_bin, *y_bin, *e_bin, rMin, rMax; 
+	double x_loc, y_loc;
 	int bins, skip, N, j=0;
 
 		c = HALO->c; 
@@ -135,20 +136,32 @@ void fit_halo_profile(struct halo *HALO)
 	HALO->fit_nfw.per = per;
 
 		x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
+		//x_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 		y_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 		e_bin = (double*) calloc(BIN_PROFILE, sizeof(double));
 
 		rMin = 2 * Rvir_frac_min;
-		rMax = F_MAX * 1.01; //HALO->radius[bins-1]/r;
+		rMax = F_MAX * 1.001; //HALO->radius[bins-1]/r;
 		x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
+		//x_bin = log_stepper(rMin, rMax, BIN_PROFILE);
 
 		average_bin(R, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
+		//average_bin(R, y, x_bin, y_bin, e_bin, BIN_PROFILE, N);
 
 	for(j=0; j<BIN_PROFILE; j++)
 	{
-		HALO->nfw.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
-		HALO->nfw.y[j] = y_bin[j];
-		//fprintf(stderr, "%d  %e  %e\n", j, x_bin[j+1], y_bin[j]);
+		
+		x_loc = 0.5 * (x_bin[j] + x_bin[j+1]);
+		HALO->nfw.x[j] = x_loc;
+
+#ifdef USE_BIN_INTERP
+	//	if(j==BIN_PROFILE-1) x_loc = x_bin[j];
+		y_loc = get_interpolated_value(R, y, N, x_loc);
+#else
+		y_loc = abs(y_bin[j]);
+#endif
+		HALO->nfw.y[j] = y_loc;
+		fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
 	}
 
 	free(x);
@@ -189,13 +202,14 @@ void average_nfw_profile(void)
 				if(halo_condition(k) == 1)
 				{
 					nfw = Haloes[k].nfw.y[i];
-
+					//fprintf(stderr, "nfw=%f\n", nfw);
 						if(isnan(nfw) == 0 && nfw>0 && nfw < 1./0.)
 						{
 							nfw_tot += nfw;
 							nfw_bin++;
+					//fprintf(stderr, "halo bin(%d), nfw_tot=%lf, nfw_bin=%d\n", i, nfw, nfw_bin);
 						}
-		
+							
 				}
 		
 			}
@@ -204,7 +218,7 @@ void average_nfw_profile(void)
 			HaloProperties[HALO_INDEX].nfw.y[i] = nfw_tot/nfw_bin;
 			HaloProperties[HALO_INDEX].nfw.n[i] = nfw_bin;
 		}
-}
+}		
 
 
 

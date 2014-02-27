@@ -18,7 +18,7 @@
 #define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 25
+#define BIN_PROFILE 30
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.005
 

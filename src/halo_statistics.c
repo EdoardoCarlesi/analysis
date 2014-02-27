@@ -93,23 +93,27 @@ int main(int argc, char **argv)
 
 #ifndef WEB_ONLY
 		compute_halo_properties();
+#ifndef NO_PROFILES
+		average_nfw_profile();
+		print_average_profiles();
 #ifdef GAS
 		average_gas_profiles();
 #endif
 
-#ifndef NO_PROFILES
-		average_nfw_profile();
-		print_average_profiles();
 #endif
-	//	sort_axis_alignment();
-	//	print_axis_alignment();
-		
-		//print_halo_best_fit_results();
+
+#ifdef COMPUTE_ALIGN
+		sort_axis_alignment();
+		print_axis_alignment();
+#endif
+
+#ifndef USE_N_HALOES
 		print_numerical_mass_function();
+#endif
 		print_all_halo_properties_to_one_file();
 		
+		print_halo_best_fit_results();
 		//print_all_haloes();
-
 #endif /* WEB_ONLY */
 
 		/* If NO_WEB is not selected, the above analysis is repeated for every environment */ 

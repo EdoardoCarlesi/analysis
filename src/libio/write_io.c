@@ -135,8 +135,8 @@ void print_average_profiles()
 	sprintf(out_url, "%s%s", Urls.output_prefix, "_avg_profiles.dat");
 	out_file = fopen(out_url,"w");
 
-	double T0 = HaloProperties[HALO_INDEX].temp.y[10];
-	double rho0 = HaloProperties[HALO_INDEX].rho_gas.y[8];
+	double T0 = HaloProperties[HALO_INDEX].temp.y[BIN_PROFILE-1];
+	double rho0 = HaloProperties[HALO_INDEX].rho_gas.y[BIN_PROFILE-1];
 			//get_interpolated_value(HaloProperties[HALO_INDEX].temp.x, 
 			//HaloProperties[HALO_INDEX].temp.y, 0.25, BIN_PROFILE);
 
@@ -145,6 +145,7 @@ void print_average_profiles()
 		fprintf(out_file,"#");
 		FILE_HEADER(out_file, "R/Rv    ", count);
 		FILE_HEADER(out_file, "rho/rho0", count);
+		FILE_HEADER(out_file, "N_bin   ", count);
 #ifdef GAS
 		FILE_HEADER(out_file, "rho_gas ", count);
 		FILE_HEADER(out_file, "Ix/Ix0  ", count);
@@ -153,13 +154,13 @@ void print_average_profiles()
 	//	FILE_HEADER(out_file, "hydro_M ", count);
 	//	FILE_HEADER(out_file, "pressure", count);
 #endif
-		FILE_HEADER(out_file, "N_bin   ", count);
 		fprintf(out_file, "\n");
 	
 			for(i=2; i<nTot; i++) 
 			{
-				fprintf(out_file, "%f",   HaloProperties[HALO_INDEX].nfw.x[i]); 
+				fprintf(out_file, "%lf",  HaloProperties[HALO_INDEX].nfw.x[i]); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].nfw.y[i]); 
+				fprintf(out_file, "\t%d", HaloProperties[HALO_INDEX].nfw.n[i]); 
 #ifdef GAS
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].rho_gas.y[i]/rho0); 
 				fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].i_x.y[i]); 
@@ -168,7 +169,6 @@ void print_average_profiles()
 			//	fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].hydro_m.y[i]); 
 			//	fprintf(out_file, "\t%f", HaloProperties[HALO_INDEX].pressure.y[i]); 
 #endif
-				fprintf(out_file, "\t%d", HaloProperties[HALO_INDEX].temp.n[i]); 
 				fprintf(out_file, "\n");
 			}
 
