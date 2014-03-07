@@ -11,31 +11,33 @@
 #					- 9
 #					- 10 (theoretical_mass_function)
 #					- 11 (test)
+#
+#sys='taurus'
+sys='comodo'
+
 # Input parameters
 n_procs=$1
 n_files=$2
+model='cde000'
 
 # MPI Settings - if using MPI
-use_multiple_cat='1'
 use_mpi='1'
 
-#sys='taurus'
-sys='comodo'
+if [ $use_mpi -eq 1 ] ; then 
+use_multiple_cat=1
+else
+use_multiple_cat=0
+fi
+
 
 # Analyze catalog at a given redshift
 zzzz='.z'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='z0.503'
-#zzzz='0000'
+zzzz='z0.027'
 fi
 
-if [ $use_mpi -eq 1 ] ; then 
-use_multiple_cat=1
-fi
-
-# Model and simulation ettings
-model1='lcdm'
+# Simulation ettings
 box_size=250
 particle_number=1024
 web_size=256
@@ -66,7 +68,7 @@ m_print=1.e+14
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=9.e+11
+m_th=30.e+13
 m_print=1.e+10
 virial=1.5
 spin=0.15
@@ -114,14 +116,14 @@ base_temp=$base_analysis/temp/
 
 DATA=$base_data/$particle_number/$box_size/
 
-ahf_dir=$DATA'ahf/'$model1'/'
-snaps_dir=$DATA'snaps/'$model1'/'
-pk_dir=$DATA'pk/'$model1'/'
-halo_dir=$DATA'catalogues/'$model1'/'
-web_dir=$DATA'vweb/'$model1'/'
+ahf_dir=$DATA'ahf/'$model'/'
+snaps_dir=$DATA'snaps/'$model'/'
+pk_dir=$DATA'pk/'$model'/'
+halo_dir=$DATA'catalogues/'$model'/'
+web_dir=$DATA'vweb/'$model'/'
 
 # General file prefixes 
-prefix=$base_out$model1'-'$box_size'-'$particle_number'-'$zzzz
+prefix=$base_out$model'-'$box_size'-'$particle_number'-'$zzzz
 
 # Expansion factor outputs
 outputs=$base_data/$particle_number/$box_size/outputs_new.txt
@@ -132,12 +134,13 @@ if [ $catalogue_number -gt 9 ] ; then
 cat_zero='0'
 fi
 
-halo_name=`ls $halo_dir*$zzzz*_halos`
-profile_name=`ls $halo_dir*$zzzz*_profiles`
 
 if [ $use_mpi -eq 1 ] ; then 
 halo_name=`ls $halo_dir*0000*$zzzz*_halos`
 profile_name=`ls $halo_dir*0000*$zzzz*_profiles`
+else
+halo_name=`ls $halo_dir*$zzzz*_halos`
+profile_name=`ls $halo_dir*$zzzz*_profiles`
 fi
 
 pk_file=`ls $pk_dir*snap*$catalogue_number`

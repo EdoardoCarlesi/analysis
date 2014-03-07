@@ -28,7 +28,7 @@ void stdout_halo_status(void);
  */
 void find_substructure()
 {
-	int i=0, j=0, host=0, nHaloes=0;
+	int i=0, j=0, host=0, host_index=0, nHaloes=0;
 
 	INFO_MSG("Sorting halo substructure");
 
@@ -41,6 +41,7 @@ void find_substructure()
 	SubStructure.host = calloc(1, sizeof(struct host_halo));
 
 	nHaloes = Settings.n_haloes;
+
 	
 	// First read in host haloes
 	for(i=0; i<nHaloes; i++)
@@ -55,6 +56,9 @@ void find_substructure()
 			SubStructure.host[SubStructure.N_host].sub_index = calloc(Haloes[i].n_satellites, sizeof(int));
 			Haloes[i].Msub = 0;  // Init the total subhalo mass fraction to zero
 			j++;
+			
+		//	if(halo_condition(i)==1)
+		//	fprintf(stderr, "mhost=%e nsub=%d\n", Haloes[i].Mvir, Haloes[i].n_satellites);
 		}
 	 }
 	
@@ -63,8 +67,9 @@ void find_substructure()
 	{
 		if(Haloes[i].host > 0)
 		{
+	//fprintf(stderr, "Haloes=%d sub \n", nHaloes);
 			host = find_host_index(Haloes[i].host);
-
+			host_index = SubStructure.host[host].index;
 			SubStructure.N_sub++;
 			SubStructure.sub = realloc(SubStructure.sub, (SubStructure.N_sub+1)*sizeof(struct sub_halo));
 			SubStructure.sub[SubStructure.N_sub].id = Haloes[i].id;
@@ -72,7 +77,10 @@ void find_substructure()
 
 			SubStructure.sub[SubStructure.N_sub].host_id = Haloes[i].host;
 			SubStructure.sub[SubStructure.N_sub].host_index = host;
-			Haloes[host].Msub += Haloes[i].Mvir;
+			Haloes[SubStructure.host[host].index].Msub += Haloes[i].Mvir;
+
+	//	if(halo_condition(host_index)==1)
+	//		fprintf(stderr, "host=%d mhost=%e msub=%e\n", host_index, Haloes[host_index].Mvir, Haloes[host_index].Msub);
 
 			SubStructure.host[host].n_sub++;
 			SubStructure.host[host].sub_index[SubStructure.host[host].n_sub-1] = i;
@@ -91,6 +99,7 @@ void find_substructure()
 /*
 		for(i=0; i<SubStructure.N_host; i++)
 		{
+			
 			fprintf(stderr, "%d) nsub =%d \n", i, SubStructure.host[i].n_sub);
 			for(j=0; j<SubStructure.host[i].n_sub; j++)
 				fprintf(stderr, "%d) Host=%d has sub_id=%d index=%llu\n", 
@@ -108,10 +117,10 @@ int find_host_index(uint64_t host_id)
 {
 	int i=0, host_index=0;
 
-		for(i=0; i<=SubStructure.N_host; i++)
-			if(SubStructure.host[i].id == host_id)
-				host_index = i;
-
+	for(i=0; i<=SubStructure.N_host; i++)
+		if(SubStructure.host[i].id == host_id)
+				host_index = i; //SubStructure.host[i].index;
+//fprintf(stderr, "host id= %llu index = %d\n", host_id, host_index);
 	return host_index;
 }
 

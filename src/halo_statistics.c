@@ -80,7 +80,7 @@ int main(int argc, char **argv)
 
 	free_comm_structures();
 
-	
+	// Files have been read in, now start the analysis
 	if(ThisTask == 0)
 	{
 		HALO_INDEX=0;
@@ -93,6 +93,8 @@ int main(int argc, char **argv)
 
 #ifndef WEB_ONLY
 		compute_halo_properties();
+		find_substructure();
+
 #ifndef NO_PROFILES
 		average_nfw_profile();
 		print_average_profiles();
@@ -113,7 +115,6 @@ int main(int argc, char **argv)
 		print_all_halo_properties_to_one_file();
 		
 		print_halo_best_fit_results();
-		//print_all_haloes();
 #endif /* WEB_ONLY */
 
 		/* If NO_WEB is not selected, the above analysis is repeated for every environment */ 
@@ -127,6 +128,11 @@ int main(int argc, char **argv)
 #endif
 		Settings.use_web = 0;
 		assign_haloes_to_web();
+#ifdef WEB_ONLY
+		// This prints all haloes with informations on the region they belong to
+		print_all_haloes();
+#endif
+
 #endif
 			// Assign halo to nodes
 			int i=0;
@@ -165,7 +171,7 @@ int main(int argc, char **argv)
 
 #ifdef SUBHALO
 		// Now select subhaloes
-		find_substructure();
+	//	find_substructure();
 
 		Settings.use_sub = 1;
 		sprintf(Urls.output_prefix, "%s%s", base_out, "substructure_");			
@@ -187,6 +193,7 @@ int main(int argc, char **argv)
 #endif /* SUBHALO */
 
 #endif /* WEB ONLY */
+		free(Haloes);
 
 	  INFO_MSG("Computed halo statistical properties at fixed z");
 	}

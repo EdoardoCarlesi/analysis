@@ -18,9 +18,9 @@
 #define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 30
+#define BIN_PROFILE 25
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
-#define Rvir_frac_min 0.005
+#define Rvir_frac_min 0.025
 
 	// Maximum and minimum delta hydrostatic mass
 #define hydro_mass_min -0.5
@@ -39,7 +39,7 @@
 #define N_SUB_MIN 40
 
 	// Maximum number of haloes to read in per task
-#define N_HALOES_MAX 100
+#define N_HALOES_MAX 200
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -529,6 +529,16 @@ extern struct halo_properties
 		double y[BIN_PROFILE];
 
 	} f_gas, nfw, rho_gas, i_x, temp, hydro_m, pressure;
+
+	// Average / Median values for the binned profiles
+	double avgMvir;
+	double avgRvir;
+	double avgMsub;
+	double avgNsub;
+	double medMvir;
+	double medRvir;
+	double medMsub;
+	double medNsub;
 
 	// Distributions
 	double *c;

@@ -121,7 +121,7 @@ void fit_halo_profile(struct halo *HALO)
 		for(j=skip; j<bins; j++)
 		{
 			y_th[j-skip] = nfw(HALO->radius[j], HALO->fit_nfw.rs, HALO->fit_nfw.rho0);
-			//fprintf(stderr, "%d) R=%e, rho=%e y=%e  y_th=%e\n", j, R[j-skip], rho0, y[j-skip], y_th[j-skip]);
+		//fprintf(stderr, "%d) R=%e, rho=%e y=%e  y_th=%e\n", j, R[j-skip], rho0, y[j-skip], y_th[j-skip]);
 		}
 
 	// Various estimators for the goodness of fit
@@ -152,16 +152,19 @@ void fit_halo_profile(struct halo *HALO)
 	{
 		
 		x_loc = 0.5 * (x_bin[j] + x_bin[j+1]);
+		HaloProperties[HALO_INDEX].nfw.x[j] = x_bin[j+1];
 		HALO->nfw.x[j] = x_loc;
 
 #ifdef USE_BIN_INTERP
 	//	if(j==BIN_PROFILE-1) x_loc = x_bin[j];
-		y_loc = get_interpolated_value(R, y, N, x_loc);
+		y_loc = nfw(x_loc, rs, rho0);
+	//	HALO->fit_nfw.rho0 = rho0;
+	//	HALO->fit_nfw.rs = rs;
 #else
 		y_loc = abs(y_bin[j]);
 #endif
 		HALO->nfw.y[j] = y_loc;
-		fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
+		//fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
 	}
 
 	free(x);
@@ -179,8 +182,8 @@ void average_nfw_profile(void)
 {
 	int k=0, i=0, m=0; 
 	int nHaloes, nHaloesCut;
-	int nfw_bin;
-	double nfw, nfw_tot;
+	int nfw_bin=0, n_halo=0, n_sub=0;
+	double nfw, nfw_tot, M, R, Msub, *m_tot=NULL, *r_tot=NULL, *msub_tot=NULL, *nsub_tot=NULL;
 
 	INFO_MSG("Sorting NFW parameters");
 
@@ -191,6 +194,33 @@ void average_nfw_profile(void)
 #else
 		nHaloes=Settings.n_threshold; 
 #endif
+		
+		m_tot = calloc(1, sizeof(double));
+		r_tot = calloc(1, sizeof(double));
+		msub_tot = calloc(1, sizeof(double));
+		nsub_tot = calloc(1, sizeof(double));
+
+		for(k=0; k<nHaloes; k++)
+			if(halo_condition(k) == 1)
+			{
+				n_halo++;
+
+				M = Haloes[k].Mvir;
+				Msub = Haloes[k].Msub;
+				n_sub = Haloes[k].n_satellites;
+				R = Haloes[k].Rvir;
+
+				m_tot = realloc(m_tot, n_halo * sizeof(double));
+				r_tot = realloc(r_tot, n_halo * sizeof(double));
+				msub_tot = realloc(msub_tot, n_halo * sizeof(double));
+				nsub_tot = realloc(nsub_tot, n_halo * sizeof(double));
+
+				m_tot[n_halo-1] = M;
+				r_tot[n_halo-1] = R;
+				msub_tot[n_halo-1] = Msub;
+				nsub_tot[n_halo-1] = (double) n_sub;
+				//fprintf(stderr, "m_tot = %e, %d, n_sub=%d Msub=%e\n", M, k, n_sub, Haloes[k].Msub);
+			}
 
 		for(i=0; i<BIN_PROFILE; i++)
 		{
@@ -214,9 +244,18 @@ void average_nfw_profile(void)
 		
 			}
 
-			HaloProperties[HALO_INDEX].nfw.x[i] = Haloes[0].nfw.x[i];
+			//HaloProperties[HALO_INDEX].nfw.x[i] = Haloes[0].nfw.x[i];
 			HaloProperties[HALO_INDEX].nfw.y[i] = nfw_tot/nfw_bin;
 			HaloProperties[HALO_INDEX].nfw.n[i] = nfw_bin;
+
+			HaloProperties[HALO_INDEX].avgMvir = average(m_tot, n_halo);
+			HaloProperties[HALO_INDEX].avgRvir = average(r_tot, n_halo);
+			HaloProperties[HALO_INDEX].avgMsub = average(msub_tot, n_halo);
+			HaloProperties[HALO_INDEX].avgNsub = average(nsub_tot, n_halo);
+			HaloProperties[HALO_INDEX].medMvir = median(m_tot, n_halo);
+			HaloProperties[HALO_INDEX].medRvir = median(r_tot, n_halo);
+			HaloProperties[HALO_INDEX].medMsub = median(msub_tot, n_halo);
+			HaloProperties[HALO_INDEX].medNsub = median(nsub_tot, n_halo);
 		}
 }		
 

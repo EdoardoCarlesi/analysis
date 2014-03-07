@@ -155,6 +155,22 @@ void print_average_profiles()
 	//	FILE_HEADER(out_file, "pressure", count);
 #endif
 		fprintf(out_file, "\n");
+
+			fprintf(out_file,"#Average Mvir = %e SM/h, Median Mvir = %e SM/h\n",
+				HaloProperties[HALO_INDEX].avgMvir, 
+				HaloProperties[HALO_INDEX].medMvir);
+
+			fprintf(out_file,"#Average Msub = %e SM/h, Median Msub = %e SM/h\n",
+				HaloProperties[HALO_INDEX].avgMsub, 
+				HaloProperties[HALO_INDEX].medMsub);
+
+			fprintf(out_file,"#Average Nsub = %f, Median Nsub = %f\n",
+				HaloProperties[HALO_INDEX].avgNsub, 
+				HaloProperties[HALO_INDEX].medNsub);
+
+			fprintf(out_file,"#Average Rvir = %e Mpc/h, Median Rvir = %e Mpc/h\n",
+				HaloProperties[HALO_INDEX].avgRvir, 
+				HaloProperties[HALO_INDEX].medRvir);
 	
 			for(i=2; i<nTot; i++) 
 			{
@@ -294,9 +310,11 @@ void print_all_haloes()
 	DUMP_MSG("halo", out_url);
 
 		fprintf(out_file, "#");
-//		FILE_HEADER(out_file, "Mass  ", count);
-//		FILE_HEADER(out_file, "Rvir  ", count);
-//		FILE_HEADER(out_file, "Msub  ", count);
+#ifndef WEB_ONLY
+		FILE_HEADER(out_file, "Mass  ", count);
+		FILE_HEADER(out_file, "Rvir  ", count);
+		FILE_HEADER(out_file, "Msub  ", count);
+#endif
 		FILE_HEADER(out_file, "n_part", count);
 		FILE_HEADER(out_file, "X     ", count);
 		FILE_HEADER(out_file, "Y     ", count);
@@ -304,24 +322,24 @@ void print_all_haloes()
 #ifndef NO_PROFILES
 		FILE_HEADER(out_file, "conc  ", count);
 #endif
-		FILE_HEADER(out_file, "vir_dm", count);
+
+#ifdef WEB_ONLY
+		FILE_HEADER(out_file, "Web   ", count);
+		FILE_HEADER(out_file, "CatNum", count);
+		FILE_HEADER(out_file, "Line  ", count);
+
+#else
 		FILE_HEADER(out_file, "lambda", count);
 		FILE_HEADER(out_file, "shape ", count);
 		FILE_HEADER(out_file, "triax ", count);
-		//FILE_HEADER(out_file, "Web   ", count);
-		//FILE_HEADER(out_file, "CatNum", count);
-		//FILE_HEADER(out_file, "Line  ", count);
-//		FILE_HEADER(out_file, "conc  ", count);
-//		FILE_HEADER(out_file, "vir_dm", count);
-//		FILE_HEADER(out_file, "lambda", count);
-//		FILE_HEADER(out_file, "shape ", count);
-//		FILE_HEADER(out_file, "triax ", count);
 #ifdef GAS
 		FILE_HEADER(out_file, "gas_fr", count);
 	      	FILE_HEADER(out_file, "gasTmw", count);
 		FILE_HEADER(out_file, "gasTew", count);
 		FILE_HEADER(out_file, "gasTsl", count);
 #endif
+#endif
+		FILE_HEADER(out_file, "vir_dm", count);
 		fprintf(out_file, "\n");
 
 		for(i=0; i<nTot; i++)	
@@ -329,19 +347,18 @@ void print_all_haloes()
  
 			if(halo_condition(i)==1)
 			{
+#ifndef WEB_ONLY
 				fprintf(out_file, "%e", Haloes[i].Mvir); 
 				fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
 				fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
-				fprintf(out_file, "\t%d\t", Haloes[i].n_part); 
-				fprintf(out_file, "\t%f", Haloes[i].X[0]);
-				fprintf(out_file, "\t%f", Haloes[i].X[1]);
-				fprintf(out_file, "\t%f", Haloes[i].X[2]);
+
 #ifndef NO_PROFILES
 				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
 #endif
-				//fprintf(out_file, "%e", Haloes[i].Mvir); 
-				//fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
-				//fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
+				fprintf(out_file, "%e", Haloes[i].Mvir); 
+				fprintf(out_file, "\t%lf", Haloes[i].Rvir); 
+				fprintf(out_file, "\t%lf", Haloes[i].Msub/Haloes[i].Mvir); 
+#endif
 				fprintf(out_file, "%d\t", Haloes[i].n_part); 
 				fprintf(out_file, "\t%f", Haloes[i].X[0]);
 				fprintf(out_file, "\t%f", Haloes[i].X[1]);
@@ -349,20 +366,25 @@ void print_all_haloes()
 #ifndef NO_WEB
 				fprintf(out_file, "\t%d\t", Haloes[i].c_web);
 #endif
+
+#ifdef WEB_ONLY
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_numb);
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_line);
-/*				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
-				fprintf(out_file, "\t%f", -2.*Haloes[i].dm.Ekin/Haloes[i].dm.Epot);
+#else
+				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
 				fprintf(out_file, "\t%f", Haloes[i].lambda);
 				fprintf(out_file, "\t%f", Haloes[i].shape);
 				fprintf(out_file, "\t%f", Haloes[i].triax);
 #ifdef GAS
+				fprintf(out_file, "\t%f", -2.*Haloes[i].dm.Ekin/Haloes[i].dm.Epot);
 				fprintf(out_file, "\t%f", Haloes[i].gas_only.b_fraction);
 				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_mw);
 				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_ew);
 				fprintf(out_file, "\t%f", Haloes[i].gas_only.T_sl);
+#else
+				fprintf(out_file, "\t%f", -2.*Haloes[i].Ekin/Haloes[i].Epot);
 #endif
-*/
+#endif
 				fprintf(out_file, "\n");
 			}
 

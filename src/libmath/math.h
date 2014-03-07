@@ -29,6 +29,8 @@ struct parameters
 
 
 double average(double*, int);
+double median(double*, int);
+
 double maximum(double*, int);
 double minimum(double*, int);
 double nonzero_minimum(double*, int);

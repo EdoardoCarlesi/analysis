@@ -18,6 +18,9 @@ sys='comodo'
 # Input parameters
 n_procs=$1
 n_files=$2
+model=$3
+zeta=$4
+masscut=$5
 
 # MPI Settings - if using MPI
 use_mpi='1'
@@ -28,14 +31,12 @@ else
 use_multiple_cat=0
 fi
 
-# Model
-model='lcdm'
 
 # Analyze catalog at a given redshift
 zzzz='.z'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='z0.503'
+zzzz=$zeta
 fi
 
 # Simulation ettings
@@ -69,7 +70,7 @@ m_print=1.e+14
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=9.e+11
+m_th=$masscut
 m_print=1.e+10
 virial=1.5
 spin=0.15
@@ -135,12 +136,13 @@ if [ $catalogue_number -gt 9 ] ; then
 cat_zero='0'
 fi
 
-halo_name=`ls $halo_dir*$zzzz*_halos`
-profile_name=`ls $halo_dir*$zzzz*_profiles`
 
 if [ $use_mpi -eq 1 ] ; then 
 halo_name=`ls $halo_dir*0000*$zzzz*_halos`
 profile_name=`ls $halo_dir*0000*$zzzz*_profiles`
+else
+halo_name=`ls $halo_dir*$zzzz*_halos`
+profile_name=`ls $halo_dir*$zzzz*_profiles`
 fi
 
 pk_file=`ls $pk_dir*snap*$catalogue_number`
@@ -180,7 +182,7 @@ ls -r $halo_dir/*$zzzz*profiles > $profile_list
 ls -r $halo_dir/*$zzzz*substructure > $subhalo_list
 
 cd $base_analysis/src/
-make clean
+#make clean
 
 url_var=$n_files' '$outputs' '$halo_file' '$profile_file' '$pk_file' '$web_dm_file' '$web_gas_file
 set_var1=$box_size' '$particle_number' '$web_size' '$n_bins' '$n_bins_th' '$r_bins' '$pk_skip' '$mf_skip' '$catalogue_number
