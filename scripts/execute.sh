@@ -12,8 +12,10 @@
 #					- 10 (theoretical_mass_function)
 #					- 11 (test)
 #
+
 #sys='taurus'
-sys='comodo'
+sys='marenos'
+#sys='comodo'
 
 # Input parameters
 n_procs=$1
@@ -108,19 +110,51 @@ zMax=3
 fit=0
 
 # Base directories
+
+if [ "$sys" == "taurus" ] ; then
 base_ahf=${HOME}/AHF/latest_ahf/
 base_data=${HOME}/data/dedm/
 base_analysis=${HOME}/Analysis/
 base_out=$base_analysis/output/
 base_temp=$base_analysis/temp/
-
 DATA=$base_data/$particle_number/$box_size/
-
 ahf_dir=$DATA'ahf/'$model'/'
 snaps_dir=$DATA'snaps/'$model'/'
 pk_dir=$DATA'pk/'$model'/'
 halo_dir=$DATA'catalogues/'$model'/'
 web_dir=$DATA'vweb/'$model'/'
+fi
+
+
+if [ "$sys" == "marenos" ] ; then
+base_ahf=${HOME}/projects/latest_ahf/
+base_data=${HOME}/projects/misc_snaps/
+base_analysis=${HOME}/projects/Analysis/
+base_out=$base_analysis/output/
+base_temp=$base_analysis/temp/
+DATA=$base_data/
+ahf_dir=$DATA'ahf/'$model'/'
+snaps_dir=$DATA'snaps/'$model'/'
+pk_dir=$DATA'pk/'$model'/'
+halo_dir=$DATA'/'$model'/'
+web_dir=$DATA'vweb/'$model'/'
+fi
+
+
+if [ "$sys" == "comodo" ] ; then
+base_ahf=${HOME}/AHF/latest_ahf/
+base_data=${HOME}/data/dedm/
+base_analysis=${HOME}/Analysis/
+base_out=$base_analysis/output/
+base_temp=$base_analysis/temp/
+DATA=$base_data/$particle_number/$box_size/
+ahf_dir=$DATA'ahf/'$model'/'
+snaps_dir=$DATA'snaps/'$model'/'
+pk_dir=$DATA'pk/'$model'/'
+halo_dir=$DATA'catalogues/'$model'/'
+web_dir=$DATA'vweb/'$model'/'
+fi
+
 
 # General file prefixes 
 prefix=$base_out$model'-'$box_size'-'$particle_number'-'$zzzz
