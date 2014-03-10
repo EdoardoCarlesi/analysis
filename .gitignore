@@ -2,7 +2,12 @@
 output/*
 temp/*
 bin/*
+*.zip
+*.tar.gz
+*.tgz
+*.tmp
 test.nfw
+*.test
 *.swp
 *.o
 *.a
