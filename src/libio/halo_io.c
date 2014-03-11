@@ -341,7 +341,7 @@ void set_halo_url()
 
 void read_halo_file()
 {
-	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
+	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0, tot_lines=0;
 	float a=0; // Dummy variable to read useless columns
 	float b, c, d;
 	char dummyline[LINE_SIZE]; 
@@ -369,6 +369,7 @@ void read_halo_file()
 		h_file = fopen(URLS->halo_file, "r");
 #ifdef USE_N_HALOES
 		SETTINGS->n_haloes += N_HALOES_MAX; 
+		SETTINGS->tot_lines = get_lines(h_file, URLS->halo_file) - skip;
 #else
 		SETTINGS->n_haloes += get_lines(h_file, URLS->halo_file) - skip;
 		SETTINGS->tot_lines = get_lines(h_file, URLS->halo_file) - skip;
