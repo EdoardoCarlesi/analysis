@@ -123,7 +123,9 @@ int main(int argc, char **argv)
 #ifndef NO_WEB
 		read_v_web();
 #ifndef WEB_ONLY
+#ifdef GAS_WEB
 		read_t_web();
+#endif
 		sort_web_statistics();
 		print_web_statistics();
 #endif
@@ -178,7 +180,9 @@ int main(int argc, char **argv)
 		sprintf(Urls.output_prefix, "%s%s", base_out, "substructure_");			
 		compute_subhalo_properties();
 		compute_halo_properties();
+#ifndef NO_PROFILES
 		average_nfw_profile();
+#endif
 #ifdef GAS
 		average_gas_profiles();
 #endif
@@ -195,9 +199,6 @@ int main(int argc, char **argv)
 
 #endif /* WEB ONLY */
 
-#ifndef NO_WEB
-	//	free_web();
-#endif
 		free(Haloes);
 
 	  INFO_MSG("Computed halo statistical properties at fixed z");

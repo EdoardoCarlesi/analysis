@@ -58,8 +58,6 @@ void initialize_internal_variables(char **argv){
 		Settings.pk_skip = atoi(argv[count++]);
 		Settings.halo_skip = atoi(argv[count++]);
 		Settings.cat_number = atoi(argv[count++]);
-		Settings.fit = atoi(argv[count++]);
-		Settings.zStart = atof(argv[count++]);
 		Settings.mass_min = atof(argv[count++]);
 		Settings.Mmin = atof(argv[count++]);
 		Settings.Mmax = atof(argv[count++]);

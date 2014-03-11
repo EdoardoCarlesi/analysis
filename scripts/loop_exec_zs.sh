@@ -1,8 +1,31 @@
 #!/bin/bash
 
-home=${HOME}/Analysis/scripts/
-out=${HOME}/Analysis/output/
-all_ex=$home/all_execute.sh
+#sys='taurus'
+#sys='marenos'
+sys='comodo'
+#sys='castor'
+
+if [ "$sys" == "taurus" ] ; then
+base_analysis=${HOME}/Analysis/
+fi
+
+if [ "$sys" == "castor" ] ; then
+base_analysis=${HOME}/Analysis/
+fi
+
+if [ "$sys" == "marenos" ] ; then
+base_analysis=${HOME}/projects/Analysis/
+fi
+
+if [ "$sys" == "comodo" ] ; then
+base_analysis=${HOME}/Analysis/
+fi
+
+home=$base_analysis/scripts/
+out=$base_analysis/output/
+all_ex=$home/general_execute.sh
+
+cd $base_analysis ; make clean ; make
 
 N_Mod=3
 N_Out=1
@@ -51,8 +74,8 @@ do
 
 zeta=${z[$k]}
 
-echo $all_ex $N_proc $N_file $mod $zeta $mass
-$all_ex $N_proc $N_file $mod $zeta $mass
+echo $all_ex $N_proc $N_file $mod $zeta $mass $sys
+$all_ex $N_proc $N_file $mod $zeta $mass $sys
 
 done
 done

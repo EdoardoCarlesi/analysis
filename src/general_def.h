@@ -18,7 +18,7 @@
 #define RMIN 0.2
 #define RMAX 1.1
 	// Density profile parameters
-#define BIN_PROFILE 25
+#define BIN_PROFILE 20
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.025
 
@@ -39,7 +39,7 @@
 #define N_SUB_MIN 40
 
 	// Maximum number of haloes to read in per task
-#define N_HALOES_MAX 2000
+#define N_HALOES_MAX 200
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -101,7 +101,6 @@ extern struct growth_factor
 
 extern struct general_settings
 {
-	int fit;	
 	int tick;
 	int inverse_read;
 	int n_part_1D;
@@ -120,7 +119,6 @@ extern struct general_settings
 	double totDarkMass;
 
 	double box_size;
-	double zStart;
 	
 	int n_threshold; // Threshold can be mass or particle number per halo
 	int n_virialized;

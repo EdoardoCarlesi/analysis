@@ -280,7 +280,6 @@ void compute_theoretical_mass_function()
 		init_sigmas();
 		init_dln_sigma_dln_mass();
 
-		if(Settings.fit==1) 
 		best_fit_mf_tinker(MassFunc[MF_INDEX].mass, MassFunc[MF_INDEX].dn, MassFunc[MF_INDEX].err_dn, MassFunc[MF_INDEX].bins);
 
 		Mmax = ThMassFunc[MF_INDEX].mass[nTot-1];
