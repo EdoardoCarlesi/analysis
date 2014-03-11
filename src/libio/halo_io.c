@@ -689,7 +689,7 @@ void read_profiles_file()
 			//fprintf(stderr,dummyline);
 			//fprintf(stderr, "\nHaloR  [%d][%d]=%e ", counter, i, HALO[counter].radius[i]);
 			//fprintf(stderr, "HaloGas[%d][%d]=%f ", counter, i, HALO[counter].u_gas[i]);
-			fprintf(stderr, "HaloRho[%d].R[%d]=%f\n", counter, iradius, HALO[counter].rho[iradius]);
+//fprintf(stderr, "HaloRho[%d].R[%d]=%f taks=%d, catnum=%d\n", counter, iradius, HALO[counter].rho[iradius], ThisTask, SETTINGS->cat_number);
 
 			if(radius<0.) 
 				neg_r++;
@@ -701,8 +701,8 @@ void read_profiles_file()
 		if(iradius == halo_bins) 
 		{
 			HALO[counter].neg_r_bins=neg_r; 
-fprintf(stderr, "task=%d, count=%d, bins=%d, neg=%d, r=%f, dens=%f\n", 
-	ThisTask, counter, iradius, neg_r, radius/HALO[counter].Rvir, dens);
+//fprintf(stderr, "task=%d, count=%d, bins=%d, neg=%d, r=%f, dens=%f\n", 
+//	ThisTask, counter, iradius, neg_r, radius/HALO[counter].Rvir, dens);
 			iradius=0;
 			npart=0;
 			neg_r=0;

@@ -32,21 +32,24 @@ void generate_url_for_tasks(int FileNumber)
 		sprintf(profile_list_task, "%s.%04d",Urls.profile_list, FileNumber);
 		sprintf(subhalo_list_task, "%s.%04d",Urls.subhalo_list, FileNumber);
 
+//		fprintf(stderr, "Task=%d is reading halo = %s, fileNumber=%d\n", ThisTask, profile_list_task,FileNumber);
+//		fprintf(stderr, "Task=%d is reading profile = %s, fileNumber=%d\n", ThisTask, halo_list_task,FileNumber);
+
 	if(ThisTask == 0)
 		TASK_INFO_MSG(ThisTask, "reading halo, profiles and substructure files lists...");
 
-		sprintf(command, "%s s/%s/%04d/ <%s | tail -1 >%s", 
+		sprintf(command, "%s s/%s/%04d/ <%s | tail -n 1 >%s", 
 			"sed ", "0000", FileNumber, Urls.halo_list, halo_list_task);
 				system(command);
 
 #ifndef NO_PROFILES
-		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
+		sprintf(command, "%s s/%s/%04d/ <%s | tail -n 1 >%s", 
 			"sed ", "0000", FileNumber, Urls.profile_list, profile_list_task);
 				system(command);
 #endif
 
 #ifndef NO_SUB
-		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
+		sprintf(command, "%s s/%s/%04d/ <%s | tail -n 1 >%s", 
 			"sed ", "0000", FileNumber, Urls.subhalo_list, subhalo_list_task);
 				system(command);
 #endif

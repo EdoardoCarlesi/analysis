@@ -1,8 +1,8 @@
 #!/bin/bash
 # Script to execute all the analysis settings.
 
-n_procs=1
-n_files=2
+n_procs=4
+n_files=4
 
 model='cde000'
 zeta='0.046'

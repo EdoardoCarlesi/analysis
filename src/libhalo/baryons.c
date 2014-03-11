@@ -119,7 +119,7 @@ void sort_f_gas_profile(struct halo *HALO)
 		skip = 0; //HALO->neg_r_bins;
 		N = bins - skip;
 
-	if(N>5)
+//	if(N>5)
 	{
 
 		x = (double*) calloc(N, sizeof(double));
@@ -143,26 +143,21 @@ void sort_f_gas_profile(struct halo *HALO)
 			rMax = F_MAX * 1.01; //R/HALO->Rvir;
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
-		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE, N);
+	//	average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE, N);
 
 	for(j=0; j<BIN_PROFILE; j++)
 	{
 		x_loc = 0.5 * (x_bin[j] + x_bin[j+1]);
 		HALO->f_gas.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
 #ifdef USE_BIN_INTERP
-		//if(j==BIN_PROFILE-1)
-		//	x_loc = x_bin[j];
-
-		//		y_loc = 0.5 * (y_bin[j] + y_bin[j+1]);
-		//if(N>15)
-			y_loc = get_linear_interpolated_value(x,y,N,x_loc);
-		//else
-		//	y_loc = abs(y_bin[j]);
+		if(j==BIN_PROFILE-1)
+			x_loc = x_bin[j];
+		y_loc = get_linear_interpolated_value(x,y,N,x_loc);
 #else
 		y_loc = abs(y_bin[j]);
 #endif
 		HALO->f_gas.y[j] = y_loc;
-		//fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
+	//	fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
 	}
 	} // if N>5
 }
@@ -450,13 +445,30 @@ void fit_I_X(struct halo *HALO)
 	{
 		R = 0.5 * (x_bin[j] + x_bin[j+1]);
 		HALO->rho_gas.x[j] = R;
-		HALO->rho_gas.y[j] = y_bin[j];
 		HALO->pressure.x[j] = R;
-		HALO->pressure.y[j] = pow(y_bin[j], 1.66666);
 		HALO->hydro_m.x[j] = R;
-		HALO->hydro_m.y[j] = m_bin[j];
 		HALO->i_x.x[j] = R; 
+
+#ifdef USE_BIN_INTERP
+		double y_loc, m_loc;
+
+		if(j==BIN_PROFILE-1)
+			R = x_bin[j];
+
+			y_loc = get_interpolated_value(r,y,N,R);
+			m_loc = get_interpolated_value(r,m,N,R);
+
+		HALO->rho_gas.y[j] = y_loc;
+		HALO->pressure.y[j] = pow(y_loc, 1.66666);
+		HALO->hydro_m.y[j] = m_loc;
+		HALO->i_x.y[j] = ix0 * y_loc * sqrt(1 + pow2(R * HALO->Rvir / rc));
+#else
+		HALO->rho_gas.y[j] = y_bin[j];
+		HALO->pressure.y[j] = pow(y_bin[j], 1.66666);
+		HALO->hydro_m.y[j] = m_bin[j];
 		HALO->i_x.y[j] = ix0 * y_bin[j] * sqrt(1 + pow2(R * HALO->Rvir / rc));
+#endif
+
 	//	fprintf(stderr, "%d  %f  mbin = %f\n", j, x_bin[j+1], m_bin[j]);
 	}
 

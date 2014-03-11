@@ -20,7 +20,7 @@
 	// Density profile parameters
 #define BIN_PROFILE 20
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
-#define Rvir_frac_min 0.025
+#define Rvir_frac_min 0.05
 
 	// Maximum and minimum delta hydrostatic mass
 #define hydro_mass_min -0.5

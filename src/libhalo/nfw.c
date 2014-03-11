@@ -152,19 +152,20 @@ void fit_halo_profile(struct halo *HALO)
 	{
 		
 		x_loc = 0.5 * (x_bin[j] + x_bin[j+1]);
-		HaloProperties[HALO_INDEX].nfw.x[j] = x_bin[j+1];
+		HaloProperties[HALO_INDEX].nfw.x[j] = x_loc; //x_bin[j+1];
 		HALO->nfw.x[j] = x_loc;
 
 #ifdef USE_BIN_INTERP
 	//	if(j==BIN_PROFILE-1) x_loc = x_bin[j];
-		y_loc = nfw(x_loc, rs, rho0);
+		y_loc = get_interpolated_value(R, y, N, x_loc);
+	//	y_loc = nfw(x_loc, rs, rho0);
 	//	HALO->fit_nfw.rho0 = rho0;
 	//	HALO->fit_nfw.rs = rs;
 #else
 		y_loc = abs(y_bin[j]);
 #endif
 		HALO->nfw.y[j] = y_loc;
-		//fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
+		fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
 	}
 
 	free(x);
