@@ -1,17 +1,17 @@
 #!/bin/bash
 # Script to execute all the analysis settings.
 
-n_procs=16
-n_files=64
+n_procs=1
+n_files=2
 
-model='cde099'
-zeta='0.000'
-masscut='1e+13'
+model='cde000'
+zeta='0.046'
+masscut='4e+13'
 
 #sys='taurus'
 #sys='marenos'
-sys='comodo'
-#sys='castor'
+#sys='comodo'
+sys='castor'
 
 if [ "$sys" == "taurus" ] ; then
 base_analysis=${HOME}/Analysis/

@@ -40,6 +40,21 @@ double get_interpolated_value(double x_array[], double y_array[], int npts, doub
 
 
 
+double get_linear_interpolated_value(double x_array[], double y_array[], int npts, double A)
+{
+	double V; 
+
+		gsl_interp_accel *gia = gsl_interp_accel_alloc();	
+		gsl_spline *gs = gsl_spline_alloc(gsl_interp_linear, npts);
+		gsl_spline_init(gs, x_array, y_array, npts);
+		V = gsl_spline_eval(gs,A,gia);
+		gsl_spline_free (gs);
+		gsl_interp_accel_free (gia);
+
+	return V;	
+}
+
+
 double* lin_stepper(double min, double max, int bins)
 {
 #ifdef PRINT_INFO

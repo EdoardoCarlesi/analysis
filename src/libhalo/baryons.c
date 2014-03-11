@@ -115,8 +115,12 @@ void sort_f_gas_profile(struct halo *HALO)
 #endif
 
 		bins = HALO->n_bins;
-		skip = HALO->neg_r_bins;
+		//skip = HALO->neg_r_bins;
+		skip = 0; //HALO->neg_r_bins;
 		N = bins - skip;
+
+	if(N>5)
+	{
 
 		x = (double*) calloc(N, sizeof(double));
 		y = (double*) calloc(N, sizeof(double));
@@ -127,6 +131,8 @@ void sort_f_gas_profile(struct halo *HALO)
 			x[j] = R/HALO->Rvir;
 			y[j] = HALO->gas_only.m[j+skip]/HALO->mass_r[j+skip];
 			HALO->gas_only.frac[j+skip] = y[j];
+			//fprintf(stderr, "j=%d) x=%f y=%f, Rvir=%f nbins=%d M_r =%e Mtot=%e\n", 
+			//	j, x[j], y[j], HALO->Rvir, HALO->n_bins, HALO->mass_r[j+skip], HALO->Mvir);
 		}
 	
 			x_bin = (double*) calloc(BIN_PROFILE+1, sizeof(double));
@@ -137,24 +143,28 @@ void sort_f_gas_profile(struct halo *HALO)
 			rMax = F_MAX * 1.01; //R/HALO->Rvir;
 			x_bin = log_stepper(rMin, rMax, BIN_PROFILE+1);
 
-		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE+1, N);
+		average_bin(x, y, x_bin, y_bin, e_bin, BIN_PROFILE, N);
 
 	for(j=0; j<BIN_PROFILE; j++)
 	{
 		x_loc = 0.5 * (x_bin[j] + x_bin[j+1]);
 		HALO->f_gas.x[j] = 0.5 * (x_bin[j] + x_bin[j+1]);
 #ifdef USE_BIN_INTERP
-		if(j==BIN_PROFILE-1) x_loc = x_bin[j];
-		if(N>4)
-		y_loc = get_interpolated_value(x,y,N,x_loc);
-		else
-		y_loc = abs(y_bin[j]);
+		//if(j==BIN_PROFILE-1)
+		//	x_loc = x_bin[j];
+
+		//		y_loc = 0.5 * (y_bin[j] + y_bin[j+1]);
+		//if(N>15)
+			y_loc = get_linear_interpolated_value(x,y,N,x_loc);
+		//else
+		//	y_loc = abs(y_bin[j]);
 #else
 		y_loc = abs(y_bin[j]);
 #endif
 		HALO->f_gas.y[j] = y_loc;
-//		fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
+		//fprintf(stderr, "%d  %f  %f\n", j, HALO->f_gas.x[j], HALO->f_gas.y[j]);
 	}
+	} // if N>5
 }
 
 

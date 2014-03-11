@@ -61,6 +61,7 @@ void average_bin(double*, double*, double *, double*, double*, int, int);
 void median_bin(double*, double*, double *, double*, double*, int, int);
 
 double get_interpolated_value(double*, double*, int, double);
+double get_linear_interpolated_value(double*, double*, int, double);
 
 double solid_angle(double, void*);
 double integrate_solid_angle(double,double,double,double);

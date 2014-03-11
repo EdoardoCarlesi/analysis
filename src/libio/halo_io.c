@@ -361,7 +361,7 @@ void read_halo_file()
 	SETTINGS = &Settings;
 #endif
 
-		if(ThisTask==0)
+		if(SETTINGS->cat_number==0)
 			skip = 1;
 		else
 			skip = 0;
@@ -601,7 +601,7 @@ void read_halo_file()
 #ifndef NO_PROFILES
 void read_profiles_file()
 {
-	int skip=0, i=0, j=0, k=0; 
+	int skip=0, iradius=0, jradius_tot=0;//, k=0; 
 	int npart=0, halo_bins=0, counter=0;
 	int neg_r=0, npart_old=0;
 
@@ -634,7 +634,7 @@ void read_profiles_file()
 		else if(ThisTask == 0)
 			fprintf(stdout, "Task=%d has found profiles file:%s\n", ThisTask, URLS->profiles_file);
 
-		if(ThisTask==0)
+		if(SETTINGS->cat_number==0)
 			skip = 1;
 		else
 			skip = 0;
@@ -649,7 +649,7 @@ void read_profiles_file()
 		{
 			fgets(dummyline, LINE_SIZE, p_file);
 
-		if(j >= skip) 
+		if(jradius_tot >= skip) 
 		{
 			sscanf(dummyline, 
 #ifndef GAS
@@ -669,40 +669,41 @@ void read_profiles_file()
 #endif
 		);
 				halo_bins = HALO[counter].n_bins;
-
+			//fprintf(stderr, "halo = %d on task %d has %d bins\n", counter, ThisTask, halo_bins);
 #ifdef USE_UNIT_MPC
 				radius *= 1.e-3; 
 #endif
-				if(i == 0)
+				if(iradius == 0)
 					alloc_halo_profiles(&HALO[counter], halo_bins);	
 
-					HALO[counter].radius[i] = sqrt(pow2(radius));	
-					HALO[counter].rho[i] = dens;
+					HALO[counter].radius[iradius] = sqrt(pow2(radius));	
+					HALO[counter].rho[iradius] = dens;
 					//HALO[counter].rho[i] = overd;
-					HALO[counter].mass_r[i] = mass_r;
-					HALO[counter].npart[i] = npart;
-					HALO[counter].err[i] = dens/sqrt(npart-npart_old); 
+					HALO[counter].mass_r[iradius] = mass_r;
+					HALO[counter].npart[iradius] = npart;
+					HALO[counter].err[iradius] = dens/sqrt(npart-npart_old); 
 #ifdef GAS
-					HALO[counter].gas_only.u[i] = u_gas;
-					HALO[counter].gas_only.m[i] = m_gas;
+					HALO[counter].gas_only.u[iradius] = u_gas;
+					HALO[counter].gas_only.m[iradius] = m_gas;
 #endif
 			//fprintf(stderr,dummyline);
 			//fprintf(stderr, "\nHaloR  [%d][%d]=%e ", counter, i, HALO[counter].radius[i]);
 			//fprintf(stderr, "HaloGas[%d][%d]=%f ", counter, i, HALO[counter].u_gas[i]);
-			//fprintf(stderr, "HaloRho[%d][%d]=%f\n", counter, i, HALO[counter].rho[i]);
+			fprintf(stderr, "HaloRho[%d].R[%d]=%f\n", counter, iradius, HALO[counter].rho[iradius]);
 
 			if(radius<0.) 
 				neg_r++;
 
 			npart_old=npart;
-			i++;
-			j++;
+			iradius++;
+			jradius_tot++;
 
-		if(i == halo_bins) 
+		if(iradius == halo_bins) 
 		{
 			HALO[counter].neg_r_bins=neg_r; 
-		//	fprintf(stderr, "task=%d, count=%d, bins=%d, neg=%d, r=%f, dens=%f\n", ThisTask, counter, i, neg_r, radius, dens);
-			i=0;
+fprintf(stderr, "task=%d, count=%d, bins=%d, neg=%d, r=%f, dens=%f\n", 
+	ThisTask, counter, iradius, neg_r, radius/HALO[counter].Rvir, dens);
+			iradius=0;
 			npart=0;
 			neg_r=0;
 			counter++;
@@ -711,10 +712,10 @@ void read_profiles_file()
 	} 
 	else 
 	{ // Skip this line
-		j++;
+		jradius_tot++;
 	}
 
-	k++;
+//	k++;
 
 	}
 

@@ -39,7 +39,7 @@
 #define N_SUB_MIN 40
 
 	// Maximum number of haloes to read in per task
-#define N_HALOES_MAX 200
+#define N_HALOES_MAX 2000
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
