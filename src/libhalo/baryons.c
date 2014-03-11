@@ -216,6 +216,7 @@ void average_gas_profiles(void)
 						{
 							f_tot += f;
 							f_bin++;
+							//fprintf(stderr, "bin=%d, f=%f, ftot=%f\n", i, f, f_tot);
 						}
 
 						if(isnan(rho) == 0 && rho>0 && rho < 1./0.)
@@ -247,16 +248,20 @@ void average_gas_profiles(void)
 							pressure_tot += pressure;
 							pressure_bin++;
 						}
-				}
-		
-			}
+
+				} // If Halo Condition
+		} // Halo Loop
+
+//		fprintf(stderr, "i=%d f_bin=%d rho_bin=%d, f_tot=%f rho_tot=%f\n", i, f_bin, rho_bin, f_tot, rho_tot);
 
 			HaloProperties[HALO_INDEX].f_gas.x[i] = Haloes[0].f_gas.x[i];
-			HaloProperties[HALO_INDEX].f_gas.y[i] = f_tot/f_bin;
+			HaloProperties[HALO_INDEX].f_gas.y[i] = f_tot/(double)f_bin;
 			HaloProperties[HALO_INDEX].f_gas.n[i] = f_bin;
 			HaloProperties[HALO_INDEX].rho_gas.x[i] = Haloes[0].rho_gas.x[i];
-			HaloProperties[HALO_INDEX].rho_gas.y[i] = rho_tot/rho_bin;
+			HaloProperties[HALO_INDEX].rho_gas.y[i] = rho_tot/(double)rho_bin;
 			HaloProperties[HALO_INDEX].rho_gas.n[i] = rho_bin;
+//		fprintf(stderr, "i=%d f=%f rho=%f\n", i,
+//		HaloProperties[HALO_INDEX].f_gas.y[i], HaloProperties[HALO_INDEX].rho_gas.y[i]);
 			HaloProperties[HALO_INDEX].i_x.x[i] = Haloes[0].i_x.x[i];
 			HaloProperties[HALO_INDEX].i_x.y[i] = ix_tot/ix_bin;
 			HaloProperties[HALO_INDEX].i_x.n[i] = ix_bin;
@@ -275,7 +280,7 @@ void average_gas_profiles(void)
 				HaloProperties[HALO_INDEX].rho_gas.y[i] = 0; 
 				HaloProperties[HALO_INDEX].i_x.y[i] = 0; 
 			}
-		}
+		} // Bin Loop
 }
 
 

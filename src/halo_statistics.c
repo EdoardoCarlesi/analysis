@@ -98,11 +98,10 @@ int main(int argc, char **argv)
 
 #ifndef NO_PROFILES
 		average_nfw_profile();
-		print_average_profiles();
 #ifdef GAS
 		average_gas_profiles();
 #endif
-
+		print_average_profiles();
 #endif
 
 #ifdef COMPUTE_ALIGN

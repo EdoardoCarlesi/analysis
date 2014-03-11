@@ -165,7 +165,7 @@ void fit_halo_profile(struct halo *HALO)
 		y_loc = abs(y_bin[j]);
 #endif
 		HALO->nfw.y[j] = y_loc;
-		fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
+		//fprintf(stderr, "%d  %e  %e\n", j, x_loc, y_loc);
 	}
 
 	free(x);
