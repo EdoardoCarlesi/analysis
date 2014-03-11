@@ -112,6 +112,7 @@ extern struct general_settings
 	int use_cat;
 	int c_web_size;
 	int tot_files;
+	int tot_lines; // Tot lines in each halo chunk
 
 	double totGasMassInHalo;
 	double totHaloMass;

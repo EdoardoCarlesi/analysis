@@ -372,7 +372,9 @@ void print_all_haloes()
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_line);
 				fprintf(out_file, "\t%d\t", Haloes[i].tot_lines);
 #else
+#ifndef NO_PROFILES
 				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
+#endif
 				fprintf(out_file, "\t%f", Haloes[i].lambda);
 				fprintf(out_file, "\t%f", Haloes[i].shape);
 				fprintf(out_file, "\t%f", Haloes[i].triax);
