@@ -36,7 +36,7 @@ fi
 zzzz='.z'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz=$zeta
+zzzz='.z'$zeta
 fi
 
 # Simulation ettings

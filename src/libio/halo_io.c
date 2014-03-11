@@ -225,31 +225,39 @@ void get_halo_files_urls()
 #endif
 
 	strcpy(url_fc, URLS->halo_list);
-	strcpy(url_fc_pro, URLS->profile_list);
-	strcpy(url_fc_sub, URLS->subhalo_list); 
-
 	fc 	= fopen(url_fc,"r");
-	fc_pro  = fopen(url_fc_pro,"r");
-	fc_sub  = fopen(url_fc_sub,"r");
 	
 	if(fc==NULL) 
 		ERROR("Could not find file:", url_fc);
+		lin = get_lines(fc, url_fc);
+
+#ifndef NO_PROFILES
+	strcpy(url_fc_pro, URLS->profile_list);
+	fc_pro  = fopen(url_fc_pro,"r");
 
 	if(fc_pro==NULL) 
 		ERROR("Could not find file:", url_fc_pro);
+		lin_pro = get_lines(fc_pro, url_fc_pro);
+#endif
+
+#ifndef NO_SUB
+	strcpy(url_fc_sub, URLS->subhalo_list); 
+	fc_sub  = fopen(url_fc_sub,"r");
 
 	if(fc_sub==NULL) 
 		ERROR("Could not find file:", url_fc_sub);
-
-		lin = get_lines(fc, url_fc);
-		lin_pro = get_lines(fc_pro, url_fc_pro);
 		lin_sub = get_lines(fc_sub, url_fc_sub);
+#endif
 
 		URLS->nCatalogueFiles = lin;
 
 		URLS->urls = (char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
+#ifndef NO_PROFILES
 		URLS->urls_profiles = (char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
+#endif
+#ifndef NO_SUB
 		URLS->urls_satellites = (char **) calloc(URLS->nCatalogueFiles, sizeof(char *));
+#endif
 
 	if(lin > 0)
 	{
@@ -267,6 +275,7 @@ void get_halo_files_urls()
 				WARNING("Trying to read empty file", url_fc);
 		}
 
+#ifndef NO_SUB
 	if(lin_sub > 0)
 	{
 		for(n=0; n<URLS->nCatalogueFiles; n++)
@@ -282,7 +291,9 @@ void get_halo_files_urls()
 			if(ThisTask==0)
 				WARNING("Trying to read empty file", url_fc_sub);
 		}
+#endif
 
+#ifndef NO_PROFILES
 	if(lin_pro > 0)
 	{
 		for(n=0; n<URLS->nCatalogueFiles; n++)
@@ -298,6 +309,7 @@ void get_halo_files_urls()
 			if(ThisTask==0)
 				WARNING("Trying to read empty file", url_fc_pro);
 		}
+#endif
 
 }
 
@@ -319,15 +331,17 @@ void set_halo_url()
 	URLS->halo_file = (char*) calloc(strlen(URLS->urls[n])+1, sizeof(char));
 	strcpy(URLS->halo_file, URLS->urls[n]);
 
+#ifndef NO_PROFILES
 	URLS->profiles_file = (char*) calloc(strlen(URLS->urls_profiles[n])+1, sizeof(char));
 	strcpy(URLS->profiles_file, URLS->urls_profiles[n]);
+#endif
 }
 
 
 
 void read_halo_file()
 {
-	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0;
+	int n=0, i=0, j=0, thr=0, vir=0, conc=0, spin=0, skip=0, all=0, condition=0, loc_halo_tot=0;
 	float a=0; // Dummy variable to read useless columns
 	float b, c, d;
 	char dummyline[LINE_SIZE]; 
@@ -357,6 +371,7 @@ void read_halo_file()
 		SETTINGS->n_haloes += N_HALOES_MAX; 
 #else
 		SETTINGS->n_haloes += get_lines(h_file, URLS->halo_file) - skip;
+		loc_halo_tot = get_lines(h_file, URLS->halo_file) - skip;
 #endif
 
 #ifdef WITH_MPI
@@ -472,7 +487,8 @@ void read_halo_file()
 
 #ifdef WITH_MPI
 	HALO[n].cat_line=j;
-	HALO[n].cat_numb=ThisTask;
+	HALO[n].cat_numb=SETTINGS->cat_number;
+	HALO[n].tot_lines = get_lines(h_file, URLS->halo_file) - skip;
 #endif
 
 	if(HALO[n].host > 0)

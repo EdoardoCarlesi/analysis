@@ -48,6 +48,7 @@ int main(int argc, char **argv)
 	for(ifile = 0; ifile < totFilesPerTask; ifile++)
         {
 		locFileNumber = ThisTask + ifile * NTask;
+		pSettings[ThisTask].cat_number = locFileNumber;
 
 		generate_url_for_tasks(locFileNumber);	
 
@@ -193,6 +194,10 @@ int main(int argc, char **argv)
 #endif /* SUBHALO */
 
 #endif /* WEB ONLY */
+
+#ifndef NO_WEB
+		free_web();
+#endif
 		free(Haloes);
 
 	  INFO_MSG("Computed halo statistical properties at fixed z");

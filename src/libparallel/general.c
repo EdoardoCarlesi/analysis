@@ -39,22 +39,30 @@ void generate_url_for_tasks(int FileNumber)
 			"sed ", "0000", FileNumber, Urls.halo_list, halo_list_task);
 				system(command);
 
+#ifndef NO_PROFILES
 		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
 			"sed ", "0000", FileNumber, Urls.profile_list, profile_list_task);
 				system(command);
+#endif
 
+#ifndef NO_SUB
 		sprintf(command, "%s s/%s/%04d/ <%s >%s", 
 			"sed ", "0000", FileNumber, Urls.subhalo_list, subhalo_list_task);
 				system(command);
+#endif
 
 	pUrls[ThisTask].halo_list = (char*) calloc(strlen(halo_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].halo_list, halo_list_task);
 
+#ifndef NO_PROFILES
 	pUrls[ThisTask].profile_list = (char*) calloc(strlen(profile_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].profile_list, profile_list_task);
+#endif
 
+#ifndef NO_SUB
 	pUrls[ThisTask].subhalo_list = (char*) calloc(strlen(subhalo_list_task)+1, sizeof(char));
 		strcpy(pUrls[ThisTask].subhalo_list, subhalo_list_task);
+#endif
 
 	if(ThisTask == 0)
 		TASK_INFO_MSG(ThisTask, "has generated halo, profiles and substructure files lists.");

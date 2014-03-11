@@ -39,7 +39,7 @@
 #define N_SUB_MIN 40
 
 	// Maximum number of haloes to read in per task
-#define N_HALOES_MAX 200
+#define N_HALOES_MAX 2000
 
 #ifdef WITH_MPI
 #define TASK_INFO_MSG(task, str) fprintf(stdout, "\nTask=%d, %s.\n", task, str)
@@ -263,6 +263,7 @@ extern struct halo
 	// For MPI remember the position in the original file and the catalogue number
 	int cat_line;
 	int cat_numb;
+	int tot_lines;
 #ifndef NO_WEB
 	// 0 void, 1 sheet, 2 filament, 3 node
 	int web_type[4];

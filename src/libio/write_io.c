@@ -327,7 +327,7 @@ void print_all_haloes()
 		FILE_HEADER(out_file, "Web   ", count);
 		FILE_HEADER(out_file, "CatNum", count);
 		FILE_HEADER(out_file, "Line  ", count);
-
+		FILE_HEADER(out_file, "Halos ", count);
 #else
 		FILE_HEADER(out_file, "lambda", count);
 		FILE_HEADER(out_file, "shape ", count);
@@ -337,9 +337,9 @@ void print_all_haloes()
 	      	FILE_HEADER(out_file, "gasTmw", count);
 		FILE_HEADER(out_file, "gasTew", count);
 		FILE_HEADER(out_file, "gasTsl", count);
-#endif
-#endif
 		FILE_HEADER(out_file, "vir_dm", count);
+#endif
+#endif
 		fprintf(out_file, "\n");
 
 		for(i=0; i<nTot; i++)	
@@ -370,6 +370,7 @@ void print_all_haloes()
 #ifdef WEB_ONLY
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_numb);
 				fprintf(out_file, "\t%d\t", Haloes[i].cat_line);
+				fprintf(out_file, "\t%d\t", Haloes[i].tot_lines);
 #else
 				fprintf(out_file, "\t%f", Haloes[i].fit_nfw.c);
 				fprintf(out_file, "\t%f", Haloes[i].lambda);

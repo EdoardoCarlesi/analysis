@@ -14,13 +14,20 @@
 #
 
 #sys='taurus'
-sys='marenos'
-#sys='comodo'
+#sys='marenos'
+sys='comodo'
 
+if [ $# -eq 0 ]
+then 
+n_procs=4
+n_files=256
+else
 # Input parameters
 n_procs=$1
 n_files=$2
-model='cde000'
+fi
+
+model='cde099'
 
 # MPI Settings - if using MPI
 use_mpi='1'
@@ -36,18 +43,18 @@ fi
 zzzz='.z'
 
 if [ $use_multiple_cat -eq 1 ] ; then
-zzzz='z0.027'
+zzzz='z0.000'
 fi
 
 # Simulation ettings
 box_size=250
 particle_number=1024
 web_size=256
-tot_snaps=61
+tot_snaps=60
 
 # Catalogue settings when using one halo catalogue only
 catalogue_z=0
-catalogue_number=61
+catalogue_number=60
 
 # Number of bins for general distributions and for the radial alignment
 n_bins=50
@@ -70,7 +77,7 @@ m_print=1.e+14
 
 # Minimum particles per halo or minimum mass per halo, spin and virial criterion
 n_min=20
-m_th=30.e+13
+m_th=1.e+10
 m_print=1.e+10
 virial=1.5
 spin=0.15
@@ -125,7 +132,6 @@ halo_dir=$DATA'catalogues/'$model'/'
 web_dir=$DATA'vweb/'$model'/'
 fi
 
-
 if [ "$sys" == "marenos" ] ; then
 base_ahf=${HOME}/projects/latest_ahf/
 base_data=${HOME}/projects/misc_snaps/
@@ -139,7 +145,6 @@ pk_dir=$DATA'pk/'$model'/'
 halo_dir=$DATA'/'$model'/'
 web_dir=$DATA'vweb/'$model'/'
 fi
-
 
 if [ "$sys" == "comodo" ] ; then
 base_ahf=${HOME}/AHF/latest_ahf/
@@ -189,6 +194,9 @@ fi
 web_dm_file=`ls $web_dir*_dm*$web_size*ascii`
 web_gas_file=`ls $web_dir*_gas*$web_size*ascii`
 
+halo_file=$halo_dir/$halo_name
+profile_file=$halo_dir/$profile_name
+
 if [ -z $web_dm_file ] ; then
 web_dm_file='web_not_found.dummy'
 echo 'web dm file' $web_dm_file
@@ -199,8 +207,11 @@ web_gas_file='web_not_found.dummy'
 echo 'web gas file' $web_gas_file
 fi
 
-halo_file=$halo_dir/$halo_name
-profile_file=$halo_dir/$profile_name
+if [ -z $profile_file ] ; then
+profile_file='profile_file.dummy'
+echo 'profile file' $profile_file
+fi
+
 
 # File where the output lists are printed
 pk_list=$base_temp/pk.list
@@ -241,11 +252,11 @@ fi
 
 if [ "$sys" == "comodo" ] ; then
 execute='mpiexec -n '$n_procs' '$base_analysis
+echo execute='mpiexec -n '$n_procs' '$base_analysis
 fi
 
 fi 
 
 # Finally execute the program
-
 make halo_statistics
-$execute/bin/halo_statistics $all_variables
+$execute'/bin/halo_statistics' $all_variables

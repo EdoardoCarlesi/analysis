@@ -34,7 +34,6 @@ struct c_web
 
 } *VWeb, *TWeb;
 
-
 struct web_info
 {
 	unsigned int N[5];	 // Total number per type of node, 0 is the total nodes
@@ -67,10 +66,16 @@ struct web_info
 int compute_node_type(struct c_web *);
 int eigenvalue_statistics(void);
 
-
 /*
  * Initialize functions
  */ 
+void free_web()
+{
+	free(TWeb);
+	free(VWeb);
+}
+
+
 void read_v_web()
 {
 	int t=0, skip=0, i=0, NWeb=0;
