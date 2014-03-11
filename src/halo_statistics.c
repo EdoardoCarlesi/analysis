@@ -196,7 +196,7 @@ int main(int argc, char **argv)
 #endif /* WEB ONLY */
 
 #ifndef NO_WEB
-		free_web();
+	//	free_web();
 #endif
 		free(Haloes);
 

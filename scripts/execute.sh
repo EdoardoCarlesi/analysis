@@ -15,7 +15,8 @@
 
 #sys='taurus'
 #sys='marenos'
-sys='comodo'
+#sys='comodo'
+sys='castor'
 
 if [ $# -eq 0 ]
 then 
@@ -119,6 +120,20 @@ fit=0
 # Base directories
 
 if [ "$sys" == "taurus" ] ; then
+base_ahf=${HOME}/AHF/latest_ahf/
+base_data=${HOME}/data/dedm/
+base_analysis=${HOME}/Analysis/
+base_out=$base_analysis/output/
+base_temp=$base_analysis/temp/
+DATA=$base_data/$particle_number/$box_size/
+ahf_dir=$DATA'ahf/'$model'/'
+snaps_dir=$DATA'snaps/'$model'/'
+pk_dir=$DATA'pk/'$model'/'
+halo_dir=$DATA'catalogues/'$model'/'
+web_dir=$DATA'vweb/'$model'/'
+fi
+
+if [ "$sys" == "castor" ] ; then
 base_ahf=${HOME}/AHF/latest_ahf/
 base_data=${HOME}/data/dedm/
 base_analysis=${HOME}/Analysis/
@@ -254,6 +269,12 @@ if [ "$sys" == "comodo" ] ; then
 execute='mpiexec -n '$n_procs' '$base_analysis
 echo execute='mpiexec -n '$n_procs' '$base_analysis
 fi
+
+if [ "$sys" == "castor" ] ; then
+echo 'mpirun -f mpd.hosts -n '$n_procs' '$base_analysis
+execute='mpirun.openmpi -n '$n_procs' '$base_analysis
+fi
+
 
 fi 
 
