@@ -60,10 +60,40 @@ void fit_and_store_nfw_parameters()
 }
 
 
+void fit_inner_slope(double *x, double *y, int N, double rs, double *alpha)
+{
+	int i=0;
+	double alpha_start = 1, r_loc=0;
+	double rmin = x[0];
+	double *r, *step, *rho, *log_rho, *log_r;
+	double *sumsq, *cov11;
+	
+	r = calloc (BIN_INNER+1, sizeof(double));
+	rho = calloc (BIN_INNER, sizeof(double));
+	log_r = calloc (BIN_INNER, sizeof(double));
+	log_rho = calloc (BIN_INNER, sizeof(double));
+	step = calloc (BIN_INNER, sizeof(double));
+
+		r = log_stepper(rmin, rs, BIN_PROFILE+1);
+
+	for(i=0; i<BIN_INNER; i++)
+	{
+		r_loc = 0.5 * (r[i] + r[i+1]);
+		step[i] = r_loc;
+		rho[i] = get_interpolated_value(x,y,N,r_loc);
+		log_r[i] = log(r_loc);
+		log_rho[i] = log(rho[i]);
+	}
+
+	gsl_fit_mul (log_r, sizeof(double), log_rho, sizeof(double), BIN_INNER, alpha, cov11, sumsq);
+
+	fprintf(stderr, "Alpha linear best fit = %f\n", alpha);
+}
+
 
 void fit_halo_profile(struct halo *HALO)
 {
-	double c=0, r=0, rho0, rho0_halo, rs, chi, gof, per; 
+	double c=0, r=0, alpha, rho0, rho0_halo, rs, chi, gof, per; 
 	double *x, *y, *e, *R, *y_th, *x_bin, *y_bin, *e_bin, rMin, rMax; 
 	double x_loc, y_loc;
 	int bins, skip, N, j=0;
@@ -110,6 +140,7 @@ void fit_halo_profile(struct halo *HALO)
 			//rho0 = 1;
 			//fprintf(stderr, "before rs=%f rho0=%f\n", rs, rho0);
 			best_fit_nfw(&rho0, &rs, N, x, y, e);
+			fit_inner_slope(x,y,N,&rs,&alpha);
 			//fprintf(stderr, "after  rs=%f rho0=%f\n", rs, rho0);
 
 			HALO->fit_nfw.rho0 = rho0;

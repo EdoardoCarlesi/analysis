@@ -19,6 +19,9 @@
 #define RMAX 1.1
 	// Density profile parameters
 #define BIN_PROFILE 20
+	// Number of bins used for the inner slope profile
+#define BIN_INNER 5
+
 	// Halo density (dm, gas, Ix) profiles will start from  2 * this fraction of Rvir, and gas fraction from 1
 #define Rvir_frac_min 0.05
 
@@ -316,6 +319,7 @@ extern struct halo
 		{
 			struct
 			{
+				float alpha; // Inner NFW slope	
 				float c; // NFW only
 				float rs;
 				float rho0;
