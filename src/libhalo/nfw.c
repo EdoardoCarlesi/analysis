@@ -63,16 +63,18 @@ void fit_and_store_nfw_parameters()
 void fit_inner_slope(double *x, double *y, int N, double rs, double *alpha)
 {
 	int i=0;
-	double alpha_start = 1, r_loc=0;
+	double *guess, *params, r_loc=0, beta;
 	double rmin = x[0];
-	double *r, *step, *rho, *log_rho, *log_r;
-	double *sumsq, *cov11;
+	double *r, *step, *rho, *err_rho;
+
+	//fprintf(stderr, "Fit inner slope. Npts=%d, r0= %lf rs=%lf\n", N, x[0], rs);
 	
 	r = calloc (BIN_INNER+1, sizeof(double));
-	rho = calloc (BIN_INNER, sizeof(double));
-	log_r = calloc (BIN_INNER, sizeof(double));
-	log_rho = calloc (BIN_INNER, sizeof(double));
 	step = calloc (BIN_INNER, sizeof(double));
+	rho = calloc (BIN_INNER, sizeof(double));
+	err_rho = calloc (BIN_INNER, sizeof(double));
+	guess = calloc (2, sizeof(double));
+	params = calloc (2, sizeof(double));
 
 		r = log_stepper(rmin, rs, BIN_PROFILE+1);
 
@@ -81,13 +83,17 @@ void fit_inner_slope(double *x, double *y, int N, double rs, double *alpha)
 		r_loc = 0.5 * (r[i] + r[i+1]);
 		step[i] = r_loc;
 		rho[i] = get_interpolated_value(x,y,N,r_loc);
-		log_r[i] = log(r_loc);
-		log_rho[i] = log(rho[i]);
+		err_rho[i] = 0.1 * rho[i];
 	}
 
-	gsl_fit_mul (log_r, sizeof(double), log_rho, sizeof(double), BIN_INNER, alpha, cov11, sumsq);
+		guess[0] = -1;
+		guess[1] = rho[0];
 
-	fprintf(stderr, "Alpha linear best fit = %f\n", alpha);
+	//gsl_fit_linear (log_r, sizeof(double), log_rho, sizeof(double), BIN_INNER, alpha, &beta, cov11, cov11, cov11,sumsq);
+	//gsl_fit_mul (log_r, sizeof(double), log_rho, sizeof(double), BIN_INNER, alpha, cov11, sumsq);
+	
+	params = best_fit_power_law(step, rho, err_rho, BIN_INNER, guess);
+	//fprintf(stderr, "Alpha linear best fit = %lf, = %lf\n", params[0], params[1]);
 }
 
 
@@ -140,9 +146,10 @@ void fit_halo_profile(struct halo *HALO)
 			//rho0 = 1;
 			//fprintf(stderr, "before rs=%f rho0=%f\n", rs, rho0);
 			best_fit_nfw(&rho0, &rs, N, x, y, e);
-			fit_inner_slope(x,y,N,&rs,&alpha);
+			fit_inner_slope(x,y,N,rs,&alpha);
 			//fprintf(stderr, "after  rs=%f rho0=%f\n", rs, rho0);
-
+	
+			HALO->fit_nfw.alpha = alpha;
 			HALO->fit_nfw.rho0 = rho0;
 			HALO->fit_nfw.rs = rs;
 			HALO->fit_nfw.c = HALO->Rvir/rs;

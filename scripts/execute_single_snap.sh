@@ -2,7 +2,7 @@
 # Script to execute all the analysis settings.
 
 n_procs=4
-n_files=256
+n_files=16
 
 model='cde000'
 zeta='0.046'
